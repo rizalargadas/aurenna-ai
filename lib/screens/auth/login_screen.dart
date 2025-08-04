@@ -70,9 +70,21 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 40),
 
+              // Logo
+              Center(
+                child: Image.asset(
+                  'assets/img/logo/square-transparent.png',
+                  height: 150,
+                  width: 150,
+                  fit: BoxFit.contain,
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
               // Welcome Text with mystical touch
               Text(
-                'Hey there,\nCosmic Soul ✨',
+                'Hey there,\nCosmic Soul',
                 style: Theme.of(context).textTheme.displayLarge,
                 textAlign: TextAlign.center,
               ),

@@ -94,6 +94,18 @@ class _SignupScreenState extends State<SignupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Logo
+              Center(
+                child: Image.asset(
+                  'assets/img/logo/square-transparent.png',
+                  height: 150,
+                  width: 150,
+                  fit: BoxFit.contain,
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
               // Welcome Text
               Text(
                 'Begin Your\nMystical Journey 🔮',

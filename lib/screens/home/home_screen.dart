@@ -47,19 +47,30 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final isSmallScreen = screenHeight < 700;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Aurenna'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
-              );
-            },
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: AppBar(
+          toolbarHeight: 80,
+          title: Image.asset(
+            'assets/img/logo/horizontal-transparent.png',
+            height: 180,
+            fit: BoxFit.contain,
           ),
-        ],
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
       body: SafeArea(
         child: Padding(
