@@ -12,21 +12,31 @@ Aurenna.ai delivers concise, empowering tarot insights with a warm, witty touch 
 
 ### Visual Style
 
--   **Mystical yet modern** - Clean layouts with subtle celestial motifs
--   **Warm & approachable** - Soft, organic backgrounds and earthy colors
+-   **Dark Cosmic Theme** - Deep space-inspired with electric accents
+-   **Mystical & Modern** - Sleek interface with ethereal gradients
+-   **Premium Feel** - Rich colors with sophisticated shadows
 
 ### Color Palette
 
--   **Eclipse Stone (#1C1E1F)** - Sleek, grounding dark tone
--   **Moon Mist (#E4DED9)** - Warm neutral for backgrounds
--   **Dusk Ember (#FF6B6B)** - Bold coral for CTAs and highlights
--   **Sage Veil (#A8C6AE)** - Gentle sage green for success states
--   **Clay Moon (#DDA15E)** - Earthy golden tone for accents
+-   **Electric Violet (#6366F1)** - Primary mystical purple
+-   **Crystal Blue (#3B82F6)** - Secondary celestial blue  
+-   **Void Black (#0F0F23)** - Deep cosmic background
+-   **Mystic Blue (#1E1B4B)** - Surface color for cards
+-   **Silver Mist (#F1F5F9)** - Primary text color
+-   **Amber Glow (#F59E0B)** - Warm accent for highlights
+-   **Cosmic Purple (#8B5CF6)** - Gradient accent
+-   **Ethereal Indigo (#312E81)** - Deep accent color
+
+### Gradients
+
+-   **Primary:** Electric Violet → Cosmic Purple
+-   **Secondary:** Crystal Blue → Deep Blue
+-   **Background:** Void Black → Mystic Blue
 
 ### Typography
 
--   **Headings:** Playfair Display (elegant serif)
--   **Body:** Inter (clean sans-serif)
+-   **Display Font:** Cinzel - Elegant and magical for titles
+-   **Headings & Body:** Outfit - Modern yet mystical, clean readability
 
 ## 🛠 Tech Stack
 
