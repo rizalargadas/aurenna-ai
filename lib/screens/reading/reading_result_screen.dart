@@ -114,6 +114,7 @@ class ReadingResultScreen extends StatelessWidget {
                   
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: drawnCards.map((drawnCard) {
                       try {
                         return _buildCardDisplay(context, drawnCard, finalCardWidth);
@@ -300,6 +301,8 @@ class ReadingResultScreen extends StatelessWidget {
     final cardHeight = cardWidth * 1.4; // Maintain aspect ratio
 
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
