@@ -227,17 +227,45 @@ Tone: Think “mystic therapist meets your favorite no-filter friend.”''',
   // Delete a specific reading
   static Future<void> deleteReading(String readingId, String userId) async {
     try {
-      final response = await SupabaseConfig.client
+      print('TarotService: Checking if reading exists - ID: $readingId, User: $userId'); // Debug
+      
+      // First check if the reading exists and belongs to the user
+      final existingReading = await SupabaseConfig.client
+          .from('readings')
+          .select('id, user_id')
+          .eq('id', readingId)
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      print('TarotService: Reading check result: $existingReading'); // Debug
+
+      if (existingReading == null) {
+        throw Exception('Reading not found or you do not have permission to delete it');
+      }
+
+      print('TarotService: Performing delete operation'); // Debug
+      
+      // Perform the delete operation
+      await SupabaseConfig.client
           .from('readings')
           .delete()
           .eq('id', readingId)
-          .eq('user_id', userId); // Ensure user can only delete their own readings
-
-      if (response == null) {
-        throw Exception('Failed to delete reading');
-      }
+          .eq('user_id', userId);
+      
+      print('TarotService: Delete operation completed successfully'); // Debug
+      
+      // If we reach here without exception, the delete was successful
     } catch (e) {
-      throw Exception('Failed to delete reading: $e');
+      print('TarotService: Delete failed with error: $e'); // Debug
+      
+      // Provide more specific error messages
+      if (e.toString().contains('not found')) {
+        throw Exception('Reading not found or already deleted');
+      } else if (e.toString().contains('permission')) {
+        throw Exception('You do not have permission to delete this reading');
+      } else {
+        throw Exception('Failed to delete reading: ${e.toString()}');
+      }
     }
   }
 }

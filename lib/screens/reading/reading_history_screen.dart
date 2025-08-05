@@ -112,7 +112,9 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
       }
 
       // Delete from database
+      print('Attempting to delete reading: $readingId for user: $userId'); // Debug log
       await TarotService.deleteReading(readingId, userId);
+      print('Delete successful for reading: $readingId'); // Debug log
 
       // Remove from local list to update UI immediately
       if (mounted) {
@@ -140,14 +142,35 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
       }
     } catch (e) {
       if (mounted) {
+        // Extract meaningful error message
+        String errorMessage = e.toString();
+        if (errorMessage.startsWith('Exception: ')) {
+          errorMessage = errorMessage.substring(11);
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.error_outline, color: Colors.white, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text('Failed to delete reading: ${e.toString()}'),
+                Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Delete Failed',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  errorMessage,
+                  style: const TextStyle(fontSize: 14),
                 ),
               ],
             ),
@@ -156,7 +179,12 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
-            duration: const Duration(seconds: 4),
+            duration: const Duration(seconds: 6),
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: () => _deleteReading(readingId),
+            ),
           ),
         );
       }
