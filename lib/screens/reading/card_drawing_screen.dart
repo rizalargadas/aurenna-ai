@@ -10,7 +10,7 @@ import '../../models/tarot_card.dart';
 import 'reading_result_screen.dart';
 import '../../widgets/mystical_loading.dart';
 import '../../widgets/error_dialog.dart';
-import '../../widgets/advanced_card_shuffle.dart';
+import '../../widgets/simple_card_shuffle.dart';
 import '../../utils/connectivity_check.dart';
 import '../../utils/platform_utils.dart';
 import '../../utils/simple_connectivity.dart';
@@ -40,8 +40,9 @@ class _CardDrawingScreenState extends State<CardDrawingScreen>
 
   List<DrawnCard>? _drawnCards;
   bool _isDrawing = false;
-  int _currentStep = 0; // 0: shuffling, 1: drawing, 2: generating reading
+  int _currentStep = 0; // 0: shuffling, 1: cards revealed, 2: generating reading
   bool _isRetrying = false; // Add this to track retry state
+  bool _shuffleStarted = false;
 
   @override
   void initState() {
@@ -97,9 +98,13 @@ class _CardDrawingScreenState extends State<CardDrawingScreen>
       _floatController.repeat(reverse: true);
       _glowController.repeat(reverse: true);
     }
-
-    // Start the drawing process
-    _startDrawing();
+    
+    // Start the drawing process after a short delay
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted && !_disposed) {
+        _startDrawing();
+      }
+    });
   }
 
   @override
@@ -127,21 +132,26 @@ class _CardDrawingScreenState extends State<CardDrawingScreen>
 
   Future<void> _startDrawing() async {
     if (!mounted || _disposed) return;
-    setState(() => _isDrawing = true);
+    setState(() {
+      _isDrawing = true;
+      _shuffleStarted = true;
+    });
+  }
 
-    // Start shuffling animation
-    if (mounted && !_disposed) _shuffleController.forward();
-    await Future.delayed(const Duration(seconds: 16)); // Even longer for 78 cards
+  void _onShuffleComplete() {
+    if (!mounted || _disposed) return;
+    // Draw the cards when shuffle completes
+    _drawnCards = TarotService.drawThreeCards();
+    setState(() {});
+  }
 
+  void _onCardsRevealed() async {
     if (!mounted || _disposed) return;
     setState(() => _currentStep = 1);
-
-    // Draw the cards with dramatic entrance
-    _drawnCards = TarotService.drawThreeCards();
-    if (mounted && !_disposed) _animationController.forward();
-
-    await Future.delayed(const Duration(seconds: 3));
-
+    
+    // Wait a moment before starting the reading generation
+    await Future.delayed(const Duration(seconds: 1));
+    
     if (!mounted || _disposed) return;
     setState(() => _currentStep = 2);
 
@@ -292,13 +302,7 @@ class _CardDrawingScreenState extends State<CardDrawingScreen>
 
                         const SizedBox(height: 16),
 
-                        // Loading indicator
-                        if (_isDrawing)
-                          const CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              AurennaTheme.electricViolet,
-                            ),
-                          ),
+                        // No loading indicator
                       ],
                     ),
                   ),
@@ -312,85 +316,21 @@ class _CardDrawingScreenState extends State<CardDrawingScreen>
   }
 
   Widget _buildAnimatedContent() {
-    if (_currentStep == 0) {
-      // Epic full-screen card shuffling animation with all 78 tarot cards
-      return AdvancedCardShuffle(
-        cardCount: 78, // Full tarot deck
-        shuffleSpeed: 0.5, // Slower for more cards
-        shuffleDepth: 100.0, // More dramatic depth
-        rotationVariance: 20.0, // More chaotic rotation
-        shuffleStyle: ShuffleStyle.bridge,
-        enableHaptics: true,
-        enableMotionBlur: true,
-        enable3DEffects: true,
-        onComplete: () {
-          // Animation completed, but don't interrupt the flow
-          // The main sequence will continue based on the timer
-        },
+    if (_currentStep == 0 && _shuffleStarted) {
+      // Simplified card shuffling animation
+      return SimpleCardShuffle(
+        onShuffleComplete: _onShuffleComplete,
+        onCardsRevealed: _onCardsRevealed,
+        drawnCards: _drawnCards,
       );
-    } else if (_currentStep == 1 && _drawnCards != null) {
-      // Three cards centered on screen with dramatic reveal
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final screenWidth = constraints.maxWidth;
-          final screenHeight = constraints.maxHeight;
-          final cardWidth = screenWidth * 0.2; // Optimal size for visibility
-          final cardSpacing = screenWidth * 0.05; // Spacing between cards
-          
-          return Center(
-            child: AnimatedBuilder(
-              animation: _animationController,
-              builder: (context, child) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: _drawnCards!.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final drawnCard = entry.value;
-                    final delay = index * 0.15;
-                    final endTime = (delay + 0.5).clamp(0.0, 1.0);
-                    final cardAnimation = Tween<double>(
-                      begin: 0.0,
-                      end: 1.0,
-                    ).animate(
-                      CurvedAnimation(
-                        parent: _animationController,
-                        curve: Interval(
-                          delay,
-                          endTime,
-                          curve: Curves.easeOutCubic,
-                        ),
-                      ),
-                    );
-                    
-                    return Container(
-                      margin: EdgeInsets.symmetric(horizontal: cardSpacing / 2),
-                      child: AnimatedBuilder(
-                        animation: cardAnimation,
-                        builder: (context, child) {
-                          if (!mounted || _disposed) return const SizedBox.shrink();
-                          
-                          return Transform.scale(
-                            scale: cardAnimation.value,
-                            child: Transform.translate(
-                              offset: Offset(0, (1 - cardAnimation.value) * 80),
-                              child: Opacity(
-                                opacity: cardAnimation.value.clamp(0.0, 1.0),
-                                child: _buildCleanDrawnCard(drawnCard, cardWidth),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  }).toList(),
-                );
-              },
-            ),
-          );
-        },
+    } else if (_currentStep == 1) {
+      // Cards are still being revealed in the SimpleCardShuffle widget
+      return SimpleCardShuffle(
+        onShuffleComplete: _onShuffleComplete,
+        onCardsRevealed: _onCardsRevealed,
+        drawnCards: _drawnCards,
       );
-    } else {
+    } else if (_currentStep == 2) {
       // Epic cosmos-channeling animation that fills and extends beyond screen
       return LayoutBuilder(
         builder: (context, constraints) {
@@ -473,6 +413,9 @@ class _CardDrawingScreenState extends State<CardDrawingScreen>
           );
         },
       );
+    } else {
+      // Default empty state before animation starts
+      return const SizedBox.shrink();
     }
   }
 
@@ -845,9 +788,9 @@ class _CardDrawingScreenState extends State<CardDrawingScreen>
 
     switch (_currentStep) {
       case 0:
-        return 'Shuffling the cosmic deck...';
+        return _shuffleStarted ? 'Shuffling the cosmic deck...' : '';
       case 1:
-        return 'Your cards have been pulled';
+        return 'Your cards have been revealed';
       case 2:
         return _isRetrying
             ? 'Reconnecting to the cosmos...'
