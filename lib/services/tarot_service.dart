@@ -224,10 +224,34 @@ Tone: Think “mystic therapist meets your favorite no-filter friend.”''',
     }
   }
 
+  // Test database permissions for a user
+  static Future<bool> testDatabasePermissions(String userId) async {
+    try {
+      // Try to perform a simple read operation
+      final testRead = await SupabaseConfig.client
+          .from('readings')
+          .select('id')
+          .eq('user_id', userId)
+          .limit(1);
+      
+      print('TarotService: Database read test result: ${testRead.length} records found'); // Debug
+      return true;
+    } catch (e) {
+      print('TarotService: Database permission test failed: $e'); // Debug
+      return false;
+    }
+  }
+
   // Delete a specific reading
   static Future<void> deleteReading(String readingId, String userId) async {
     try {
       print('TarotService: Checking if reading exists - ID: $readingId, User: $userId'); // Debug
+      
+      // Test database permissions first
+      final hasPermissions = await testDatabasePermissions(userId);
+      if (!hasPermissions) {
+        throw Exception('Database access test failed. You may not have proper permissions.');
+      }
       
       // First check if the reading exists and belongs to the user
       final existingReading = await SupabaseConfig.client
@@ -245,26 +269,52 @@ Tone: Think “mystic therapist meets your favorite no-filter friend.”''',
 
       print('TarotService: Performing delete operation'); // Debug
       
-      // Perform the delete operation
-      await SupabaseConfig.client
+      // Perform the delete operation and get the result
+      final deleteResult = await SupabaseConfig.client
           .from('readings')
           .delete()
           .eq('id', readingId)
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .select(); // This will return the deleted rows
       
-      print('TarotService: Delete operation completed successfully'); // Debug
+      print('TarotService: Delete result: $deleteResult'); // Debug
+      
+      // Check if any rows were actually deleted
+      if (deleteResult.isEmpty) {
+        throw Exception('No rows were deleted. The reading may not exist or you may not have permission to delete it.');
+      }
+      
+      print('TarotService: Delete operation completed successfully - ${deleteResult.length} row(s) deleted'); // Debug
+      
+      // Verify the deletion by checking if the record still exists
+      final verificationCheck = await SupabaseConfig.client
+          .from('readings')
+          .select('id')
+          .eq('id', readingId)
+          .eq('user_id', userId)
+          .maybeSingle();
+          
+      if (verificationCheck != null) {
+        print('TarotService: WARNING - Record still exists after delete: $verificationCheck'); // Debug
+        throw Exception('Delete operation appeared to succeed but the record still exists. This may be a database permission issue.');
+      }
+      
+      print('TarotService: Verification confirmed - record is actually deleted'); // Debug
       
       // If we reach here without exception, the delete was successful
     } catch (e) {
       print('TarotService: Delete failed with error: $e'); // Debug
       
       // Provide more specific error messages
-      if (e.toString().contains('not found')) {
+      String errorMsg = e.toString();
+      if (errorMsg.contains('not found') || errorMsg.contains('already deleted')) {
         throw Exception('Reading not found or already deleted');
-      } else if (e.toString().contains('permission')) {
-        throw Exception('You do not have permission to delete this reading');
+      } else if (errorMsg.contains('permission') || errorMsg.contains('RLS') || errorMsg.contains('policy')) {
+        throw Exception('Database permission error: You may not have permission to delete this reading. Please contact support if this persists.');
+      } else if (errorMsg.contains('still exists')) {
+        throw Exception('Delete failed - the reading still exists in the database. This is likely a permission issue.');
       } else {
-        throw Exception('Failed to delete reading: ${e.toString()}');
+        throw Exception('Failed to delete reading: $errorMsg');
       }
     }
   }
