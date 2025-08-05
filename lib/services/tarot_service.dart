@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:math';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 import '../config/openai.dart';
@@ -222,6 +221,23 @@ Tone: Think “mystic therapist meets your favorite no-filter friend.”''',
       return (response as List).map((json) => Reading.fromJson(json)).toList();
     } catch (e) {
       throw Exception('Failed to fetch readings: $e');
+    }
+  }
+
+  // Delete a specific reading
+  static Future<void> deleteReading(String readingId, String userId) async {
+    try {
+      final response = await SupabaseConfig.client
+          .from('readings')
+          .delete()
+          .eq('id', readingId)
+          .eq('user_id', userId); // Ensure user can only delete their own readings
+
+      if (response == null) {
+        throw Exception('Failed to delete reading');
+      }
+    } catch (e) {
+      throw Exception('Failed to delete reading: $e');
     }
   }
 }

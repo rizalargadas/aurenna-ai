@@ -3,8 +3,6 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/question_counter.dart';
-import '../../providers/theme_provider.dart';
-import 'theme_selection_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -151,7 +149,7 @@ class SettingsScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // Theme Settings
+            // Reading History
             Container(
               padding: const EdgeInsets.all(20),
               decoration: AurennaTheme.cardDecoration,
@@ -159,36 +157,72 @@ class SettingsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '🎨 Appearance',
+                    '📚 Reading History',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
-                  Consumer<ThemeProvider>(
-                    builder: (context, themeProvider, child) {
+                  FutureBuilder<bool>(
+                    future: authService.hasActiveSubscription(),
+                    builder: (context, snapshot) {
+                      final hasSubscription = snapshot.data ?? false;
                       return ListTile(
                         contentPadding: EdgeInsets.zero,
                         title: Text(
-                          'Theme',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                        subtitle: Text(
-                          themeProvider.getThemeName(themeProvider.currentTheme),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AurennaTheme.textSecondary,
+                          'View Past Readings',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: hasSubscription 
+                                ? AurennaTheme.textPrimary 
+                                : AurennaTheme.textSecondary,
                           ),
                         ),
-                        trailing: Icon(
-                          Icons.arrow_forward_ios,
-                          size: 16,
-                          color: AurennaTheme.textSecondary,
+                        subtitle: Text(
+                          hasSubscription 
+                              ? 'Access your complete cosmic journey'
+                              : 'Premium feature - Upgrade to unlock',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: hasSubscription 
+                                ? AurennaTheme.textSecondary
+                                : AurennaTheme.amberGlow,
+                          ),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (!hasSubscription)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, 
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AurennaTheme.amberGlow.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  'PRO',
+                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: AurennaTheme.amberGlow,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 10,
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: hasSubscription 
+                                  ? AurennaTheme.textSecondary 
+                                  : AurennaTheme.textSecondary.withOpacity(0.5),
+                            ),
+                          ],
                         ),
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ThemeSelectionScreen(),
-                            ),
-                          );
+                          if (hasSubscription) {
+                            Navigator.pushNamed(context, '/reading-history');
+                          } else {
+                            Navigator.pushNamed(context, '/premium-upgrade');
+                          }
                         },
                       );
                     },
