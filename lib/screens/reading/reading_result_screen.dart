@@ -6,12 +6,14 @@ class ReadingResultScreen extends StatelessWidget {
   final String question;
   final List<DrawnCard> drawnCards;
   final String reading;
+  final bool isFromHistory;
 
   const ReadingResultScreen({
     super.key,
     required this.question,
     required this.drawnCards,
     required this.reading,
+    this.isFromHistory = false,
   });
 
   @override
@@ -244,33 +246,22 @@ class ReadingResultScreen extends StatelessWidget {
 
                       const SizedBox(height: 12),
 
-                      OutlinedButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text(
-                                'Reading history coming in Phase 3! 📚',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                              backgroundColor: AurennaTheme.crystalBlue,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
+                      if (!isFromHistory)
+                        OutlinedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/reading-history');
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: constraints.maxWidth < 300 ? 16 : 32,
+                              vertical: 16,
                             ),
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: constraints.maxWidth < 300 ? 16 : 32,
-                            vertical: 16,
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: const Text('View Reading History'),
                           ),
                         ),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: const Text('View Reading History'),
-                        ),
-                      ),
                     ],
                   );
                 },

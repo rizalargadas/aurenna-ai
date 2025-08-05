@@ -242,6 +242,43 @@ Tone: Think “mystic therapist meets your favorite no-filter friend.”''',
     }
   }
 
+  // Diagnose RLS policy issues
+  static Future<String> diagnoseRLSIssue(String readingId, String userId) async {
+    try {
+      print('TarotService: Diagnosing RLS issue for reading: $readingId, user: $userId');
+      
+      // Test if we can read the specific record
+      final canRead = await SupabaseConfig.client
+          .from('readings')
+          .select('id, user_id, created_at')
+          .eq('id', readingId)
+          .eq('user_id', userId)
+          .maybeSingle();
+      
+      if (canRead == null) {
+        return 'ISSUE: Cannot read the reading record. Either it doesn\'t exist or READ RLS policy is blocking access.';
+      }
+      
+      print('TarotService: Can read record: $canRead');
+      
+      // Test if we can update the record (often indicates similar permissions as delete)
+      try {
+        await SupabaseConfig.client
+            .from('readings')
+            .update({'updated_at': DateTime.now().toIso8601String()}) // Add a harmless update
+            .eq('id', readingId)
+            .eq('user_id', userId);
+        
+        return 'DIAGNOSIS: Can read and update the record, but DELETE RLS policy is missing or restrictive. This confirms it\'s specifically a DELETE permission issue.';
+      } catch (updateError) {
+        return 'DIAGNOSIS: Can read but cannot update the record. This suggests general RLS policy restrictions beyond just DELETE. Error: ${updateError.toString()}';
+      }
+      
+    } catch (e) {
+      return 'DIAGNOSIS FAILED: Could not diagnose RLS issue due to error: ${e.toString()}';
+    }
+  }
+
   // Delete a specific reading
   static Future<void> deleteReading(String readingId, String userId) async {
     try {
@@ -281,7 +318,10 @@ Tone: Think “mystic therapist meets your favorite no-filter friend.”''',
       
       // Check if any rows were actually deleted
       if (deleteResult.isEmpty) {
-        throw Exception('No rows were deleted. The reading may not exist or you may not have permission to delete it.');
+        // Run diagnosis to provide more specific information
+        final diagnosis = await diagnoseRLSIssue(readingId, userId);
+        print('TarotService: RLS Diagnosis: $diagnosis'); // Debug
+        throw Exception('DATABASE PERMISSION ISSUE: No rows were deleted. $diagnosis');
       }
       
       print('TarotService: Delete operation completed successfully - ${deleteResult.length} row(s) deleted'); // Debug

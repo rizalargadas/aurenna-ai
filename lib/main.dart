@@ -5,6 +5,8 @@ import 'config/app_themes.dart';
 import 'config/supabase.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
+import 'screens/reading/reading_history_screen.dart';
+import 'screens/premium/premium_upgrade_screen.dart';
 import 'services/auth_service.dart';
 import 'providers/theme_provider.dart';
 
@@ -64,6 +66,11 @@ class _MaterialAppWithThemeState extends State<_MaterialAppWithTheme> {
           theme: _cachedTheme!,
           home: const AuthWrapper(),
           debugShowCheckedModeBanner: false,
+          routes: {
+            '/home': (context) => const HomeScreen(),
+            '/reading-history': (context) => const ReadingHistoryScreen(),
+            '/premium-upgrade': (context) => const PremiumUpgradeScreen(),
+          },
         );
       },
     );
@@ -75,7 +82,6 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context);
 
     return StreamBuilder(
       stream: SupabaseConfig.client.auth.onAuthStateChange,

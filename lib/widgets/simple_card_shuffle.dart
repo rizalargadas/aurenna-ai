@@ -250,8 +250,6 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
           crossAxisAlignment: CrossAxisAlignment.start, // Align cards at top
           children: _selectedCardIndices.asMap().entries.map((entry) {
             final index = entry.key;
-            final cardIndex = entry.value;
-            final revealProgress = index <= _currentRevealIndex ? 1.0 : 0.0;
 
             final cardWidget = SizedBox(
               width: cardWidth,

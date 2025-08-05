@@ -148,6 +148,11 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
           errorMessage = errorMessage.substring(11);
         }
         
+        // Check if this is a database permission issue
+        final isDatabasePermissionIssue = errorMessage.contains('DATABASE PERMISSION ISSUE') || 
+                                         errorMessage.contains('RLS') ||
+                                         errorMessage.contains('No rows were deleted');
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Column(
@@ -156,11 +161,15 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                    Icon(
+                      isDatabasePermissionIssue ? Icons.security : Icons.error_outline, 
+                      color: Colors.white, 
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Delete Failed',
-                      style: TextStyle(
+                    Text(
+                      isDatabasePermissionIssue ? 'Permission Issue' : 'Delete Failed',
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -169,18 +178,27 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  errorMessage,
+                  isDatabasePermissionIssue 
+                      ? 'Delete functionality is temporarily unavailable due to database configuration. Please contact support.'
+                      : errorMessage,
                   style: const TextStyle(fontSize: 14),
                 ),
+                if (isDatabasePermissionIssue) ...[
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Technical: Missing RLS DELETE policy in Supabase',
+                    style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                  ),
+                ],
               ],
             ),
-            backgroundColor: Colors.red.shade600,
+            backgroundColor: isDatabasePermissionIssue ? Colors.orange.shade700 : Colors.red.shade600,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
-            duration: const Duration(seconds: 6),
-            action: SnackBarAction(
+            duration: const Duration(seconds: 8),
+            action: isDatabasePermissionIssue ? null : SnackBarAction(
               label: 'Retry',
               textColor: Colors.white,
               onPressed: () => _deleteReading(readingId),
