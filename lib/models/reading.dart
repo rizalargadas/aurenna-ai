@@ -1,14 +1,19 @@
 import 'tarot_card.dart';
 import '../data/tarot_deck.dart';
 
+enum ReadingType {
+  threeCard,
+  general,
+}
+
 class Reading {
   final String id;
   final String userId;
   final String question;
-  final List<DrawnCard>
-  drawnCards; // Cards with their positions and orientations
+  final List<DrawnCard> drawnCards; // Cards with their positions and orientations
   final String aiReading;
   final DateTime createdAt;
+  final ReadingType readingType;
 
   const Reading({
     required this.id,
@@ -17,6 +22,7 @@ class Reading {
     required this.drawnCards,
     required this.aiReading,
     required this.createdAt,
+    required this.readingType,
   });
 
   // Convert to JSON for database storage
@@ -28,20 +34,28 @@ class Reading {
       'cards': drawnCards.map((dc) => dc.toJson()).toList(),
       'ai_reading': aiReading,
       'created_at': createdAt.toIso8601String(),
+      'reading_type': readingType.name,
     };
   }
 
   // Create from database JSON
   factory Reading.fromJson(Map<String, dynamic> json) {
+    final readingTypeStr = json['reading_type'] ?? 'threeCard';
+    final readingType = ReadingType.values.firstWhere(
+      (e) => e.name == readingTypeStr,
+      orElse: () => ReadingType.threeCard,
+    );
+    
     return Reading(
       id: json['id'],
       userId: json['user_id'],
       question: json['question'],
       drawnCards: (json['cards'] as List)
-          .map((cardJson) => DrawnCard.fromJson(cardJson))
+          .map((cardJson) => DrawnCard.fromJson(cardJson, readingType))
           .toList(),
       aiReading: json['ai_reading'],
       createdAt: DateTime.parse(json['created_at']),
+      readingType: readingType,
     );
   }
 }
@@ -49,25 +63,42 @@ class Reading {
 // Represents a card that was drawn with its position and orientation
 class DrawnCard {
   final TarotCard card;
-  final int position; // 0: Past, 1: Present, 2: Future
+  final int position;
   final bool isReversed;
+  final ReadingType readingType;
 
   const DrawnCard({
     required this.card,
     required this.position,
     required this.isReversed,
+    required this.readingType,
   });
 
   String get positionName {
-    switch (position) {
-      case 0:
-        return 'Past';
-      case 1:
-        return 'Present';
-      case 2:
-        return 'Future';
-      default:
-        return 'Unknown';
+    if (readingType == ReadingType.general) {
+      switch (position) {
+        case 0: return 'Mind';
+        case 1: return 'Body';
+        case 2: return 'Spirit';
+        case 3: return 'Friends & Family';
+        case 4: return 'You';
+        case 5: return 'Blessings';
+        case 6: return 'Challenges';
+        case 7: return 'Advice';
+        case 8: return 'Romance';
+        case 9: return 'Hobbies';
+        case 10: return 'Career';
+        case 11: return 'Finances';
+        default: return 'Unknown';
+      }
+    } else {
+      // Three card reading
+      switch (position) {
+        case 0: return 'Past';
+        case 1: return 'Present';
+        case 2: return 'Future';
+        default: return 'Unknown';
+      }
     }
   }
 
@@ -78,16 +109,26 @@ class DrawnCard {
       'card_id': card.id,
       'position': position,
       'is_reversed': isReversed,
+      'reading_type': readingType.name,
     };
   }
 
-  factory DrawnCard.fromJson(Map<String, dynamic> json) {
+  factory DrawnCard.fromJson(Map<String, dynamic> json, [ReadingType? readingType]) {
     // Import TarotDeck to get the actual card
     final card = TarotDeck.getCardById(json['card_id']);
+    final cardReadingType = readingType ?? 
+        (json['reading_type'] != null 
+            ? ReadingType.values.firstWhere(
+                (e) => e.name == json['reading_type'],
+                orElse: () => ReadingType.threeCard,
+              )
+            : ReadingType.threeCard);
+    
     return DrawnCard(
       card: card,
       position: json['position'],
       isReversed: json['is_reversed'],
+      readingType: cardReadingType,
     );
   }
 }

@@ -8,12 +8,16 @@ class SimpleCardShuffle extends StatefulWidget {
   final VoidCallback? onShuffleComplete;
   final VoidCallback? onCardsRevealed;
   final List<DrawnCard>? drawnCards;
+  final int cardCount;
+  final bool showCardDetails; // Whether to show card names and positions
 
   const SimpleCardShuffle({
     super.key,
     this.onShuffleComplete,
     this.onCardsRevealed,
     this.drawnCards,
+    this.cardCount = 3, // Default to 3 cards
+    this.showCardDetails = true, // Default to showing details
   });
 
   @override
@@ -110,10 +114,10 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
       );
     });
 
-    // Select 3 random cards for the final reveal
+    // Select random cards for the final reveal based on widget.cardCount
     final indices = List.generate(cardCount, (i) => i);
     indices.shuffle();
-    _selectedCardIndices = indices.take(3).toList();
+    _selectedCardIndices = indices.take(widget.cardCount).toList();
   }
 
   Future<void> _startAnimation() async {
@@ -148,7 +152,7 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
   }
 
   Future<void> _revealCards() async {
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < widget.cardCount; i++) {
       if (!mounted) return;
 
       setState(() {
@@ -183,6 +187,9 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
       child: Stack(
         alignment: Alignment.center,
         children: [
+          // Background sparkles during shuffling
+          if (_isShuffling) ..._buildBackgroundSparkles(),
+          
           // Shuffling cards
           if (_isShuffling) ..._buildShufflingCards(),
 
@@ -239,31 +246,62 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
   List<Widget> _buildSelectedCards() {
     final screenWidth = MediaQuery.of(context).size.width;
     final availableWidth = screenWidth * 0.9;
-    final maxCardWidth = (availableWidth - 40) / 3;
-    final cardWidth = math.min(maxCardWidth, 100.0);
-    final cardHeight = cardWidth * 1.4;
+    
+    // Handle different card counts
+    if (widget.cardCount <= 4) {
+      // Row layout for 3-4 cards
+      final maxCardWidth = (availableWidth - (widget.cardCount - 1) * 16) / widget.cardCount;
+      final cardWidth = math.min(maxCardWidth, 100.0);
 
-    return [
-      Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start, // Align cards at top
-          children: _selectedCardIndices.asMap().entries.map((entry) {
-            final index = entry.key;
+      return [
+        Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: _selectedCardIndices.asMap().entries.map((entry) {
+              final index = entry.key;
 
-            final cardWidget = SizedBox(
-              width: cardWidth,
-              child: _buildCardFront(cardWidth, index, cardHeight),
-            );
+              final cardWidget = SizedBox(
+                width: cardWidth,
+                child: _buildCardFront(cardWidth, index),
+              );
 
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: cardWidget,
-            );
-          }).toList(),
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: cardWidget,
+              );
+            }).toList(),
+          ),
         ),
-      ),
-    ];
+      ];
+    } else {
+      // Grid layout for more cards (like 12-card general reading)
+      final crossAxisCount = widget.cardCount == 12 ? 3 : 4;
+      final cardWidth = (availableWidth - (crossAxisCount + 1) * 8) / crossAxisCount;
+      final finalCardWidth = math.min(cardWidth, 80.0);
+
+      return [
+        Center(
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: widget.cardCount,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
+                childAspectRatio: widget.showCardDetails ? 0.5 : 0.7,
+              ),
+              itemBuilder: (context, index) {
+                return _buildCardFront(finalCardWidth, index);
+              },
+            ),
+          ),
+        ),
+      ];
+    }
   }
 
   Widget _buildCardBack(double width) {
@@ -311,7 +349,7 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
     );
   }
 
-  Widget _buildCardFront(double width, int position, double screenHeight) {
+  Widget _buildCardFront(double width, int position) {
     // If we have drawn cards, display them
     if (widget.drawnCards != null && position < widget.drawnCards!.length) {
       final drawnCard = widget.drawnCards![position];
@@ -397,64 +435,66 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
               ),
             ),
           ),
-          // Text labels below card
-          const SizedBox(height: 8),
+          // Text labels below card (only if showCardDetails is true)
+          if (widget.showCardDetails) ...[
+            const SizedBox(height: 8),
 
-          // Position name
-          Text(
-            drawnCard.positionName,
-            style: TextStyle(
-              color: AurennaTheme.crystalBlue,
-              fontSize: width * 0.12,
-              fontWeight: FontWeight.w600,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-
-          const SizedBox(height: 6),
-
-          // Card name
-          SizedBox(
-            width: width,
-            child: Text(
-              drawnCard.card.name.isNotEmpty
-                  ? drawnCard.card.name
-                  : 'Unknown Card',
+            // Position name
+            Text(
+              drawnCard.positionName,
               style: TextStyle(
-                color: AurennaTheme.textPrimary,
-                fontSize: width * 0.11,
+                color: AurennaTheme.crystalBlue,
+                fontSize: width * 0.12,
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-          ),
 
-          // Reversed indicator if needed
-          if (drawnCard.isReversed) ...[
             const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: AurennaTheme.amberGlow.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: AurennaTheme.amberGlow.withOpacity(0.3),
-                  width: 1,
-                ),
-              ),
+
+            // Card name
+            SizedBox(
+              width: width,
               child: Text(
-                'Reversed',
+                drawnCard.card.name.isNotEmpty
+                    ? drawnCard.card.name
+                    : 'Unknown Card',
                 style: TextStyle(
-                  color: AurennaTheme.amberGlow,
-                  fontSize: width * 0.08,
+                  color: AurennaTheme.textPrimary,
+                  fontSize: width * 0.11,
                   fontWeight: FontWeight.w600,
                 ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
+
+            // Reversed indicator if needed
+            if (drawnCard.isReversed) ...[
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AurennaTheme.amberGlow.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AurennaTheme.amberGlow.withOpacity(0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  'Reversed',
+                  style: TextStyle(
+                    color: AurennaTheme.amberGlow,
+                    fontSize: width * 0.08,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ],
         ],
       );
@@ -495,6 +535,55 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
         ],
       ),
     );
+  }
+
+  List<Widget> _buildBackgroundSparkles() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final random = math.Random();
+    
+    return List.generate(50, (index) {
+      // Create fixed base positions for each sparkle
+      final baseX = random.nextDouble() * screenWidth;
+      final baseY = random.nextDouble() * screenHeight;
+      
+      return AnimatedBuilder(
+        animation: _shuffleController,
+        builder: (context, child) {
+          // Much smaller, slower movement for galaxy effect
+          final sparkleOffset = Offset(
+            baseX + (math.sin((_shuffleController.value * 0.5 * math.pi) + index) * 8),
+            baseY + (math.cos((_shuffleController.value * 0.3 * math.pi) + index) * 6),
+          );
+          
+          // Gentler opacity changes
+          final opacity = (math.sin((_shuffleController.value * 1.5 * math.pi) + index) + 1) / 2;
+          
+          return Positioned(
+            left: sparkleOffset.dx,
+            top: sparkleOffset.dy,
+            child: Opacity(
+              opacity: opacity * 0.4, // More subtle
+              child: Container(
+                width: 2 + (math.sin((_shuffleController.value * 2 * math.pi) + index) * 1),
+                height: 2 + (math.sin((_shuffleController.value * 2 * math.pi) + index) * 1),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AurennaTheme.silverMist.withOpacity(0.8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AurennaTheme.electricViolet.withOpacity(0.3),
+                      blurRadius: 4,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    });
   }
 }
 

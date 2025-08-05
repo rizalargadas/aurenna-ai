@@ -345,6 +345,9 @@ class _CardDrawingScreenState extends State<CardDrawingScreen>
               return Stack(
                 alignment: Alignment.center,
                 children: [
+                  // Animated starfield background
+                  ..._buildCosmicBackground(screenWidth, screenHeight),
+                  
                   // Massive background gradient that extends beyond screen
                   Container(
                     width: screenWidth * 2.5, // 2.5x screen width
@@ -790,7 +793,7 @@ class _CardDrawingScreenState extends State<CardDrawingScreen>
       case 0:
         return _shuffleStarted ? 'Shuffling the cosmic deck...' : '';
       case 1:
-        return 'Your cards have been revealed';
+        return 'Your cards have been revealed. Please wait...';
       case 2:
         return _isRetrying
             ? 'Reconnecting to the cosmos...'
@@ -798,5 +801,88 @@ class _CardDrawingScreenState extends State<CardDrawingScreen>
       default:
         return '';
     }
+  }
+  
+  List<Widget> _buildCosmicBackground(double screenWidth, double screenHeight) {
+    final random = math.Random();
+    final List<Widget> stars = [];
+    
+    // Create multiple layers of stars
+    for (int i = 0; i < 100; i++) {
+      final size = random.nextDouble() * 3 + 1;
+      final x = random.nextDouble() * screenWidth;
+      final y = random.nextDouble() * screenHeight;
+      final delay = random.nextDouble() * 2; // Increased delay spread for more variety
+      
+      stars.add(
+        Positioned(
+          left: x,
+          top: y,
+          child: AnimatedBuilder(
+            animation: _glowAnimation,
+            builder: (context, child) {
+              // Much slower, smoother twinkling (0.3x speed)
+              final opacity = ((math.sin((_glowAnimation.value + delay) * math.pi * 0.6) + 1) / 2) * 0.6;
+              return Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AurennaTheme.silverMist.withOpacity(opacity),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AurennaTheme.silverMist.withOpacity(opacity * 0.5),
+                      blurRadius: size * 2,
+                      spreadRadius: size * 0.5,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+    
+    // Add some floating cosmic dust
+    for (int i = 0; i < 20; i++) {
+      final x = random.nextDouble() * screenWidth;
+      final y = random.nextDouble() * screenHeight;
+      final floatSpeed = 0.3 + random.nextDouble() * 0.2; // Variable slow speeds
+      
+      stars.add(
+        Positioned(
+          left: x,
+          top: y,
+          child: AnimatedBuilder(
+            animation: _floatAnimation,
+            builder: (context, child) {
+              // Much slower, smoother floating (0.3x speed with variable speeds)
+              final offsetY = math.sin(_floatAnimation.value * math.pi * floatSpeed) * 10;
+              final offsetX = math.cos(_floatAnimation.value * math.pi * floatSpeed * 0.8) * 8;
+              return Transform.translate(
+                offset: Offset(offsetX, offsetY),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        AurennaTheme.cosmicPurple.withOpacity(0.2),
+                        AurennaTheme.electricViolet.withOpacity(0.05),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+    
+    return stars;
   }
 }

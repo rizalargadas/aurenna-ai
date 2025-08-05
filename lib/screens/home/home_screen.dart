@@ -96,58 +96,188 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               // Flexible spacing that adapts to screen size
               Spacer(flex: isSmallScreen ? 1 : 2),
 
-              // Main tarot card container
-              Container(
-                constraints: BoxConstraints(
-                  maxHeight: isSmallScreen ? 280 : 320,
-                  minHeight: 240,
-                ),
-                padding: EdgeInsets.all(isSmallScreen ? 24 : 32),
-                decoration: AurennaTheme.mysticalGradientBox,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '🔮',
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        fontSize: isSmallScreen ? 48 : 56,
-                      ),
-                    ),
-                    SizedBox(height: isSmallScreen ? 12 : 16),
-                    Text(
-                      'Your tarot journey begins here',
-                      style: Theme.of(context).textTheme.titleLarge,
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: isSmallScreen ? 6 : 8),
-                    Text(
-                      'Ask a question and let the cards reveal their wisdom',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: isSmallScreen ? 20 : 28),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const QuestionScreen(),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            vertical: isSmallScreen ? 14 : 16,
+              // Reading options
+              Column(
+                children: [
+                  // Three-Card Reading
+                  Container(
+                    padding: EdgeInsets.all(isSmallScreen ? 20 : 24),
+                    decoration: AurennaTheme.mysticalGradientBox,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '🔮',
+                          style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                            fontSize: isSmallScreen ? 36 : 42,
                           ),
                         ),
-                        child: const Text('Ask the Cards'),
-                      ),
+                        SizedBox(height: isSmallScreen ? 8 : 12),
+                        Text(
+                          'Three-Card Reading',
+                          style: Theme.of(context).textTheme.titleLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: isSmallScreen ? 4 : 6),
+                        Text(
+                          'Ask a question and let the cards reveal their wisdom',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: isSmallScreen ? 16 : 20),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const QuestionScreen(),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                vertical: isSmallScreen ? 12 : 14,
+                              ),
+                            ),
+                            child: const Text('Ask the Cards'),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  
+                  SizedBox(height: isSmallScreen ? 16 : 20),
+                  
+                  // General Reading (Premium)
+                  FutureBuilder<bool>(
+                    future: authService.hasActiveSubscription(),
+                    builder: (context, snapshot) {
+                      final hasSubscription = snapshot.data ?? false;
+                      
+                      return Container(
+                        padding: EdgeInsets.all(isSmallScreen ? 20 : 24),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: hasSubscription 
+                                ? [
+                                    AurennaTheme.electricViolet.withOpacity(0.2),
+                                    AurennaTheme.cosmicPurple.withOpacity(0.2),
+                                  ]
+                                : [
+                                    AurennaTheme.mysticBlue.withOpacity(0.1),
+                                    AurennaTheme.voidBlack.withOpacity(0.1),
+                                  ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: hasSubscription 
+                                ? AurennaTheme.electricViolet.withOpacity(0.5)
+                                : AurennaTheme.silverMist.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '✨',
+                                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                                    fontSize: isSmallScreen ? 36 : 42,
+                                  ),
+                                ),
+                                if (!hasSubscription) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, 
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AurennaTheme.amberGlow.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      'PREMIUM',
+                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        color: AurennaTheme.amberGlow,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            SizedBox(height: isSmallScreen ? 8 : 12),
+                            Text(
+                              'Comprehensive General Reading',
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: hasSubscription 
+                                    ? AurennaTheme.textPrimary
+                                    : AurennaTheme.textSecondary,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: isSmallScreen ? 4 : 6),
+                            Text(
+                              hasSubscription 
+                                  ? '12 cards revealing all aspects of your life'
+                                  : 'Unlock a complete view of your cosmic energy',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: hasSubscription 
+                                    ? AurennaTheme.textSecondary
+                                    : AurennaTheme.textSecondary.withOpacity(0.8),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: isSmallScreen ? 16 : 20),
+                            SizedBox(
+                              width: double.infinity,
+                              child: hasSubscription 
+                                  ? ElevatedButton.icon(
+                                      onPressed: () {
+                                        Navigator.pushNamed(context, '/general-reading');
+                                      },
+                                      icon: const Icon(Icons.auto_awesome, size: 20),
+                                      label: const Text('Begin General Reading'),
+                                      style: ElevatedButton.styleFrom(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: isSmallScreen ? 12 : 14,
+                                        ),
+                                        backgroundColor: AurennaTheme.electricViolet,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                    )
+                                  : OutlinedButton.icon(
+                                      onPressed: () {
+                                        Navigator.pushNamed(context, '/premium-upgrade');
+                                      },
+                                      icon: const Icon(Icons.lock, size: 18),
+                                      label: const Text('Upgrade to Unlock'),
+                                      style: OutlinedButton.styleFrom(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: isSmallScreen ? 12 : 14,
+                                        ),
+                                        side: BorderSide(
+                                          color: AurennaTheme.amberGlow.withOpacity(0.5),
+                                        ),
+                                        foregroundColor: AurennaTheme.amberGlow,
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
 
               // Bottom flexible spacing
