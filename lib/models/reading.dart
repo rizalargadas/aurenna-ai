@@ -6,6 +6,7 @@ enum ReadingType {
   general,
   compatibility,
   situationship,
+  yesOrNo,
 }
 
 class Reading {
@@ -110,6 +111,13 @@ class DrawnCard {
         case 3: return 'Their Intentions';
         case 4: return 'Their Actions/Plan';
         case 5: return 'Advice for This Situationship';
+        default: return 'Unknown';
+      }
+    } else if (readingType == ReadingType.yesOrNo) {
+      switch (position) {
+        case 0: return 'Card 1 - Initial Energy';
+        case 1: return 'Card 2 - Core Message';
+        case 2: return 'Card 3 - Final Verdict';
         default: return 'Unknown';
       }
     } else {

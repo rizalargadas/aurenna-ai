@@ -538,6 +538,141 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       );
                     },
                   ),
+                  
+                  SizedBox(height: isSmallScreen ? 16 : 20),
+                  
+                  // Yes or No Reading (Premium)
+                  FutureBuilder<bool>(
+                    future: authService.hasActiveSubscription(),
+                    builder: (context, snapshot) {
+                      final hasSubscription = snapshot.data ?? false;
+                      
+                      return GestureDetector(
+                        onTap: hasSubscription 
+                            ? () => Navigator.pushNamed(context, '/yes-or-no-reading')
+                            : () => Navigator.pushNamed(context, '/premium-upgrade'),
+                        child: Container(
+                        padding: EdgeInsets.all(isSmallScreen ? 20 : 24),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: hasSubscription 
+                                ? [
+                                    const Color(0xFF7C4DFF).withOpacity(0.2),
+                                    const Color(0xFF536DFE).withOpacity(0.2),
+                                  ]
+                                : [
+                                    AurennaTheme.mysticBlue.withOpacity(0.1),
+                                    AurennaTheme.voidBlack.withOpacity(0.1),
+                                  ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: hasSubscription 
+                                ? const Color(0xFF7C4DFF).withOpacity(0.5)
+                                : AurennaTheme.silverMist.withOpacity(0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '❓',
+                                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                                    fontSize: isSmallScreen ? 36 : 42,
+                                  ),
+                                ),
+                                if (!hasSubscription) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, 
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AurennaTheme.amberGlow.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      'PREMIUM',
+                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        color: AurennaTheme.amberGlow,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            SizedBox(height: isSmallScreen ? 8 : 12),
+                            Text(
+                              'Yes or No Reading',
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: hasSubscription 
+                                    ? AurennaTheme.textPrimary
+                                    : AurennaTheme.textSecondary,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: isSmallScreen ? 4 : 6),
+                            Text(
+                              hasSubscription 
+                                  ? 'Get straight-to-the-point cosmic guidance'
+                                  : 'Unlock decisive answers from the universe',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: hasSubscription 
+                                    ? AurennaTheme.textSecondary
+                                    : AurennaTheme.textSecondary.withOpacity(0.8),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: isSmallScreen ? 16 : 20),
+                            SizedBox(
+                              width: double.infinity,
+                              child: hasSubscription 
+                                  ? ElevatedButton.icon(
+                                      onPressed: () {
+                                        Navigator.pushNamed(context, '/yes-or-no-reading');
+                                      },
+                                      icon: const Icon(Icons.help_outline, size: 20),
+                                      label: const Text('Ask Your Question'),
+                                      style: ElevatedButton.styleFrom(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: isSmallScreen ? 12 : 14,
+                                        ),
+                                        backgroundColor: const Color(0xFF7C4DFF),
+                                        foregroundColor: Colors.white,
+                                      ),
+                                    )
+                                  : OutlinedButton.icon(
+                                      onPressed: () {
+                                        Navigator.pushNamed(context, '/premium-upgrade');
+                                      },
+                                      icon: const Icon(Icons.lock, size: 18),
+                                      label: const Text('Upgrade to Unlock'),
+                                      style: OutlinedButton.styleFrom(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: isSmallScreen ? 12 : 14,
+                                        ),
+                                        side: BorderSide(
+                                          color: AurennaTheme.amberGlow.withOpacity(0.5),
+                                        ),
+                                        foregroundColor: AurennaTheme.amberGlow,
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      );
+                    },
+                  ),
                 ],
                 ),
 
@@ -564,4 +699,5 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       ),
     );
   }
+
 }

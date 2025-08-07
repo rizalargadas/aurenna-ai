@@ -57,6 +57,28 @@ class TarotService {
     return drawnCards;
   }
 
+  // Draw 3 unique cards for yes or no reading
+  static List<DrawnCard> drawThreeCardsForYesOrNo() {
+    final List<TarotCard> deck = List.from(TarotDeck.cards);
+    deck.shuffle();
+
+    final random = Random();
+    final drawnCards = <DrawnCard>[];
+
+    for (int i = 0; i < 3; i++) {
+      drawnCards.add(
+        DrawnCard(
+          card: deck[i],
+          position: i, // 0: Card 1, 1: Card 2, 2: Card 3
+          isReversed: random.nextBool(), // 50% chance of being reversed
+          readingType: ReadingType.yesOrNo,
+        ),
+      );
+    }
+
+    return drawnCards;
+  }
+
   // Draw 5 unique cards for compatibility reading
   static List<DrawnCard> drawFiveCards() {
     final List<TarotCard> deck = List.from(TarotDeck.cards);
@@ -69,7 +91,8 @@ class TarotService {
       drawnCards.add(
         DrawnCard(
           card: deck[i],
-          position: i, // 0: Your Feelings, 1: Partner's Feelings, 2: Dominant Characteristic, 3: Challenges, 4: Potential
+          position:
+              i, // 0: Your Feelings, 1: Partner's Feelings, 2: Dominant Characteristic, 3: Challenges, 4: Potential
           isReversed: random.nextBool(), // 50% chance of being reversed
           readingType: ReadingType.compatibility,
         ),
@@ -91,7 +114,8 @@ class TarotService {
       drawnCards.add(
         DrawnCard(
           card: deck[i],
-          position: i, // 0: Your Current Energy, 1: Their Feelings, 2: Their Thoughts, 3: Their Intentions, 4: Their Actions/Plan, 5: Advice
+          position:
+              i, // 0: Your Current Energy, 1: Their Feelings, 2: Their Thoughts, 3: Their Intentions, 4: Their Actions/Plan, 5: Advice
           isReversed: random.nextBool(), // 50% chance of being reversed
           readingType: ReadingType.situationship,
         ),
@@ -311,7 +335,8 @@ Goal: Give them comprehensive insights and clarity to different parts of their l
             {'role': 'user', 'content': prompt},
           ],
           'temperature': OpenAIConfig.temperature,
-          'max_tokens': OpenAIConfig.maxTokensGeneral, // Use higher limit for comprehensive readings
+          'max_tokens': OpenAIConfig
+              .maxTokensGeneral, // Use higher limit for comprehensive readings
         }),
       );
 
@@ -342,7 +367,11 @@ Goal: Give them comprehensive insights and clarity to different parts of their l
     String? yourName,
     String? partnerName,
   }) async {
-    final prompt = _buildCompatibilityPrompt(cards, yourName: yourName, partnerName: partnerName);
+    final prompt = _buildCompatibilityPrompt(
+      cards,
+      yourName: yourName,
+      partnerName: partnerName,
+    );
 
     try {
       final response = await http.post(
@@ -422,7 +451,8 @@ Goal: Give them comprehensive insights about their romantic compatibility and cl
             {'role': 'user', 'content': prompt},
           ],
           'temperature': OpenAIConfig.temperature,
-          'max_tokens': OpenAIConfig.maxTokensGeneral, // Use higher limit for comprehensive readings
+          'max_tokens': OpenAIConfig
+              .maxTokensGeneral, // Use higher limit for comprehensive readings
         }),
       );
 
@@ -453,7 +483,11 @@ Goal: Give them comprehensive insights about their romantic compatibility and cl
     String? yourName,
     String? theirName,
   }) async {
-    final prompt = _buildSituationshipPrompt(cards, yourName: yourName, theirName: theirName);
+    final prompt = _buildSituationshipPrompt(
+      cards,
+      yourName: yourName,
+      theirName: theirName,
+    );
 
     try {
       final response = await http.post(
@@ -540,7 +574,8 @@ Goal: Give them absolute clarity about this undefined relationship and empower t
             {'role': 'user', 'content': prompt},
           ],
           'temperature': OpenAIConfig.temperature,
-          'max_tokens': OpenAIConfig.maxTokensGeneral, // Use higher limit for comprehensive readings
+          'max_tokens': OpenAIConfig
+              .maxTokensGeneral, // Use higher limit for comprehensive readings
         }),
       );
 
@@ -633,11 +668,20 @@ Goal: Give them absolute clarity about this undefined relationship and empower t
   }
 
   // Build the prompt for compatibility reading
-  static String _buildCompatibilityPrompt(List<DrawnCard> cards, {String? yourName, String? partnerName}) {
+  static String _buildCompatibilityPrompt(
+    List<DrawnCard> cards, {
+    String? yourName,
+    String? partnerName,
+  }) {
     final buffer = StringBuffer();
 
-    if (yourName != null && yourName.isNotEmpty && partnerName != null && partnerName.isNotEmpty) {
-      buffer.writeln('5-Card Love Compatibility Reading for $yourName & $partnerName:\n');
+    if (yourName != null &&
+        yourName.isNotEmpty &&
+        partnerName != null &&
+        partnerName.isNotEmpty) {
+      buffer.writeln(
+        '5-Card Love Compatibility Reading for $yourName & $partnerName:\n',
+      );
     } else {
       buffer.writeln('5-Card Love Compatibility Reading:\n');
     }
@@ -667,11 +711,20 @@ Goal: Give them absolute clarity about this undefined relationship and empower t
   }
 
   // Build the prompt for situationship reading
-  static String _buildSituationshipPrompt(List<DrawnCard> cards, {String? yourName, String? theirName}) {
+  static String _buildSituationshipPrompt(
+    List<DrawnCard> cards, {
+    String? yourName,
+    String? theirName,
+  }) {
     final buffer = StringBuffer();
 
-    if (yourName != null && yourName.isNotEmpty && theirName != null && theirName.isNotEmpty) {
-      buffer.writeln('6-Card Situationship Reading for $yourName about $theirName:\n');
+    if (yourName != null &&
+        yourName.isNotEmpty &&
+        theirName != null &&
+        theirName.isNotEmpty) {
+      buffer.writeln(
+        '6-Card Situationship Reading for $yourName about $theirName:\n',
+      );
     } else if (yourName != null && yourName.isNotEmpty) {
       buffer.writeln('6-Card Situationship Reading for $yourName:\n');
     } else {
@@ -688,7 +741,8 @@ Goal: Give them absolute clarity about this undefined relationship and empower t
       buffer.writeln('Description: ${drawnCard.card.description}\n');
     }
 
-    buffer.writeln('''Provide a premium situationship reading that:
+    buffer.writeln(
+      '''Provide a premium situationship reading that:
 1. Cuts through the confusion of this undefined relationship
 2. Reveals what's really going on in both their heads and hearts
 3. Calls out mixed signals and situationship BS with love but no sugar-coating
@@ -697,7 +751,8 @@ Goal: Give them absolute clarity about this undefined relationship and empower t
 6. Feels like a \$150 session with a dating coach who's psychic and won't let them settle for crumbs
 7. Uses frank, warm language - like their wisest friend who's tired of watching them get played
 8. Provides crystal-clear, actionable advice on whether to define it, walk away, or wait it out
-9. Ends with a "Situationship Verdict" that gives absolute clarity and empowers them to choose themselves''');
+9. Ends with a "Situationship Verdict" that gives absolute clarity and empowers them to choose themselves''',
+    );
 
     return buffer.toString();
   }
@@ -831,6 +886,156 @@ Goal: Give them absolute clarity about this undefined relationship and empower t
     } catch (e) {
       return 'DIAGNOSIS FAILED: Could not diagnose RLS issue due to error: ${e.toString()}';
     }
+  }
+
+  // Generate yes or no reading using OpenAI
+  static Future<String> generateYesOrNoReading(
+    List<DrawnCard> cards, {
+    String? question,
+  }) async {
+    final prompt = _buildYesOrNoPrompt(cards, question: question);
+
+    try {
+      final response = await http.post(
+        Uri.parse(OpenAIConfig.chatCompletionsEndpoint),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${OpenAIConfig.apiKey}',
+        },
+        body: jsonEncode({
+          'model': OpenAIConfig.model,
+          'messages': [
+            {
+              'role': 'system',
+              'content':
+                  '''You are Aurenna, a premium tarot reader — part mystic, part decision coach, part no-nonsense bestie. Your yes/no readings feel like a \$75 session over coffee: quick, intuitive, and straight to the point with a side of cosmic wisdom.
+
+[PERSONALITY & STYLE]
+- Speak like a wise best friend who cuts through the confusion—and gives you the clarity you need.
+- Be FRANK: Give them the real answer, not what they want to hear.
+- Be FUNNY: A little humor when delivering the cosmic verdict, avoid cringey analogies.
+- Be WARM: Like a supportive friend who's got your back no matter what.
+- Be INTUITIVE: You can sense the energy behind their question and what they really need to know.
+- Be PROTECTIVE: Never encourage harmful decisions or toxic patterns.
+- Be DECISIVE: This is yes/no territory—be clear about the cosmic verdict.
+- Be VALUABLE: Make them walk away with total clarity on their next move.
+
+[ETHICAL & SAFETY RULES]
+- Handle sensitive yes/no questions with care:
+   * Relationships? Be honest but kind about red flags or green lights.
+   * Life changes? Encourage thoughtful action, not impulsive choices.
+   * Health/legal/financial decisions? Add: "Cards give vibes, experts give facts—get both."
+   * Harmful choices? Never support decisions that could hurt them or others.
+   * Always remind them they have free will and the final say.
+
+[TASK INSTRUCTION — YES OR NO READING VERSION]
+When given a Yes or No Reading, you'll draw 3 cards and interpret each as YES, NO, or MAYBE based on traditional meanings and intuitive energy:
+
+**Card Classification System:**
+- **YES Cards:** Generally positive, forward-moving, green-light energy
+- **NO Cards:** Blocking, warning, red-flag, or "not now" energy  
+- **MAYBE Cards:** Neutral, conditional, or "depends on your approach" energy
+
+**Verdict Tallying:**
+- 3 Yes = Strong YES
+- 2 Yes + 1 Maybe = YES  
+- 1 Yes + 2 Maybe = MAYBE (leaning yes)
+- 3 Maybe = MAYBE
+- 2 Maybe + 1 No = MAYBE (leaning no)
+- 1 Maybe + 2 No = NO
+- 2 No + 1 Yes = NO
+- 3 No = Strong NO
+
+Your job is to give them cosmic clarity on their burning question with sass, warmth, and zero BS.
+
+Instructions:
+1. Interpret each card's yes/no energy in context of their specific question.
+2. Be intuitive about what each card is really saying about their situation.
+3. Give clear reasoning for why each card lands as yes/no/maybe.
+4. Tally the results and deliver a definitive verdict.
+5. End with empowering guidance on how to move forward with their answer.
+
+FORMAT:
+
+**🔮 Card 1 – [Card Position/Theme]**
+**[CARD NAME] – [Upright/Reversed]**
+Interpretation of why this card is a Yes/No/Maybe for their specific question. Include the energy and message. 3-4 sentences with personality and insight.
+
+**🔮 Card 2 – [Card Position/Theme]**
+**[CARD NAME] – [Upright/Reversed]**
+Interpretation of why this card is a Yes/No/Maybe for their specific question. Include the energy and message. 3-4 sentences with personality and insight.
+
+**🔮 Card 3 – [Card Position/Theme]**
+**[CARD NAME] – [Upright/Reversed]**
+Interpretation of why this card is a Yes/No/Maybe for their specific question. Include the energy and message. 3-4 sentences with personality and insight.
+
+**✨ VERDICT: [X] Yes cards + [X] No cards + [X] Maybe cards = [YES/NO/MAYBE] ✨**
+
+**The Final Word:** 
+Clear, empowering guidance on how to move forward with this answer. What should they do with this cosmic intel? 2-3 sentences that leave them feeling confident about their next steps.
+
+Tone: Think intuitive life coach meets cosmic bestfriend with a direct line to the universe.
+Goal: Give them absolute clarity on their yes/no question and the confidence to act on it.''',
+            },
+            {'role': 'user', 'content': prompt},
+          ],
+          'temperature': OpenAIConfig.temperature,
+          'max_tokens': OpenAIConfig.maxTokens,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['choices'][0]['message']['content'];
+      } else if (response.statusCode == 401) {
+        throw Exception(
+          'Authentication failed. Please check your API configuration.',
+        );
+      } else if (response.statusCode == 429) {
+        throw Exception('Too many requests. Please try again in a moment.');
+      } else if (response.statusCode == 500 || response.statusCode == 503) {
+        throw Exception(
+          'The AI service is temporarily unavailable. Please try again later.',
+        );
+      } else {
+        throw Exception('Unable to generate reading. Please try again.');
+      }
+    } catch (e) {
+      throw Exception('Error generating yes/no reading: $e');
+    }
+  }
+
+  // Build the prompt for yes or no reading
+  static String _buildYesOrNoPrompt(List<DrawnCard> cards, {String? question}) {
+    final buffer = StringBuffer();
+
+    if (question != null && question.isNotEmpty) {
+      buffer.writeln('3-Card Yes or No Reading for Question: "$question"\n');
+    } else {
+      buffer.writeln('3-Card Yes or No Reading:\n');
+    }
+
+    for (final drawnCard in cards) {
+      final orientation = drawnCard.isReversed ? 'Reversed' : 'Upright';
+      buffer.writeln(
+        '${drawnCard.positionName} - ${drawnCard.card.fullName} ($orientation)',
+      );
+      buffer.writeln('Meaning: ${drawnCard.meaning}');
+      buffer.writeln('Keywords: ${drawnCard.card.keywords}');
+      buffer.writeln('Description: ${drawnCard.card.description}\n');
+    }
+
+    buffer.writeln('''Provide a decisive yes/no reading that:
+1. Interprets each card as YES, NO, or MAYBE based on its energy
+2. Considers the specific question context
+3. Tallies the cosmic vote clearly
+4. Delivers a definitive verdict with confidence
+5. Feels like a \$75 session with a psychic who gives it to you straight
+6. Uses warm, frank language with a touch of cosmic sass
+7. Provides clear guidance on what to do with this answer
+8. Ends with empowering next steps''');
+
+    return buffer.toString();
   }
 
   // Delete a specific reading

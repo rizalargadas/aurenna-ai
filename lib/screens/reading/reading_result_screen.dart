@@ -114,31 +114,40 @@ class ReadingResultScreen extends StatelessWidget {
                   final maxCardWidth = 120.0;
                   final finalCardWidth = cardWidth < maxCardWidth ? cardWidth : maxCardWidth;
                   
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: drawnCards.map((drawnCard) {
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: drawnCards.map((drawnCard) {
                       try {
-                        return _buildCardDisplay(context, drawnCard, finalCardWidth);
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 12.0),
+                          child: _buildCardDisplay(context, drawnCard, finalCardWidth),
+                        );
                       } catch (e) {
                         // Fallback card display if individual card fails
-                        return Container(
-                          width: finalCardWidth,
-                          height: finalCardWidth * 1.4,
-                          decoration: BoxDecoration(
-                            color: AurennaTheme.mysticBlue,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'Error loading card',
-                              style: Theme.of(context).textTheme.bodySmall,
-                              textAlign: TextAlign.center,
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 12.0),
+                          child: Container(
+                            width: finalCardWidth,
+                            height: finalCardWidth * 1.4,
+                            decoration: BoxDecoration(
+                              color: AurennaTheme.mysticBlue,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Error loading card',
+                                style: Theme.of(context).textTheme.bodySmall,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
                         );
                       }
                     }).toList(),
+                    ),
                   );
                 },
               ),
