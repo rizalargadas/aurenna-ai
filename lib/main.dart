@@ -7,6 +7,8 @@ import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/reading/reading_history_screen.dart';
 import 'screens/reading/general_reading_screen.dart';
+import 'screens/reading/compatibility_reading_screen.dart';
+import 'screens/reading/situationship_reading_screen.dart';
 import 'screens/premium/premium_upgrade_screen.dart';
 import 'services/auth_service.dart';
 import 'providers/theme_provider.dart';
@@ -71,6 +73,8 @@ class _MaterialAppWithThemeState extends State<_MaterialAppWithTheme> {
             '/home': (context) => const HomeScreen(),
             '/reading-history': (context) => const ReadingHistoryScreen(),
             '/general-reading': (context) => const GeneralReadingScreen(),
+            '/compatibility-reading': (context) => const CompatibilityReadingScreen(),
+            '/situationship-reading': (context) => const SituationshipReadingScreen(),
             '/premium-upgrade': (context) => const PremiumUpgradeScreen(),
           },
         );

@@ -57,6 +57,50 @@ class TarotService {
     return drawnCards;
   }
 
+  // Draw 5 unique cards for compatibility reading
+  static List<DrawnCard> drawFiveCards() {
+    final List<TarotCard> deck = List.from(TarotDeck.cards);
+    deck.shuffle();
+
+    final random = Random();
+    final drawnCards = <DrawnCard>[];
+
+    for (int i = 0; i < 5; i++) {
+      drawnCards.add(
+        DrawnCard(
+          card: deck[i],
+          position: i, // 0: Your Feelings, 1: Partner's Feelings, 2: Dominant Characteristic, 3: Challenges, 4: Potential
+          isReversed: random.nextBool(), // 50% chance of being reversed
+          readingType: ReadingType.compatibility,
+        ),
+      );
+    }
+
+    return drawnCards;
+  }
+
+  // Draw 6 unique cards for situationship reading
+  static List<DrawnCard> drawSixCards() {
+    final List<TarotCard> deck = List.from(TarotDeck.cards);
+    deck.shuffle();
+
+    final random = Random();
+    final drawnCards = <DrawnCard>[];
+
+    for (int i = 0; i < 6; i++) {
+      drawnCards.add(
+        DrawnCard(
+          card: deck[i],
+          position: i, // 0: Your Current Energy, 1: Their Feelings, 2: Their Thoughts, 3: Their Intentions, 4: Their Actions/Plan, 5: Advice
+          isReversed: random.nextBool(), // 50% chance of being reversed
+          readingType: ReadingType.situationship,
+        ),
+      );
+    }
+
+    return drawnCards;
+  }
+
   // Generate AI reading using OpenAI
   static Future<String> generateReading(
     String question,
@@ -217,11 +261,11 @@ Instructions:
 1. Interpret each card in context of its position. Don't just list meanings — tell a story that connects the dots.
 2. Write 3–5 emotionally rich paragraphs covering all 12 areas of life. Keep it flowing like a conversation, not a report card.
 3. Be intuitive — pull out deeper patterns, highlight themes, and reflect on contradictions. Where are the highs and lows? What's the cosmic tea?
-4. Be warm, frank, and funny — like the no-filter bestie who's also psychic.
+4. Be warm, and frank — like the no-filter bestie who's also psychic. Avoid cringey analogies and too much references.
 5. Be kind but clear if any energy feels off or conflicted. Call it out with love.
 6. Wrap it up with a powerful summary that leaves them feeling more confident, seen, and ready to take on life.
 
-FORMAT:
+FORMAT (seperate each card interpretation their own paragraph):
 **Mind - [CARD Drawn]**
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
@@ -267,7 +311,7 @@ Goal: Give them comprehensive insights and clarity to different parts of their l
             {'role': 'user', 'content': prompt},
           ],
           'temperature': OpenAIConfig.temperature,
-          'max_tokens': OpenAIConfig.maxTokens,
+          'max_tokens': OpenAIConfig.maxTokensGeneral, // Use higher limit for comprehensive readings
         }),
       );
 
@@ -289,6 +333,235 @@ Goal: Give them comprehensive insights and clarity to different parts of their l
       }
     } catch (e) {
       throw Exception('Error generating general reading: $e');
+    }
+  }
+
+  // Generate love compatibility reading using OpenAI
+  static Future<String> generateCompatibilityReading(
+    List<DrawnCard> cards, {
+    String? yourName,
+    String? partnerName,
+  }) async {
+    final prompt = _buildCompatibilityPrompt(cards, yourName: yourName, partnerName: partnerName);
+
+    try {
+      final response = await http.post(
+        Uri.parse(OpenAIConfig.chatCompletionsEndpoint),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${OpenAIConfig.apiKey}',
+        },
+        body: jsonEncode({
+          'model': OpenAIConfig.model,
+          'messages': [
+            {
+              'role': 'system',
+              'content':
+                  '''You are Aurenna, a premium tarot reader — part mystic, part relationship coach, part no-nonsense bestie. Your love readings feel like a \$200 session over wine: deeply intuitive, slightly sassy, and full of heart.
+
+[PERSONALITY & STYLE]
+- Speak like a wise best friend who won't sugarcoat—but always has your back.
+- Be FRANK: Tell it like it is about love, but always with care.
+- Be FUNNY: A little humor, a little sass, always human, avoid cringey analogies.
+- Be WARM: Like a blanket and a pep talk in one.
+- Be INTUITIVE: You are a super psychic when it comes to matters of the heart!
+- Be PROTECTIVE: Never say anything that could hurt them or their relationship.
+- Be COMPLETE: Answer their love questions fully and thoughtfully.
+- Be VALUABLE: Make them walk away thinking, "Damn, that was worth it."
+
+[ETHICAL & SAFETY RULES]
+- Handle sensitive love topics with humor and heart:
+   * Cheating concerns? Be gentle. "Listen, if something smells off, trust your nose — but don't go full soap opera just yet."
+   * Toxic patterns? Call it out with love. "Honey, red flags aren't party decorations."
+   * Unrequited love? Be kind but real. "Sometimes the universe says 'not this one' to make room for 'the one.'"
+   * Never encourage harmful, manipulative, or obsessive behaviors.
+   * Always promote healthy communication and boundaries.
+   * If the reading suggests serious relationship issues, gently suggest professional counseling.
+
+[TASK INSTRUCTION — LOVE COMPATIBILITY READING VERSION]
+When given a 5-card Love Compatibility Reading with the following positions:
+1. Your Feelings
+2. Partner's Feelings
+3. Dominant Characteristic (of the relationship)
+4. Challenges
+5. Potential
+
+Your job is to weave a holistic, intuitive narrative about this romantic connection that feels like a \$200 tarot session with wine — warm, witty, grounded, and empowering.
+
+Instructions:
+1. Interpret each card in context of its position. Don't just list meanings — tell a love story that connects the dots.
+2. Write a flowing narrative covering all 5 areas. Keep it conversational, not clinical.
+3. Be intuitive — pull out deeper patterns about this connection. What's the real dynamic here? What's the cosmic tea about this relationship?
+4. Be warm and frank — like the no-filter bestie who's also psychic about love. Avoid cringey analogies.
+5. Be honest about any challenging energy, but always with love and hope for growth.
+6. Wrap it up with empowering advice that leaves them feeling clearer about their connection and next steps.
+
+FORMAT (separate each card interpretation into their own paragraph):
+
+**Your Feelings - [CARD Drawn]**
+Interpretation of the card in the context of their feelings toward their partner. 3 to 5 sentences long.
+
+**Partner's Feelings - [CARD Drawn]**
+Interpretation of the card in the context of their partner's feelings toward them. 3 to 5 sentences long.
+
+**Dominant Characteristic - [CARD Drawn]**
+Interpretation of the card as the main energy/theme defining this relationship. 3 to 5 sentences long.
+
+**Challenges - [CARD Drawn]**
+Interpretation of the card as the primary obstacle or area of tension in this connection. 3 to 5 sentences long.
+
+**Potential - [CARD Drawn]**
+Interpretation of the card as what this relationship could become with effort and understanding. 3 to 5 sentences long.
+
+**LOVE VERDICT:**
+Wrap it up with honest, empowering insights about this connection. Give them clarity on whether to lean in, step back, or pivot. Leave them feeling confident about their next move in love.
+
+Tone: Think relationship therapist meets psychic bestfriend with a wine glass.
+Goal: Give them comprehensive insights about their romantic compatibility and clear guidance on their love path.''',
+            },
+            {'role': 'user', 'content': prompt},
+          ],
+          'temperature': OpenAIConfig.temperature,
+          'max_tokens': OpenAIConfig.maxTokensGeneral, // Use higher limit for comprehensive readings
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['choices'][0]['message']['content'];
+      } else if (response.statusCode == 401) {
+        throw Exception(
+          'Authentication failed. Please check your API configuration.',
+        );
+      } else if (response.statusCode == 429) {
+        throw Exception('Too many requests. Please try again in a moment.');
+      } else if (response.statusCode == 500 || response.statusCode == 503) {
+        throw Exception(
+          'The AI service is temporarily unavailable. Please try again later.',
+        );
+      } else {
+        throw Exception('Unable to generate reading. Please try again.');
+      }
+    } catch (e) {
+      throw Exception('Error generating compatibility reading: $e');
+    }
+  }
+
+  // Generate situationship reading using OpenAI
+  static Future<String> generateSituationshipReading(
+    List<DrawnCard> cards, {
+    String? yourName,
+    String? theirName,
+  }) async {
+    final prompt = _buildSituationshipPrompt(cards, yourName: yourName, theirName: theirName);
+
+    try {
+      final response = await http.post(
+        Uri.parse(OpenAIConfig.chatCompletionsEndpoint),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${OpenAIConfig.apiKey}',
+        },
+        body: jsonEncode({
+          'model': OpenAIConfig.model,
+          'messages': [
+            {
+              'role': 'system',
+              'content':
+                  '''You are Aurenna, a premium tarot reader — part mystic, part relationship therapist, part no-nonsense bestie. Your situationship readings feel like a \$150 session over wine: deeply intuitive, slightly sassy, and brutally honest about those messy in-between connections.
+
+[PERSONALITY & STYLE]
+- Speak like a wise best friend who's been through the dating trenches—and won't let you settle.
+- Be FRANK: Call out the situationship BS, but always with love.
+- Be FUNNY: A little humor about dating chaos, always human, avoid cringey analogies.
+- Be WARM: Like a hug when you're confused about "what are we?"
+- Be INTUITIVE: You can read between the lines of mixed signals like nobody's business!
+- Be PROTECTIVE: Never let them accept crumbs when they deserve the whole damn meal.
+- Be COMPLETE: Cut through the confusion and give them clarity.
+- Be VALUABLE: Make them walk away thinking, "Finally, someone gets it."
+
+[ETHICAL & SAFETY RULES]
+- Handle situationship drama with humor and heart:
+   * Mixed signals? "Honey, if they wanted to, they would. Period."
+   * Breadcrumbing? Call it out. "Crumbs aren't a meal, babe."
+   * False hope? Be gentle but real. "Sometimes 'maybe' is just a slow no."
+   * Unhealthy patterns? "This hot-and-cold thing? That's not passion, that's emotional whiplash."
+   * Never encourage chasing, begging, or sacrificing self-worth.
+   * Always promote self-respect and healthy boundaries.
+   * If the reading reveals manipulation or toxicity, call it out clearly.
+
+[TASK INSTRUCTION — SITUATIONSHIP READING VERSION]
+When given a 6-card Situationship Reading with the following positions:
+1. Your Current Energy
+2. Their Feelings  
+3. Their Thoughts
+4. Their Intentions
+5. Their Actions/Plan
+6. Advice for This Situationship
+
+**Situationship Spread Description:** This spread cuts through the confusion of undefined relationships. It reveals what's really going on in their head and heart, what they're actually planning to do about it, and gives you the clarity to decide if this limbo is worth your time.
+
+Your job is to decode this messy middle ground with the precision of a relationship detective and the warmth of your most honest friend.
+
+Instructions:
+1. Interpret each card in context of situationship dynamics. Don't sugarcoat—tell the real story behind the mixed signals.
+2. Write a flowing narrative that connects their energy to their person's true intentions. No fluff, just facts.
+3. Be intuitive about the gap between what they say and what they do. Where's the disconnect?
+4. Be warm but uncompromising about self-worth. Call out any energy that screams "you deserve better."
+5. Be honest about whether this person is genuinely confused or just keeping you on the back burner.
+6. End with clear, actionable advice—should they define it, walk away, or wait it out?
+
+FORMAT (separate each card interpretation into their own paragraph):
+
+**Your Current Energy - [CARD Drawn]**
+Interpretation of where they're at emotionally in this undefined situation. 3 to 5 sentences long.
+
+**Their Feelings - [CARD Drawn]**
+Interpretation of what this person actually feels about them (beyond the surface). 3 to 5 sentences long.
+
+**Their Thoughts - [CARD Drawn]**
+Interpretation of what's going through their person's mind about this connection. 3 to 5 sentences long.
+
+**Their Intentions - [CARD Drawn]**
+Interpretation of what this person actually wants or plans to do. 3 to 5 sentences long.
+
+**Their Actions/Plan - [CARD Drawn]**
+Interpretation of the concrete steps (or lack thereof) this person will take. 3 to 5 sentences long.
+
+**Advice for This Situationship - [CARD Drawn]**
+Interpretation of the best path forward for their highest good. 3 to 5 sentences long.
+
+**THE SITUATIONSHIP VERDICT:**
+Cut through the confusion with crystal-clear guidance. Tell them exactly what this connection is, where it's headed, and what they should do about it. No mixed messages—just the truth they need to make the right choice for themselves.
+
+Tone: Think dating coach meets psychic bestfriend who's tired of watching you get played.
+Goal: Give them absolute clarity about this undefined relationship and empower them to choose themselves.''',
+            },
+            {'role': 'user', 'content': prompt},
+          ],
+          'temperature': OpenAIConfig.temperature,
+          'max_tokens': OpenAIConfig.maxTokensGeneral, // Use higher limit for comprehensive readings
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['choices'][0]['message']['content'];
+      } else if (response.statusCode == 401) {
+        throw Exception(
+          'Authentication failed. Please check your API configuration.',
+        );
+      } else if (response.statusCode == 429) {
+        throw Exception('Too many requests. Please try again in a moment.');
+      } else if (response.statusCode == 500 || response.statusCode == 503) {
+        throw Exception(
+          'The AI service is temporarily unavailable. Please try again later.',
+        );
+      } else {
+        throw Exception('Unable to generate reading. Please try again.');
+      }
+    } catch (e) {
+      throw Exception('Error generating situationship reading: $e');
     }
   }
 
@@ -355,6 +628,76 @@ Goal: Give them comprehensive insights and clarity to different parts of their l
 7. Provides actionable insights and empowering guidance
 8. Maximum 4-5 emotionally rich paragraphs
 9. Ends with a powerful summary that boosts confidence''');
+
+    return buffer.toString();
+  }
+
+  // Build the prompt for compatibility reading
+  static String _buildCompatibilityPrompt(List<DrawnCard> cards, {String? yourName, String? partnerName}) {
+    final buffer = StringBuffer();
+
+    if (yourName != null && yourName.isNotEmpty && partnerName != null && partnerName.isNotEmpty) {
+      buffer.writeln('5-Card Love Compatibility Reading for $yourName & $partnerName:\n');
+    } else {
+      buffer.writeln('5-Card Love Compatibility Reading:\n');
+    }
+
+    for (final drawnCard in cards) {
+      final orientation = drawnCard.isReversed ? 'Reversed' : 'Upright';
+      buffer.writeln(
+        '${drawnCard.positionName} - ${drawnCard.card.fullName} ($orientation)',
+      );
+      buffer.writeln('Meaning: ${drawnCard.meaning}');
+      buffer.writeln('Keywords: ${drawnCard.card.keywords}');
+      buffer.writeln('Description: ${drawnCard.card.description}\n');
+    }
+
+    buffer.writeln('''Provide a premium love compatibility reading that:
+1. Interprets each card specifically for its love position
+2. Weaves the five cards into a cohesive relationship narrative
+3. Identifies the core dynamic and energy between these two people
+4. Addresses challenges with honesty but also hope
+5. Reveals the relationship's true potential
+6. Feels like a \$200 session with a relationship therapist who's also psychic
+7. Uses warm, witty language - like their wisest friend who tells it straight
+8. Provides clear, actionable guidance on the relationship's path
+9. Ends with a "Love Verdict" that gives clarity and confidence''');
+
+    return buffer.toString();
+  }
+
+  // Build the prompt for situationship reading
+  static String _buildSituationshipPrompt(List<DrawnCard> cards, {String? yourName, String? theirName}) {
+    final buffer = StringBuffer();
+
+    if (yourName != null && yourName.isNotEmpty && theirName != null && theirName.isNotEmpty) {
+      buffer.writeln('6-Card Situationship Reading for $yourName about $theirName:\n');
+    } else if (yourName != null && yourName.isNotEmpty) {
+      buffer.writeln('6-Card Situationship Reading for $yourName:\n');
+    } else {
+      buffer.writeln('6-Card Situationship Reading:\n');
+    }
+
+    for (final drawnCard in cards) {
+      final orientation = drawnCard.isReversed ? 'Reversed' : 'Upright';
+      buffer.writeln(
+        '${drawnCard.positionName} - ${drawnCard.card.fullName} ($orientation)',
+      );
+      buffer.writeln('Meaning: ${drawnCard.meaning}');
+      buffer.writeln('Keywords: ${drawnCard.card.keywords}');
+      buffer.writeln('Description: ${drawnCard.card.description}\n');
+    }
+
+    buffer.writeln('''Provide a premium situationship reading that:
+1. Cuts through the confusion of this undefined relationship
+2. Reveals what's really going on in both their heads and hearts
+3. Calls out mixed signals and situationship BS with love but no sugar-coating
+4. Identifies if this person is genuinely confused or just keeping them on the back burner
+5. Shows the gap between what they say and what they actually do
+6. Feels like a \$150 session with a dating coach who's psychic and won't let them settle for crumbs
+7. Uses frank, warm language - like their wisest friend who's tired of watching them get played
+8. Provides crystal-clear, actionable advice on whether to define it, walk away, or wait it out
+9. Ends with a "Situationship Verdict" that gives absolute clarity and empowers them to choose themselves''');
 
     return buffer.toString();
   }

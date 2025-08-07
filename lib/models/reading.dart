@@ -4,6 +4,8 @@ import '../data/tarot_deck.dart';
 enum ReadingType {
   threeCard,
   general,
+  compatibility,
+  situationship,
 }
 
 class Reading {
@@ -89,6 +91,25 @@ class DrawnCard {
         case 9: return 'Hobbies';
         case 10: return 'Career';
         case 11: return 'Finances';
+        default: return 'Unknown';
+      }
+    } else if (readingType == ReadingType.compatibility) {
+      switch (position) {
+        case 0: return 'Your Feelings';
+        case 1: return 'Partner\'s Feelings';
+        case 2: return 'Dominant Characteristic';
+        case 3: return 'Challenges';
+        case 4: return 'Potential';
+        default: return 'Unknown';
+      }
+    } else if (readingType == ReadingType.situationship) {
+      switch (position) {
+        case 0: return 'Your Current Energy';
+        case 1: return 'Their Feelings';
+        case 2: return 'Their Thoughts';
+        case 3: return 'Their Intentions';
+        case 4: return 'Their Actions/Plan';
+        case 5: return 'Advice for This Situationship';
         default: return 'Unknown';
       }
     } else {
