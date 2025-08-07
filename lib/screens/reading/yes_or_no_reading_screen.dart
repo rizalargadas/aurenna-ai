@@ -7,7 +7,7 @@ import '../../models/tarot_card.dart';
 import '../../services/auth_service.dart';
 import '../../services/tarot_service.dart';
 import '../../widgets/mystical_loading.dart';
-import '../../widgets/comprehensive_reading_animation.dart';
+import '../../widgets/reading_animation_v1.dart';
 
 class YesOrNoReadingScreen extends StatefulWidget {
   const YesOrNoReadingScreen({super.key});

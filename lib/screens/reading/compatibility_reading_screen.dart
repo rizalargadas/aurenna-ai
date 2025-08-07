@@ -4,7 +4,7 @@ import '../../config/theme.dart';
 import '../../models/reading.dart';
 import '../../services/auth_service.dart';
 import '../../services/tarot_service.dart';
-import '../../widgets/comprehensive_reading_animation.dart';
+import '../../widgets/reading_animation_v1.dart';
 
 class CompatibilityReadingScreen extends StatefulWidget {
   const CompatibilityReadingScreen({super.key});

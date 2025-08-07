@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "Bash(ls:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh auth:*)",
+      "Bash(flutter pub:*)",
+      "Bash(git push:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(flutter build:*)",
+      "Bash(sed:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }
