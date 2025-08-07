@@ -366,7 +366,7 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
     }
     
     return ComprehensiveReadingAnimation(
-      cardCount: 3,
+      cardCount: 78,
       drawnCards: _drawnCards,
       phase: phase,
       statusMessage: statusMessage,
@@ -485,12 +485,12 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
                                   : Matrix4.identity(),
                                 child: Image.asset(
                                   'assets/img/cards/${card.card.id}.png',
-                                  fit: BoxFit.cover,
+                                  fit: BoxFit.contain,
                                   errorBuilder: (context, error, stackTrace) {
                                     // Fallback to cover image if specific card not found
                                     return Image.asset(
                                       'assets/img/cards/cover.png',
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.contain,
                                     );
                                   },
                                 ),
@@ -595,47 +595,45 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
             const SizedBox(height: 32),
             
             // Action buttons
-            Center(
-              child: Wrap(
-                spacing: 16,
-                runSpacing: 16,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/yes-or-no-reading');
-                    },
-                    icon: Icon(Icons.refresh),
-                    label: Text('Ask Another Question'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AurennaTheme.amberGlow,
-                      foregroundColor: AurennaTheme.voidBlack,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(context, '/yes-or-no-reading');
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Ask Another Question'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AurennaTheme.amberGlow,
+                    foregroundColor: AurennaTheme.voidBlack,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  OutlinedButton.icon(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.home),
-                    label: Text('Back to Home'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AurennaTheme.amberGlow,
-                      side: BorderSide(color: AurennaTheme.amberGlow),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.home),
+                  label: const Text('Back to Home'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AurennaTheme.amberGlow,
+                    side: BorderSide(color: AurennaTheme.amberGlow),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
             const SizedBox(height: 40),
           ],
