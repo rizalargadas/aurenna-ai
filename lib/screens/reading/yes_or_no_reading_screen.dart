@@ -7,7 +7,7 @@ import '../../models/tarot_card.dart';
 import '../../services/auth_service.dart';
 import '../../services/tarot_service.dart';
 import '../../widgets/mystical_loading.dart';
-import '../../widgets/advanced_card_shuffle.dart';
+import '../../widgets/comprehensive_reading_animation.dart';
 
 class YesOrNoReadingScreen extends StatefulWidget {
   const YesOrNoReadingScreen({super.key});
@@ -199,12 +199,10 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
               // Main content
               if (_showQuestionInput)
                 _buildQuestionInput()
-              else if (_currentStep == 1)
-                _buildShufflePhase()
-              else if (_currentStep == 2)
-                _buildGeneratingPhase()
               else if (_currentStep == 3 && _isComplete)
-                _buildReadingResult(),
+                _buildReadingResult()
+              else
+                _buildAnimationPhase(),
               
               // Back button
               Positioned(
@@ -348,52 +346,49 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
     );
   }
 
-  Widget _buildShufflePhase() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'The cards are revealing your answer...',
-            style: TextStyle(
-              color: AurennaTheme.textPrimary,
-              fontSize: 18,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 40),
-          AdvancedCardShuffle(
-            cardCount: 3,
-            shuffleSpeed: 1.0,
-            shuffleStyle: ShuffleStyle.bridge,
-            enable3DEffects: true,
-            enableMotionBlur: true,
-            onComplete: _onShuffleComplete,
-          ),
-          const SizedBox(height: 40),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGeneratingPhase() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          MysticalLoading(),
-          SizedBox(height: 24),
-          Text(
-            'Aurenna is divining your cosmic verdict...',
-            style: TextStyle(
-              color: AurennaTheme.textPrimary,
-              fontSize: 16,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+  Widget _buildAnimationPhase() {
+    // Use the reusable animation widget
+    ReadingAnimationPhase phase;
+    String? statusMessage;
+    
+    switch (_currentStep) {
+      case 1:
+        phase = ReadingAnimationPhase.shuffling;
+        statusMessage = 'The cards are revealing your answer...';
+        break;
+      case 2:
+        phase = ReadingAnimationPhase.generating;
+        statusMessage = 'Aurenna is divining your cosmic verdict...';
+        break;
+      default:
+        phase = ReadingAnimationPhase.complete;
+        break;
+    }
+    
+    return ComprehensiveReadingAnimation(
+      cardCount: 3,
+      drawnCards: _drawnCards,
+      phase: phase,
+      statusMessage: statusMessage,
+      onShuffleComplete: () {
+        if (mounted && !_disposed) {
+          // Draw 3 cards for Yes/No reading
+          _drawnCards = TarotService.drawThreeCardsForYesOrNo();
+          setState(() {
+            _currentStep = 2; // Move to generating phase
+          });
+          
+          // Start generating reading after a brief pause
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted && !_disposed) {
+              _generateReading();
+            }
+          });
+        }
+      },
+      onCardsRevealed: () {
+        // This callback is not used for Yes/No reading since we move to generating immediately
+      },
     );
   }
 

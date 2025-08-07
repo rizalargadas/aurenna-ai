@@ -7,6 +7,7 @@ import '../../models/tarot_card.dart';
 import '../../services/auth_service.dart';
 import '../../services/tarot_service.dart';
 import '../../widgets/mystical_loading.dart';
+import '../../widgets/comprehensive_reading_animation.dart';
 import 'reading_result_screen.dart';
 
 class GeneralReadingScreen extends StatefulWidget {
@@ -380,60 +381,34 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
       return _buildCompleteReading();
     }
     
-    // For animation states, use Stack
-    return Stack(
-      children: [
-        // Full-screen animation layer
-        Positioned.fill(
-          child: _buildAnimatedContent(),
-        ),
-        
-        // UI overlay at bottom (only show during card reveal and generating)
-        if (_currentStep == 1 || _currentStep == 2)
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 300),
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(
-              child: Container(
-                padding: const EdgeInsets.all(24.0),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      AurennaTheme.voidBlack.withOpacity(0.9),
-                      AurennaTheme.voidBlack.withOpacity(0.7),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Status text - no background container
-                    if (_getStatusText().isNotEmpty)
-                      Text(
-                        _getStatusText(),
-                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          color: AurennaTheme.silverMist,
-                          fontSize: 24,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withOpacity(0.8),
-                              blurRadius: 10,
-                            ),
-                          ],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-      ],
+    // Use the reusable animation widget
+    ReadingAnimationPhase phase;
+    String? statusMessage;
+    
+    switch (_currentStep) {
+      case 0:
+        phase = ReadingAnimationPhase.shuffling;
+        break;
+      case 1:
+        phase = ReadingAnimationPhase.revealing;
+        statusMessage = 'Your cards have been revealed';
+        break;
+      case 2:
+        phase = ReadingAnimationPhase.generating;
+        statusMessage = 'Aurenna is weaving your cosmic narrative...';
+        break;
+      default:
+        phase = ReadingAnimationPhase.complete;
+        break;
+    }
+    
+    return ComprehensiveReadingAnimation(
+      cardCount: 78,
+      drawnCards: _drawnCards,
+      phase: phase,
+      statusMessage: statusMessage,
+      onShuffleComplete: _onShuffleComplete,
+      onCardsRevealed: _onCardsRevealed,
     );
   }
 
