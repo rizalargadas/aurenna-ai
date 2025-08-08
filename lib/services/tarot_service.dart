@@ -290,40 +290,40 @@ Instructions:
 6. Wrap it up with a powerful summary that leaves them feeling more confident, seen, and ready to take on life.
 
 FORMAT (seperate each card interpretation their own paragraph):
-✨ Mind - [CARD Drawn]
+✨ Mind - [CARD Drawn] ✨
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-✨ Body - [CARD Drawn]
+✨ Body - [CARD Drawn] ✨
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-✨ Spirit - [CARD Drawn]
+✨ Spirit - [CARD Drawn] ✨
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-✨ Friends & Family - [CARD Drawn]
+✨ Friends & Family - [CARD Drawn] ✨
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-✨ You - [CARD Drawn]
+✨ You - [CARD Drawn] ✨
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-✨ Blessings - [CARD Drawn]
+✨ Blessings - [CARD Drawn] ✨
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-✨ Challenges - [CARD Drawn]
+✨ Challenges - [CARD Drawn] ✨
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-✨ Advice - [CARD Drawn]
+✨ Advice - [CARD Drawn] ✨
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-✨ Romance - [CARD Drawn]
+✨ Romance - [CARD Drawn] ✨
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-✨ Hobbies - [CARD Drawn]
+✨ Hobbies - [CARD Drawn] ✨
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-✨ Career - [CARD Drawn]
+✨ Career - [CARD Drawn] ✨
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-✨ Finances - [CARD Drawn]
+✨ Finances - [CARD Drawn] ✨
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
 ☪️ CONCLUSION ☪️ 
@@ -427,27 +427,27 @@ Instructions:
 
 FORMAT (separate each card interpretation into their own paragraph):
 
-✨ Your Feelings - [CARD Drawn]
+✨ Your Feelings - [CARD Drawn] ✨
 Interpretation of the card in the context of their feelings toward their partner. 3 to 5 sentences long.
 
 
-✨ Partner's Feelings - [CARD Drawn]
+✨ Partner's Feelings - [CARD Drawn] ✨
 Interpretation of the card in the context of their partner's feelings toward them. 3 to 5 sentences long.
 
 
-✨ Dominant Characteristic - [CARD Drawn]
+✨ Dominant Characteristic - [CARD Drawn] ✨
 Interpretation of the card as the main energy/theme defining this relationship. 3 to 5 sentences long.
 
 
-✨ Challenges - [CARD Drawn]
+✨ Challenges - [CARD Drawn] ✨
 Interpretation of the card as the primary obstacle or area of tension in this connection. 3 to 5 sentences long.
 
 
-✨ Potential - [CARD Drawn]
+✨ Potential - [CARD Drawn] ✨
 Interpretation of the card as what this relationship could become with effort and understanding. 3 to 5 sentences long.
 
 
-✨ LOVE VERDICT:
+✨ LOVE VERDICT: ✨
 Wrap it up with honest, empowering insights about this connection. Give them clarity on whether to lean in, step back, or pivot. Leave them feeling confident about their next move in love.
 
 Tone: Think relationship therapist meets psychic bestfriend with a wine glass.
@@ -552,22 +552,22 @@ Instructions:
 
 FORMAT (separate each card interpretation into their own paragraph):
 
-✨ Your Current Energy - [CARD Drawn]
+✨ Your Current Energy - [CARD Drawn] ✨
 Interpretation of where they're at emotionally in this undefined situation. 3 to 5 sentences long.
 
-✨ Their Feelings - [CARD Drawn]
+✨ Their Feelings - [CARD Drawn] ✨
 Interpretation of what this person actually feels about them (beyond the surface). 3 to 5 sentences long.
 
-✨ Their Thoughts - [CARD Drawn]
+✨ Their Thoughts - [CARD Drawn] ✨
 Interpretation of what's going through their person's mind about this connection. 3 to 5 sentences long.
 
-✨ Their Intentions - [CARD Drawn]
+✨ Their Intentions - [CARD Drawn] ✨
 Interpretation of what this person actually wants or plans to do. 3 to 5 sentences long.
 
-✨ Their Actions/Plan - [CARD Drawn]
+✨ Their Actions/Plan - [CARD Drawn] ✨
 Interpretation of the concrete steps (or lack thereof) this person will take. 3 to 5 sentences long.
 
-✨ Advice for This Situationship - [CARD Drawn]
+✨ Advice for This Situationship - [CARD Drawn] ✨
 Interpretation of the best path forward for their highest good. 3 to 5 sentences long.
 
 ☪️ THE SITUATIONSHIP VERDICT: ☪️ 
@@ -893,6 +893,95 @@ Goal: Give them absolute clarity about this undefined relationship and empower t
     }
   }
 
+  // Fast batch delete for multiple readings - optimized for performance
+  static Future<Map<String, List<String>>> batchDeleteReadings(
+    List<String> readingIds,
+    String userId,
+  ) async {
+    final results = {
+      'successful': <String>[],
+      'failed': <String>[],
+    };
+
+    if (readingIds.isEmpty) return results;
+
+    // Use optimized individual deletes without excessive verification
+    // This is still much faster than the original method due to removed debug prints and checks
+    return await _fallbackIndividualDeletes(readingIds, userId);
+  }
+
+  // Optimized parallel deletes without excessive logging
+  static Future<Map<String, List<String>>> _fallbackIndividualDeletes(
+    List<String> readingIds,
+    String userId,
+  ) async {
+    final results = {
+      'successful': <String>[],
+      'failed': <String>[],
+    };
+
+    // Process deletes in parallel for much better performance
+    final deleteOperations = readingIds.map((readingId) async {
+      try {
+        // Streamlined delete without verification checks
+        final deleteResult = await SupabaseConfig.client
+            .from('readings')
+            .delete()
+            .eq('id', readingId)
+            .eq('user_id', userId)
+            .select('id');
+
+        return {
+          'id': readingId,
+          'success': deleteResult.isNotEmpty,
+        };
+      } catch (e) {
+        return {
+          'id': readingId,
+          'success': false,
+        };
+      }
+    });
+
+    // Wait for all operations to complete in parallel
+    final operationResults = await Future.wait(deleteOperations);
+
+    // Process results
+    for (final result in operationResults) {
+      final id = result['id'] as String;
+      final success = result['success'] as bool;
+      
+      if (success) {
+        results['successful']!.add(id);
+      } else {
+        results['failed']!.add(id);
+      }
+    }
+
+    return results;
+  }
+
+  // Fast single delete without excessive debugging - optimized version
+  static Future<void> deleteReadingFast(String readingId, String userId) async {
+    try {
+      final deleteResult = await SupabaseConfig.client
+          .from('readings')
+          .delete()
+          .eq('id', readingId)
+          .eq('user_id', userId)
+          .select('id');
+
+      if (deleteResult.isEmpty) {
+        throw Exception('Reading not found or permission denied');
+      }
+    } catch (e) {
+      if (e.toString().contains('not found') || e.toString().contains('permission')) {
+        throw Exception('Reading not found or permission denied');
+      }
+      throw Exception('Delete failed: ${e.toString()}');
+    }
+  }
+
   // Generate yes or no reading using OpenAI
   static Future<String> generateYesOrNoReading(
     List<DrawnCard> cards, {
@@ -962,16 +1051,16 @@ Instructions:
 
 FORMAT:
 
-✨ Card 1 – [CARD NAME] – [Upright/Reversed]
+✨ Card 1 – [CARD NAME] – [Upright/Reversed] ✨
 Interpretation of why this card is a Yes/No/Maybe for their specific question. Include the energy and message. 3-4 sentences with personality and insight.
 
-✨ Card 2 – [CARD NAME] – [Upright/Reversed]
+✨ Card 2 – [CARD NAME] – [Upright/Reversed] ✨
 Interpretation of why this card is a Yes/No/Maybe for their specific question. Include the energy and message. 3-4 sentences with personality and insight.
 
-✨ Card 3 – [CARD NAME] – [Upright/Reversed]
+✨ Card 3 – [CARD NAME] – [Upright/Reversed] ✨
 Interpretation of why this card is a Yes/No/Maybe for their specific question. Include the energy and message. 3-4 sentences with personality and insight.
 
-✨ VERDICT: [X] Yes cards + [X] No cards + [X] Maybe cards = [YES/NO/MAYBE]
+✨ VERDICT: [X] Yes cards + [X] No cards + [X] Maybe cards = [YES/NO/MAYBE] ✨
 
 ☪️ The Final Word ☪️ 
 Clear, empowering guidance on how to move forward with this answer. What should they do with this cosmic intel? 2-3 sentences that leave them feeling confident about their next steps.

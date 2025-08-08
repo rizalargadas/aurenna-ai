@@ -151,18 +151,10 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
       // Create list of reading IDs to delete
       final readingIdsToDelete = List<String>.from(_selectedReadings);
       
-      // Delete readings one by one (could be optimized with batch delete in the future)
-      int successCount = 0;
-      List<String> failedReadings = [];
-      
-      for (String readingId in readingIdsToDelete) {
-        try {
-          await TarotService.deleteReading(readingId, userId);
-          successCount++;
-        } catch (e) {
-          failedReadings.add(readingId);
-        }
-      }
+      // Use optimized batch delete for much faster performance
+      final deleteResults = await TarotService.batchDeleteReadings(readingIdsToDelete, userId);
+      final successCount = deleteResults['successful']!.length;
+      final failedReadings = deleteResults['failed']!;
 
       // Update UI by removing successfully deleted readings
       if (mounted) {
@@ -259,10 +251,8 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
         throw Exception('User not authenticated');
       }
 
-      // Delete from database
-      print('Attempting to delete reading: $readingId for user: $userId'); // Debug log
-      await TarotService.deleteReading(readingId, userId);
-      print('Delete successful for reading: $readingId'); // Debug log
+      // Delete from database using optimized method
+      await TarotService.deleteReadingFast(readingId, userId);
 
       // Remove from local list to update UI immediately
       if (mounted) {
