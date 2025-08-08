@@ -338,7 +338,7 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
               Icon(
                 Icons.error_outline,
                 size: 64,
-                color: AurennaTheme.electricViolet.withOpacity(0.5),
+                color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 16),
               Text(
@@ -381,8 +381,8 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AurennaTheme.electricViolet.withOpacity(0.3),
-                      AurennaTheme.cosmicPurple.withOpacity(0.1),
+                      AurennaTheme.electricViolet.withValues(alpha: 0.3),
+                      AurennaTheme.cosmicPurple.withValues(alpha: 0.1),
                     ],
                   ),
                 ),
@@ -455,12 +455,12 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AurennaTheme.mysticBlue.withOpacity(0.05),
-              AurennaTheme.cosmicPurple.withOpacity(0.05),
+              AurennaTheme.mysticBlue.withValues(alpha: 0.05),
+              AurennaTheme.cosmicPurple.withValues(alpha: 0.05),
             ],
           ),
           border: Border.all(
-            color: AurennaTheme.electricViolet.withOpacity(0.1),
+            color: AurennaTheme.electricViolet.withValues(alpha: 0.1),
             width: 1,
           ),
         ),
@@ -517,7 +517,7 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AurennaTheme.electricViolet.withOpacity(0.1),
+                    color: AurennaTheme.electricViolet.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(

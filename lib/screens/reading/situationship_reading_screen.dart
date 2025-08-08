@@ -5,6 +5,7 @@ import '../../models/reading.dart';
 import '../../services/auth_service.dart';
 import '../../services/tarot_service.dart';
 import '../../utils/reading_messages.dart';
+import '../../utils/share_reading.dart';
 import '../../widgets/reading_animation_v1.dart';
 
 class SituationshipReadingScreen extends StatefulWidget {
@@ -120,20 +121,31 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
           if (_isComplete)
             IconButton(
               icon: const Icon(Icons.share),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text(
-                      'Sharing coming soon! ✨',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    backgroundColor: AurennaTheme.crystalBlue,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                );
+              onPressed: () async {
+                try {
+                  await ShareReading.shareSituationshipReading(
+                    person1: _yourName,
+                    person2: _theirName,
+                    drawnCards: _drawnCards,
+                    reading: _aiReading,
+                  );
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          e.toString().replaceAll('Exception: ', ''),
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: AurennaTheme.crystalBlue,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    );
+                  }
+                }
               },
             ),
         ],
@@ -200,7 +212,7 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
             Icon(
               Icons.error_outline,
               size: 64,
-              color: AurennaTheme.electricViolet.withOpacity(0.5),
+              color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -248,13 +260,13 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AurennaTheme.electricViolet.withOpacity(0.3),
-                  AurennaTheme.crystalBlue.withOpacity(0.3),
+                  AurennaTheme.electricViolet.withValues(alpha: 0.3),
+                  AurennaTheme.crystalBlue.withValues(alpha: 0.3),
                 ],
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AurennaTheme.electricViolet.withOpacity(0.5),
+                color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
                 width: 1,
               ),
             ),
@@ -304,7 +316,7 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
             children: [
               Expanded(
                 child: Divider(
-                  color: AurennaTheme.electricViolet.withOpacity(0.3),
+                  color: AurennaTheme.electricViolet.withValues(alpha: 0.3),
                   thickness: 1,
                 ),
               ),
@@ -318,7 +330,7 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
               ),
               Expanded(
                 child: Divider(
-                  color: AurennaTheme.electricViolet.withOpacity(0.3),
+                  color: AurennaTheme.electricViolet.withValues(alpha: 0.3),
                   thickness: 1,
                 ),
               ),
@@ -342,12 +354,12 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
               color: AurennaTheme.mysticBlue,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AurennaTheme.silverMist.withOpacity(0.1),
+                color: AurennaTheme.silverMist.withValues(alpha: 0.1),
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AurennaTheme.silverMist.withOpacity(0.05),
+                  color: AurennaTheme.silverMist.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -359,7 +371,7 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
               children: [
                 _buildFormattedReading(),
                 const SizedBox(height: 16),
-                Divider(color: AurennaTheme.silverMist.withOpacity(0.2)),
+                Divider(color: AurennaTheme.silverMist.withValues(alpha: 0.2)),
                 const SizedBox(height: 16),
                 Text(
                   'Remember, undefined connections can be powerful. Trust your intuition as you navigate this journey.',
@@ -467,7 +479,7 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
           width: cardWidth,
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
           decoration: BoxDecoration(
-            color: AurennaTheme.crystalBlue.withOpacity(0.2),
+            color: AurennaTheme.crystalBlue.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
@@ -494,7 +506,7 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
             borderRadius: BorderRadius.circular(6),
             boxShadow: [
               BoxShadow(
-                color: borderColor.withOpacity(0.2),
+                color: borderColor.withValues(alpha: 0.2),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -552,7 +564,7 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
                         vertical: 1,
                       ),
                       decoration: BoxDecoration(
-                        color: AurennaTheme.electricViolet.withOpacity(0.9),
+                        color: AurennaTheme.electricViolet.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(3),
                       ),
                       child: Text(
@@ -609,13 +621,13 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AurennaTheme.electricViolet.withOpacity(0.3),
-                      AurennaTheme.crystalBlue.withOpacity(0.3),
+                      AurennaTheme.electricViolet.withValues(alpha: 0.3),
+                      AurennaTheme.crystalBlue.withValues(alpha: 0.3),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AurennaTheme.electricViolet.withOpacity(0.5),
+                    color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
                     width: 1,
                   ),
                 ),

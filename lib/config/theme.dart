@@ -57,11 +57,9 @@ class AurennaTheme {
     colorScheme: const ColorScheme.dark(
       primary: electricViolet,
       secondary: stardustPurple,
-      background: voidBlack,
       surface: mysticBlue,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
-      onBackground: silverMist,
       onSurface: silverMist,
       error: errorColor,
     ),
@@ -175,7 +173,7 @@ class AurennaTheme {
     // Input decoration theme
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: mysticBlue.withOpacity(0.5),
+      fillColor: mysticBlue.withValues(alpha: 0.5),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -184,7 +182,7 @@ class AurennaTheme {
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: etherealIndigo.withOpacity(0.5),
+          color: etherealIndigo.withValues(alpha: 0.5),
           width: 1,
         ),
       ),
@@ -202,7 +200,7 @@ class AurennaTheme {
       ),
       labelStyle: GoogleFonts.outfit(color: textSecondary, fontSize: 14),
       hintStyle: GoogleFonts.outfit(
-        color: textSecondary.withOpacity(0.6),
+        color: textSecondary.withValues(alpha: 0.6),
         fontSize: 14,
       ),
       errorStyle: GoogleFonts.outfit(color: errorColor, fontSize: 12),
@@ -214,7 +212,7 @@ class AurennaTheme {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: etherealIndigo.withOpacity(0.3), width: 1),
+        side: BorderSide(color: etherealIndigo.withValues(alpha: 0.3), width: 1),
       ),
     ),
 
@@ -236,7 +234,7 @@ class AurennaTheme {
   static BoxDecoration mysticalGradientBox = BoxDecoration(
     gradient: mysticalGradient,
     borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: etherealIndigo.withOpacity(0.3), width: 1),
+    border: Border.all(color: etherealIndigo.withValues(alpha: 0.3), width: 1),
   );
 
   static BoxDecoration cosmicGradientBox = BoxDecoration(
@@ -244,7 +242,7 @@ class AurennaTheme {
     borderRadius: BorderRadius.circular(16),
     boxShadow: [
       BoxShadow(
-        color: electricViolet.withOpacity(0.3),
+        color: electricViolet.withValues(alpha: 0.3),
         blurRadius: 20,
         offset: const Offset(0, 8),
       ),
@@ -254,10 +252,10 @@ class AurennaTheme {
   static BoxDecoration cardDecoration = BoxDecoration(
     color: mysticBlue,
     borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: etherealIndigo.withOpacity(0.3), width: 1),
+    border: Border.all(color: etherealIndigo.withValues(alpha: 0.3), width: 1),
     boxShadow: [
       BoxShadow(
-        color: voidBlack.withOpacity(0.5),
+        color: voidBlack.withValues(alpha: 0.5),
         blurRadius: 10,
         offset: const Offset(0, 4),
       ),
@@ -266,7 +264,7 @@ class AurennaTheme {
 
   // Glow effect for special elements
   static BoxShadow cosmicGlow = BoxShadow(
-    color: electricViolet.withOpacity(0.4),
+    color: electricViolet.withValues(alpha: 0.4),
     blurRadius: 20,
     spreadRadius: 2,
   );
@@ -283,11 +281,9 @@ class AurennaTheme {
         brightness: _getBrightness(themeData),
         primary: themeData.primary,
         secondary: themeData.secondary,
-        background: themeData.background,
         surface: themeData.surface,
         onPrimary: _getContrastColor(themeData.primary),
         onSecondary: _getContrastColor(themeData.secondary),
-        onBackground: themeData.textPrimary,
         onSurface: themeData.textPrimary,
         error: themeData.error,
       ),
@@ -482,7 +478,7 @@ class AurennaTheme {
   static InputDecorationTheme _buildInputDecorationTheme(AppThemeData themeData) {
     return InputDecorationTheme(
       filled: true,
-      fillColor: themeData.surface.withOpacity(0.5),
+      fillColor: themeData.surface.withValues(alpha: 0.5),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -491,7 +487,7 @@ class AurennaTheme {
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(
-          color: themeData.accent3.withOpacity(0.5),
+          color: themeData.accent3.withValues(alpha: 0.5),
           width: 1,
         ),
       ),
@@ -509,7 +505,7 @@ class AurennaTheme {
       ),
       labelStyle: _getGoogleFont(themeData.bodyFont)(color: themeData.textSecondary, fontSize: 14),
       hintStyle: _getGoogleFont(themeData.bodyFont)(
-        color: themeData.textSecondary.withOpacity(0.6),
+        color: themeData.textSecondary.withValues(alpha: 0.6),
         fontSize: 14,
       ),
       errorStyle: _getGoogleFont(themeData.bodyFont)(color: themeData.error, fontSize: 12),
@@ -522,7 +518,7 @@ class AurennaTheme {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: themeData.accent3.withOpacity(0.3), width: 1),
+        side: BorderSide(color: themeData.accent3.withValues(alpha: 0.3), width: 1),
       ),
     );
   }

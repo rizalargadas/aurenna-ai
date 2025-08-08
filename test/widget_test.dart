@@ -45,7 +45,6 @@ void main() {
     });
 
     testWidgets('Theme provider maintains Aurenna theme', (WidgetTester tester) async {
-      ThemeProvider? themeProvider;
       
       await tester.pumpWidget(
         MaterialApp(
@@ -53,7 +52,6 @@ void main() {
             create: (_) => ThemeProvider(),
             child: Consumer<ThemeProvider>(
               builder: (context, provider, child) {
-                themeProvider = provider;
                 return Scaffold(
                   body: Column(
                     children: [

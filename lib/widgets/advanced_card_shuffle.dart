@@ -263,7 +263,7 @@ class _AdvancedCardShuffleState extends State<AdvancedCardShuffle>
                             ? AurennaTheme.electricViolet 
                             : index % 3 == 1 
                                 ? AurennaTheme.cosmicPurple 
-                                : AurennaTheme.mysticBlue).withOpacity(0.8),
+                                : AurennaTheme.mysticBlue).withValues(alpha: 0.8),
                         blurRadius: 15,
                         spreadRadius: 3,
                       ),
@@ -569,7 +569,7 @@ class _AdvancedCardShuffleState extends State<AdvancedCardShuffle>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),

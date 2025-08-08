@@ -11,7 +11,9 @@
       "Bash(flutter build:*)",
       "Bash(sed:*)",
       "Bash(mv:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(flutter clean:*)",
+      "Bash(dart analyze:*)"
     ],
     "deny": []
   }

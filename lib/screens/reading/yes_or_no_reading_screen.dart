@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../models/reading.dart';
-import '../../models/tarot_card.dart';
 import '../../services/auth_service.dart';
 import '../../services/tarot_service.dart';
 import '../../utils/reading_messages.dart';
-import '../../widgets/mystical_loading.dart';
 import '../../widgets/reading_animation_v1.dart';
 
 class YesOrNoReadingScreen extends StatefulWidget {
@@ -169,7 +167,6 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     
     return Scaffold(
       backgroundColor: AurennaTheme.voidBlack,
@@ -180,7 +177,7 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
             end: Alignment.bottomRight,
             colors: [
               AurennaTheme.voidBlack,
-              AurennaTheme.mysticBlue.withOpacity(0.3),
+              AurennaTheme.mysticBlue.withValues(alpha: 0.3),
               const Color(0xFF1A1B3A),
             ],
           ),
@@ -218,7 +215,7 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
                 child: IconButton(
                   icon: Icon(
                     Icons.arrow_back_ios,
-                    color: AurennaTheme.amberGlow.withOpacity(0.8),
+                    color: AurennaTheme.amberGlow.withValues(alpha: 0.8),
                   ),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -253,7 +250,7 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
                 'Ask your burning question',
                 style: TextStyle(color: AurennaTheme.textSecondary).copyWith(
                   fontSize: 16,
-                  color: AurennaTheme.stardustPurple.withOpacity(0.9),
+                  color: AurennaTheme.stardustPurple.withValues(alpha: 0.9),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -272,23 +269,23 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
                         labelText: 'Your Question',
                         hintText: 'What decision weighs on your mind?',
                         hintStyle: TextStyle(
-                          color: AurennaTheme.textPrimary.withOpacity(0.4),
+                          color: AurennaTheme.textPrimary.withValues(alpha: 0.4),
                         ),
                         labelStyle: TextStyle(
                           color: AurennaTheme.amberGlow,
                         ),
                         filled: true,
-                        fillColor: AurennaTheme.mysticBlue.withOpacity(0.3),
+                        fillColor: AurennaTheme.mysticBlue.withValues(alpha: 0.3),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: AurennaTheme.amberGlow.withOpacity(0.3),
+                            color: AurennaTheme.amberGlow.withValues(alpha: 0.3),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: AurennaTheme.amberGlow.withOpacity(0.3),
+                            color: AurennaTheme.amberGlow.withValues(alpha: 0.3),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -325,7 +322,7 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
                           borderRadius: BorderRadius.circular(30),
                         ),
                         elevation: 8,
-                        shadowColor: AurennaTheme.amberGlow.withOpacity(0.5),
+                        shadowColor: AurennaTheme.amberGlow.withValues(alpha: 0.5),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -427,10 +424,10 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AurennaTheme.mysticBlue.withOpacity(0.3),
+                      color: AurennaTheme.mysticBlue.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: AurennaTheme.amberGlow.withOpacity(0.3),
+                        color: AurennaTheme.amberGlow.withValues(alpha: 0.3),
                       ),
                     ),
                     child: Text(
@@ -478,7 +475,7 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AurennaTheme.amberGlow.withOpacity(0.3),
+                                  color: AurennaTheme.amberGlow.withValues(alpha: 0.3),
                                   blurRadius: 8,
                                   spreadRadius: 1,
                                 ),
@@ -551,19 +548,19 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AurennaTheme.mysticBlue.withOpacity(0.5),
-                    AurennaTheme.mysticBlue.withOpacity(0.3),
+                    AurennaTheme.mysticBlue.withValues(alpha: 0.5),
+                    AurennaTheme.mysticBlue.withValues(alpha: 0.3),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: AurennaTheme.amberGlow.withOpacity(0.3),
+                  color: AurennaTheme.amberGlow.withValues(alpha: 0.3),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AurennaTheme.amberGlow.withOpacity(0.1),
+                    color: AurennaTheme.amberGlow.withValues(alpha: 0.1),
                     blurRadius: 20,
                     spreadRadius: 2,
                   ),
@@ -669,7 +666,7 @@ class MysticalBackgroundPainter extends CustomPainter {
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, 50);
 
     // Floating orbs
-    paint.color = AurennaTheme.amberGlow.withOpacity(0.1 * glowValue);
+    paint.color = AurennaTheme.amberGlow.withValues(alpha: 0.1 * glowValue);
     canvas.drawCircle(
       Offset(
         size.width * 0.2,
@@ -679,7 +676,7 @@ class MysticalBackgroundPainter extends CustomPainter {
       paint,
     );
 
-    paint.color = AurennaTheme.stardustPurple.withOpacity(0.08 * glowValue);
+    paint.color = AurennaTheme.stardustPurple.withValues(alpha: 0.08 * glowValue);
     canvas.drawCircle(
       Offset(
         size.width * 0.8,
@@ -689,7 +686,7 @@ class MysticalBackgroundPainter extends CustomPainter {
       paint,
     );
 
-    paint.color = const Color(0xFF9C27B0).withOpacity(0.06 * glowValue);
+    paint.color = const Color(0xFF9C27B0).withValues(alpha: 0.06 * glowValue);
     canvas.drawCircle(
       Offset(
         size.width * 0.5,

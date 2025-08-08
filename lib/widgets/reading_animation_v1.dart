@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../config/theme.dart';
 import '../models/reading.dart';
 import '../models/tarot_card.dart';
-import '../utils/reading_messages.dart';
 import 'mystical_loading.dart';
 
 enum ReadingAnimationPhase {
@@ -335,10 +334,10 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
                   center: Alignment.center,
                   radius: 1.0,
                   colors: [
-                    AurennaTheme.electricViolet.withOpacity((_glowAnimation.value * 0.4).clamp(0.0, 1.0)),
-                    AurennaTheme.cosmicPurple.withOpacity((_glowAnimation.value * 0.35).clamp(0.0, 1.0)),
-                    AurennaTheme.mysticBlue.withOpacity((_glowAnimation.value * 0.25).clamp(0.0, 1.0)),
-                    AurennaTheme.crystalBlue.withOpacity((_glowAnimation.value * 0.15).clamp(0.0, 1.0)),
+                    AurennaTheme.electricViolet.withValues(alpha: (_glowAnimation.value * 0.4).clamp(0.0, 1.0)),
+                    AurennaTheme.cosmicPurple.withValues(alpha: (_glowAnimation.value * 0.35).clamp(0.0, 1.0)),
+                    AurennaTheme.mysticBlue.withValues(alpha: (_glowAnimation.value * 0.25).clamp(0.0, 1.0)),
+                    AurennaTheme.crystalBlue.withValues(alpha: (_glowAnimation.value * 0.15).clamp(0.0, 1.0)),
                     Colors.transparent,
                   ],
                   stops: const [0.0, 0.3, 0.6, 0.8, 1.0],
@@ -354,8 +353,8 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AurennaTheme.electricViolet.withOpacity((_glowAnimation.value * 0.3).clamp(0.0, 1.0)),
-                    AurennaTheme.amberGlow.withOpacity((_glowAnimation.value * 0.2).clamp(0.0, 1.0)),
+                    AurennaTheme.electricViolet.withValues(alpha: (_glowAnimation.value * 0.3).clamp(0.0, 1.0)),
+                    AurennaTheme.amberGlow.withValues(alpha: (_glowAnimation.value * 0.2).clamp(0.0, 1.0)),
                     Colors.transparent,
                   ],
                   stops: const [0.0, 0.5, 1.0],
@@ -371,12 +370,12 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AurennaTheme.electricViolet.withOpacity((_glowAnimation.value * 0.8).clamp(0.0, 1.0)),
+                    color: AurennaTheme.electricViolet.withValues(alpha: (_glowAnimation.value * 0.8).clamp(0.0, 1.0)),
                     blurRadius: 60,
                     spreadRadius: 20,
                   ),
                   BoxShadow(
-                    color: AurennaTheme.cosmicPurple.withOpacity((_glowAnimation.value * 0.6).clamp(0.0, 1.0)),
+                    color: AurennaTheme.cosmicPurple.withValues(alpha: (_glowAnimation.value * 0.6).clamp(0.0, 1.0)),
                     blurRadius: 40,
                     spreadRadius: 10,
                   ),
@@ -413,8 +412,8 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
               colors: [
-                AurennaTheme.voidBlack.withOpacity(0.9),
-                AurennaTheme.voidBlack.withOpacity(0.7),
+                AurennaTheme.voidBlack.withValues(alpha: 0.9),
+                AurennaTheme.voidBlack.withValues(alpha: 0.7),
                 Colors.transparent,
               ],
             ),
@@ -426,7 +425,7 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
               fontSize: 24,
               shadows: [
                 Shadow(
-                  color: Colors.black.withOpacity(0.8),
+                  color: Colors.black.withValues(alpha: 0.8),
                   blurRadius: 10,
                 ),
               ],
@@ -572,7 +571,7 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -626,7 +625,7 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 6,
                   offset: const Offset(0, 3),
                 ),
@@ -723,7 +722,7 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
         gradient: AurennaTheme.mysticalGradient,
         boxShadow: [
           BoxShadow(
-            color: AurennaTheme.electricViolet.withOpacity(0.5),
+            color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
             blurRadius: 20,
             spreadRadius: 2,
           ),
@@ -780,10 +779,10 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
                 height: 2 + (math.sin((_shuffleController.value * 2 * math.pi) + index) * 1),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AurennaTheme.silverMist.withOpacity(0.8),
+                  color: AurennaTheme.silverMist.withValues(alpha: 0.8),
                   boxShadow: [
                     BoxShadow(
-                      color: AurennaTheme.electricViolet.withOpacity(0.3),
+                      color: AurennaTheme.electricViolet.withValues(alpha: 0.3),
                       blurRadius: 4,
                       spreadRadius: 1,
                     ),
@@ -821,10 +820,10 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
                 height: size,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AurennaTheme.silverMist.withOpacity(opacity),
+                  color: AurennaTheme.silverMist.withValues(alpha: opacity),
                   boxShadow: [
                     BoxShadow(
-                      color: AurennaTheme.silverMist.withOpacity(opacity * 0.5),
+                      color: AurennaTheme.silverMist.withValues(alpha: opacity * 0.5),
                       blurRadius: size * 2,
                       spreadRadius: size * 0.5,
                     ),
@@ -861,8 +860,8 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        AurennaTheme.cosmicPurple.withOpacity(0.2),
-                        AurennaTheme.electricViolet.withOpacity(0.05),
+                        AurennaTheme.cosmicPurple.withValues(alpha: 0.2),
+                        AurennaTheme.electricViolet.withValues(alpha: 0.05),
                         Colors.transparent,
                       ],
                     ),

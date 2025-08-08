@@ -7,9 +7,9 @@ import '../../models/tarot_card.dart';
 import '../../services/auth_service.dart';
 import '../../services/tarot_service.dart';
 import '../../utils/reading_messages.dart';
+import '../../utils/share_reading.dart';
 import '../../widgets/mystical_loading.dart';
 import '../../widgets/reading_animation_v1.dart';
-import 'reading_result_screen.dart';
 
 class GeneralReadingScreen extends StatefulWidget {
   const GeneralReadingScreen({super.key});
@@ -327,18 +327,6 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
     }
   }
 
-  String _getStatusText() {
-    switch (_currentStep) {
-      case 0:
-        return ''; // Remove shuffling text
-      case 1:
-        return 'Your cards have been revealed';
-      case 2:
-        return 'Aurenna is weaving your cosmic narrative...';
-      default:
-        return '';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -351,20 +339,30 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
           if (_isComplete)
             IconButton(
               icon: const Icon(Icons.share),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text(
-                      'Sharing coming soon! ✨',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    backgroundColor: AurennaTheme.crystalBlue,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                );
+              onPressed: () async {
+                try {
+                  await ShareReading.shareGeneralReading(
+                    question: 'Comprehensive General Reading for $_userName',
+                    drawnCards: _drawnCards,
+                    reading: _aiReading,
+                  );
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          e.toString().replaceAll('Exception: ', ''),
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: AurennaTheme.crystalBlue,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    );
+                  }
+                }
               },
             ),
         ],
@@ -432,7 +430,7 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
             Icon(
               Icons.error_outline,
               size: 64,
-              color: AurennaTheme.electricViolet.withOpacity(0.5),
+              color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -467,109 +465,6 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
   }
 
 
-  Widget _buildAnimatedContent() {
-    // Return empty container if we haven't started yet
-    if (!_shuffleStarted) {
-      return Container(color: AurennaTheme.voidBlack);
-    }
-    
-    if (_currentStep == 0 && _shuffleStarted) {
-      // Exact same shuffling animation as 3-card reading, but with 12 cards
-      return _buildShuffleAnimation();
-    } else if (_currentStep == 1) {
-      // Cards are still being revealed
-      return _buildShuffleAnimation();
-    } else if (_currentStep == 2) {
-      // Epic cosmos-channeling animation that fills and extends beyond screen
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final screenWidth = MediaQuery.of(context).size.width;
-          final screenHeight = MediaQuery.of(context).size.height;
-          
-          return AnimatedBuilder(
-            animation: _glowAnimation,
-            builder: (context, child) {
-              if (!mounted || _disposed) return const SizedBox.shrink();
-              
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Animated starfield background
-                  ..._buildCosmicBackground(screenWidth, screenHeight),
-                  
-                  // Massive background gradient that extends beyond screen
-                  Container(
-                    width: screenWidth * 2.5, // 2.5x screen width
-                    height: screenHeight * 2.0, // 2x screen height
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        center: Alignment.center,
-                        radius: 1.0,
-                        colors: [
-                          AurennaTheme.electricViolet.withOpacity((_glowAnimation.value * 0.4).clamp(0.0, 1.0)),
-                          AurennaTheme.cosmicPurple.withOpacity((_glowAnimation.value * 0.35).clamp(0.0, 1.0)),
-                          AurennaTheme.mysticBlue.withOpacity((_glowAnimation.value * 0.25).clamp(0.0, 1.0)),
-                          AurennaTheme.crystalBlue.withOpacity((_glowAnimation.value * 0.15).clamp(0.0, 1.0)),
-                          Colors.transparent,
-                        ],
-                        stops: const [0.0, 0.3, 0.6, 0.8, 1.0],
-                      ),
-                    ),
-                  ),
-                  
-                  // Secondary pulsing layer
-                  Container(
-                    width: screenWidth * 1.8,
-                    height: screenHeight * 1.5,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          AurennaTheme.electricViolet.withOpacity((_glowAnimation.value * 0.3).clamp(0.0, 1.0)),
-                          AurennaTheme.amberGlow.withOpacity((_glowAnimation.value * 0.2).clamp(0.0, 1.0)),
-                          Colors.transparent,
-                        ],
-                        stops: const [0.0, 0.5, 1.0],
-                      ),
-                    ),
-                  ),
-                  
-                  // Core mystical loading with enhanced glow
-                  Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AurennaTheme.electricViolet.withOpacity((_glowAnimation.value * 0.8).clamp(0.0, 1.0)),
-                          blurRadius: 60,
-                          spreadRadius: 20,
-                        ),
-                        BoxShadow(
-                          color: AurennaTheme.cosmicPurple.withOpacity((_glowAnimation.value * 0.6).clamp(0.0, 1.0)),
-                          blurRadius: 40,
-                          spreadRadius: 10,
-                        ),
-                      ],
-                    ),
-                    child: const MysticalLoading(
-                      message: 'Weaving your cosmic narrative...',
-                      size: 80,
-                    ),
-                  ),
-                ],
-              );
-            },
-          );
-        },
-      );
-    } else {
-      // Default empty container
-      return Container(color: AurennaTheme.voidBlack);
-    }
-  }
 
   Widget _buildCompleteReading() {
     return SingleChildScrollView(
@@ -585,13 +480,13 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AurennaTheme.crystalBlue.withOpacity(0.3),
-                  AurennaTheme.electricViolet.withOpacity(0.3),
+                  AurennaTheme.crystalBlue.withValues(alpha: 0.3),
+                  AurennaTheme.electricViolet.withValues(alpha: 0.3),
                 ],
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: AurennaTheme.electricViolet.withOpacity(0.5),
+                color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
                 width: 1,
               ),
             ),
@@ -634,7 +529,7 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
             children: [
               Expanded(
                 child: Divider(
-                  color: AurennaTheme.electricViolet.withOpacity(0.3),
+                  color: AurennaTheme.electricViolet.withValues(alpha: 0.3),
                   thickness: 1,
                 ),
               ),
@@ -648,7 +543,7 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
               ),
               Expanded(
                 child: Divider(
-                  color: AurennaTheme.electricViolet.withOpacity(0.3),
+                  color: AurennaTheme.electricViolet.withValues(alpha: 0.3),
                   thickness: 1,
                 ),
               ),
@@ -672,12 +567,12 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
               color: AurennaTheme.mysticBlue,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AurennaTheme.silverMist.withOpacity(0.1),
+                color: AurennaTheme.silverMist.withValues(alpha: 0.1),
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AurennaTheme.silverMist.withOpacity(0.05),
+                  color: AurennaTheme.silverMist.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -690,7 +585,7 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
                 // Reading content - no constraints
                 _buildFormattedReading(),
                 const SizedBox(height: 16),
-                Divider(color: AurennaTheme.silverMist.withOpacity(0.2)),
+                Divider(color: AurennaTheme.silverMist.withValues(alpha: 0.2)),
                 const SizedBox(height: 16),
                 Text(
                   'This reading reflects the current energies in your life. Trust your intuition as you move forward.',
@@ -799,7 +694,7 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
           width: cardWidth,
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
           decoration: BoxDecoration(
-            color: AurennaTheme.crystalBlue.withOpacity(0.2),
+            color: AurennaTheme.crystalBlue.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
@@ -826,7 +721,7 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
             borderRadius: BorderRadius.circular(6),
             boxShadow: [
               BoxShadow(
-                color: borderColor.withOpacity(0.2),
+                color: borderColor.withValues(alpha: 0.2),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -884,7 +779,7 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
                         vertical: 1,
                       ),
                       decoration: BoxDecoration(
-                        color: AurennaTheme.electricViolet.withOpacity(0.9),
+                        color: AurennaTheme.electricViolet.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(3),
                       ),
                       child: Text(
@@ -1034,7 +929,7 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
         boxShadow: [
           // Simple shadow for shuffling cards - no magical glow
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -1092,7 +987,7 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
               boxShadow: [
                 // Remove glow effects, keep only basic shadow
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 6,
                   offset: const Offset(0, 3),
                 ),
@@ -1189,7 +1084,7 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
         gradient: AurennaTheme.mysticalGradient,
         boxShadow: [
           BoxShadow(
-            color: AurennaTheme.electricViolet.withOpacity(0.5),
+            color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
             blurRadius: 20,
             spreadRadius: 2,
           ),
@@ -1240,13 +1135,13 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AurennaTheme.cosmicPurple.withOpacity(0.3),
-                      AurennaTheme.electricViolet.withOpacity(0.3),
+                      AurennaTheme.cosmicPurple.withValues(alpha: 0.3),
+                      AurennaTheme.electricViolet.withValues(alpha: 0.3),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AurennaTheme.electricViolet.withOpacity(0.5),
+                    color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
                     width: 1,
                   ),
                 ),
@@ -1453,10 +1348,10 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
                 height: 2 + (math.sin((_shuffleController.value * 2 * math.pi) + index) * 1),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AurennaTheme.silverMist.withOpacity(0.8),
+                  color: AurennaTheme.silverMist.withValues(alpha: 0.8),
                   boxShadow: [
                     BoxShadow(
-                      color: AurennaTheme.electricViolet.withOpacity(0.3),
+                      color: AurennaTheme.electricViolet.withValues(alpha: 0.3),
                       blurRadius: 4,
                       spreadRadius: 1,
                     ),
@@ -1495,10 +1390,10 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
                 height: size,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AurennaTheme.silverMist.withOpacity(opacity),
+                  color: AurennaTheme.silverMist.withValues(alpha: opacity),
                   boxShadow: [
                     BoxShadow(
-                      color: AurennaTheme.silverMist.withOpacity(opacity * 0.5),
+                      color: AurennaTheme.silverMist.withValues(alpha: opacity * 0.5),
                       blurRadius: size * 2,
                       spreadRadius: size * 0.5,
                     ),
@@ -1536,8 +1431,8 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        AurennaTheme.cosmicPurple.withOpacity(0.2),
-                        AurennaTheme.electricViolet.withOpacity(0.05),
+                        AurennaTheme.cosmicPurple.withValues(alpha: 0.2),
+                        AurennaTheme.electricViolet.withValues(alpha: 0.05),
                         Colors.transparent,
                       ],
                     ),

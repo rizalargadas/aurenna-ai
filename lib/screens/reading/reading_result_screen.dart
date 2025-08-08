@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import '../../models/reading.dart';
+import '../../utils/share_reading.dart';
 
 class ReadingResultScreen extends StatelessWidget {
   final String question;
@@ -34,20 +35,30 @@ class ReadingResultScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.share),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text(
-                    'Sharing coming soon! ✨',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  backgroundColor: AurennaTheme.crystalBlue,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              );
+            onPressed: () async {
+              try {
+                await ShareReading.shareReadingResult(
+                  question: question,
+                  drawnCards: drawnCards,
+                  reading: reading,
+                );
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        e.toString().replaceAll('Exception: ', ''),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: AurennaTheme.crystalBlue,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  );
+                }
+              }
             },
           ),
         ],

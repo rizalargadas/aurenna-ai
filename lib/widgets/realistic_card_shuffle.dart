@@ -202,7 +202,7 @@ class _RealisticCardShuffleState extends State<RealisticCardShuffle>
             shape: BoxShape.circle,
             gradient: RadialGradient(
               colors: [
-                AurennaTheme.electricViolet.withOpacity(0.1),
+                AurennaTheme.electricViolet.withValues(alpha: 0.1),
                 Colors.transparent,
               ],
             ),
@@ -364,7 +364,7 @@ class _RealisticCardShuffleState extends State<RealisticCardShuffle>
         borderRadius: BorderRadius.circular(8), // Larger border radius for bigger cards
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 12, // Larger shadow for bigger cards
             offset: const Offset(0, 6),
           ),

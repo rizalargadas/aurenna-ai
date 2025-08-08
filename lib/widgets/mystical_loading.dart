@@ -81,7 +81,7 @@ class _MysticalLoadingState extends State<MysticalLoading>
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: AurennaTheme.electricViolet.withOpacity(0.4),
+                            color: AurennaTheme.electricViolet.withValues(alpha: 0.4),
                             blurRadius: 20,
                             spreadRadius: 5,
                           ),

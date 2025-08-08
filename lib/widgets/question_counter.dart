@@ -81,10 +81,10 @@ class QuestionCounter extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: isEmpty
-                ? AurennaTheme.amberGlow.withOpacity(0.1)
+                ? AurennaTheme.amberGlow.withValues(alpha: 0.1)
                 : isLow
-                ? AurennaTheme.stardustPurple.withOpacity(0.1)
-                : AurennaTheme.crystalBlue.withOpacity(0.1),
+                ? AurennaTheme.stardustPurple.withValues(alpha: 0.1)
+                : AurennaTheme.crystalBlue.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isEmpty

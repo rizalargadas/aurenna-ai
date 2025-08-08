@@ -87,7 +87,7 @@ class SettingsScreen extends StatelessWidget {
                           LinearProgressIndicator(
                             value: 0.33, // placeholder value
                             backgroundColor: AurennaTheme.textSecondary
-                                .withOpacity(0.2),
+                                .withValues(alpha: 0.2),
                             valueColor: const AlwaysStoppedAnimation<Color>(
                               AurennaTheme.crystalBlue,
                             ),
@@ -195,7 +195,7 @@ class SettingsScreen extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AurennaTheme.amberGlow.withOpacity(0.2),
+                                  color: AurennaTheme.amberGlow.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
@@ -213,7 +213,7 @@ class SettingsScreen extends StatelessWidget {
                               size: 16,
                               color: hasSubscription 
                                   ? AurennaTheme.textSecondary 
-                                  : AurennaTheme.textSecondary.withOpacity(0.5),
+                                  : AurennaTheme.textSecondary.withValues(alpha: 0.5),
                             ),
                           ],
                         ),

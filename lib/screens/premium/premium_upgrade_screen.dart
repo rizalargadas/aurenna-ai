@@ -153,16 +153,16 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AurennaTheme.electricViolet.withOpacity(_glowAnimation.value * 0.8),
-                  AurennaTheme.cosmicPurple.withOpacity(_glowAnimation.value * 0.6),
-                  AurennaTheme.mysticBlue.withOpacity(_glowAnimation.value * 0.4),
+                  AurennaTheme.electricViolet.withValues(alpha: _glowAnimation.value * 0.8),
+                  AurennaTheme.cosmicPurple.withValues(alpha: _glowAnimation.value * 0.6),
+                  AurennaTheme.mysticBlue.withValues(alpha: _glowAnimation.value * 0.4),
                   Colors.transparent,
                 ],
                 stops: const [0.0, 0.4, 0.7, 1.0],
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AurennaTheme.electricViolet.withOpacity(_glowAnimation.value * 0.5),
+                  color: AurennaTheme.electricViolet.withValues(alpha: _glowAnimation.value * 0.5),
                   blurRadius: 40,
                   spreadRadius: 10,
                 ),
@@ -221,10 +221,10 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AurennaTheme.mysticBlue.withOpacity(0.1),
+        color: AurennaTheme.mysticBlue.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AurennaTheme.electricViolet.withOpacity(0.2),
+          color: AurennaTheme.electricViolet.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -283,13 +283,13 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AurennaTheme.electricViolet.withOpacity(0.2),
-            AurennaTheme.cosmicPurple.withOpacity(0.2),
+            AurennaTheme.electricViolet.withValues(alpha: 0.2),
+            AurennaTheme.cosmicPurple.withValues(alpha: 0.2),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AurennaTheme.electricViolet.withOpacity(0.5),
+          color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
           width: 2,
         ),
       ),
@@ -333,7 +333,7 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AurennaTheme.amberGlow.withOpacity(0.2),
+              color: AurennaTheme.amberGlow.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(

@@ -6,6 +6,7 @@ import '../../models/reading.dart';
 import '../../services/auth_service.dart';
 import '../../services/tarot_service.dart';
 import '../../utils/reading_messages.dart';
+import '../../utils/share_reading.dart';
 import '../../widgets/reading_animation_v1.dart';
 
 class CompatibilityReadingScreen extends StatefulWidget {
@@ -111,18 +112,6 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
     }
   }
 
-  String _getStatusText() {
-    switch (_currentStep) {
-      case 0:
-        return '';
-      case 1:
-        return 'Your love cards have been revealed';
-      case 2:
-        return 'Aurenna is reading your romantic compatibility...';
-      default:
-        return '';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,20 +124,31 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
           if (_isComplete)
             IconButton(
               icon: const Icon(Icons.share),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text(
-                      'Sharing coming soon! ✨',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    backgroundColor: AurennaTheme.crystalBlue,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                );
+              onPressed: () async {
+                try {
+                  await ShareReading.shareLoveReading(
+                    person1: _yourName,
+                    person2: _partnerName,
+                    drawnCards: _drawnCards,
+                    reading: _aiReading,
+                  );
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          e.toString().replaceAll('Exception: ', ''),
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: AurennaTheme.crystalBlue,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    );
+                  }
+                }
               },
             ),
         ],
@@ -215,7 +215,7 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
             Icon(
               Icons.error_outline,
               size: 64,
-              color: AurennaTheme.electricViolet.withOpacity(0.5),
+              color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -263,13 +263,13 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AurennaTheme.amberGlow.withOpacity(0.3),
-                  AurennaTheme.electricViolet.withOpacity(0.3),
+                  AurennaTheme.amberGlow.withValues(alpha: 0.3),
+                  AurennaTheme.electricViolet.withValues(alpha: 0.3),
                 ],
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AurennaTheme.electricViolet.withOpacity(0.5),
+                color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
                 width: 1,
               ),
             ),
@@ -319,7 +319,7 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
             children: [
               Expanded(
                 child: Divider(
-                  color: AurennaTheme.amberGlow.withOpacity(0.3),
+                  color: AurennaTheme.amberGlow.withValues(alpha: 0.3),
                   thickness: 1,
                 ),
               ),
@@ -333,7 +333,7 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
               ),
               Expanded(
                 child: Divider(
-                  color: AurennaTheme.amberGlow.withOpacity(0.3),
+                  color: AurennaTheme.amberGlow.withValues(alpha: 0.3),
                   thickness: 1,
                 ),
               ),
@@ -357,12 +357,12 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
               color: AurennaTheme.mysticBlue,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AurennaTheme.silverMist.withOpacity(0.1),
+                color: AurennaTheme.silverMist.withValues(alpha: 0.1),
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AurennaTheme.silverMist.withOpacity(0.05),
+                  color: AurennaTheme.silverMist.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -374,7 +374,7 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
               children: [
                 _buildFormattedReading(),
                 const SizedBox(height: 16),
-                Divider(color: AurennaTheme.silverMist.withOpacity(0.2)),
+                Divider(color: AurennaTheme.silverMist.withValues(alpha: 0.2)),
                 const SizedBox(height: 16),
                 Text(
                   'Remember, love is a journey of growth and understanding. Trust in the connection you share.',
@@ -485,7 +485,7 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
           width: cardWidth,
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
           decoration: BoxDecoration(
-            color: AurennaTheme.amberGlow.withOpacity(0.2),
+            color: AurennaTheme.amberGlow.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
@@ -512,7 +512,7 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
             borderRadius: BorderRadius.circular(6),
             boxShadow: [
               BoxShadow(
-                color: borderColor.withOpacity(0.2),
+                color: borderColor.withValues(alpha: 0.2),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -570,7 +570,7 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
                         vertical: 1,
                       ),
                       decoration: BoxDecoration(
-                        color: AurennaTheme.electricViolet.withOpacity(0.9),
+                        color: AurennaTheme.electricViolet.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(3),
                       ),
                       child: Text(
@@ -633,13 +633,13 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AurennaTheme.amberGlow.withOpacity(0.3),
-                      AurennaTheme.electricViolet.withOpacity(0.3),
+                      AurennaTheme.amberGlow.withValues(alpha: 0.3),
+                      AurennaTheme.electricViolet.withValues(alpha: 0.3),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AurennaTheme.electricViolet.withOpacity(0.5),
+                    color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
                     width: 1,
                   ),
                 ),

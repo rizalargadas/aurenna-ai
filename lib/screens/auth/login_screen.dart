@@ -193,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Expanded(
                           child: Divider(
-                            color: AurennaTheme.textSecondary.withOpacity(0.3),
+                            color: AurennaTheme.textSecondary.withValues(alpha: 0.3),
                           ),
                         ),
                         Padding(
@@ -205,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         Expanded(
                           child: Divider(
-                            color: AurennaTheme.textSecondary.withOpacity(0.3),
+                            color: AurennaTheme.textSecondary.withValues(alpha: 0.3),
                           ),
                         ),
                       ],

@@ -165,19 +165,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             end: Alignment.bottomRight,
                             colors: hasSubscription 
                                 ? [
-                                    AurennaTheme.electricViolet.withOpacity(0.2),
-                                    AurennaTheme.cosmicPurple.withOpacity(0.2),
+                                    AurennaTheme.electricViolet.withValues(alpha: 0.2),
+                                    AurennaTheme.cosmicPurple.withValues(alpha: 0.2),
                                   ]
                                 : [
-                                    AurennaTheme.mysticBlue.withOpacity(0.1),
-                                    AurennaTheme.voidBlack.withOpacity(0.1),
+                                    AurennaTheme.mysticBlue.withValues(alpha: 0.1),
+                                    AurennaTheme.voidBlack.withValues(alpha: 0.1),
                                   ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: hasSubscription 
-                                ? AurennaTheme.electricViolet.withOpacity(0.5)
-                                : AurennaTheme.silverMist.withOpacity(0.3),
+                                ? AurennaTheme.electricViolet.withValues(alpha: 0.5)
+                                : AurennaTheme.silverMist.withValues(alpha: 0.3),
                             width: 2,
                           ),
                         ),
@@ -201,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: AurennaTheme.amberGlow.withOpacity(0.2),
+                                      color: AurennaTheme.amberGlow.withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
@@ -234,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: hasSubscription 
                                     ? AurennaTheme.textSecondary
-                                    : AurennaTheme.textSecondary.withOpacity(0.8),
+                                    : AurennaTheme.textSecondary.withValues(alpha: 0.8),
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -267,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                           vertical: isSmallScreen ? 12 : 14,
                                         ),
                                         side: BorderSide(
-                                          color: AurennaTheme.amberGlow.withOpacity(0.5),
+                                          color: AurennaTheme.amberGlow.withValues(alpha: 0.5),
                                         ),
                                         foregroundColor: AurennaTheme.amberGlow,
                                       ),
@@ -295,19 +295,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             end: Alignment.bottomRight,
                             colors: hasSubscription 
                                 ? [
-                                    AurennaTheme.amberGlow.withOpacity(0.2),
-                                    AurennaTheme.electricViolet.withOpacity(0.2),
+                                    AurennaTheme.amberGlow.withValues(alpha: 0.2),
+                                    AurennaTheme.electricViolet.withValues(alpha: 0.2),
                                   ]
                                 : [
-                                    AurennaTheme.mysticBlue.withOpacity(0.1),
-                                    AurennaTheme.voidBlack.withOpacity(0.1),
+                                    AurennaTheme.mysticBlue.withValues(alpha: 0.1),
+                                    AurennaTheme.voidBlack.withValues(alpha: 0.1),
                                   ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: hasSubscription 
-                                ? AurennaTheme.amberGlow.withOpacity(0.5)
-                                : AurennaTheme.silverMist.withOpacity(0.3),
+                                ? AurennaTheme.amberGlow.withValues(alpha: 0.5)
+                                : AurennaTheme.silverMist.withValues(alpha: 0.3),
                             width: 2,
                           ),
                         ),
@@ -331,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: AurennaTheme.amberGlow.withOpacity(0.2),
+                                      color: AurennaTheme.amberGlow.withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
@@ -364,7 +364,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: hasSubscription 
                                     ? AurennaTheme.textSecondary
-                                    : AurennaTheme.textSecondary.withOpacity(0.8),
+                                    : AurennaTheme.textSecondary.withValues(alpha: 0.8),
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -397,7 +397,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                           vertical: isSmallScreen ? 12 : 14,
                                         ),
                                         side: BorderSide(
-                                          color: AurennaTheme.amberGlow.withOpacity(0.5),
+                                          color: AurennaTheme.amberGlow.withValues(alpha: 0.5),
                                         ),
                                         foregroundColor: AurennaTheme.amberGlow,
                                       ),
@@ -425,19 +425,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             end: Alignment.bottomRight,
                             colors: hasSubscription 
                                 ? [
-                                    AurennaTheme.electricViolet.withOpacity(0.2),
-                                    AurennaTheme.crystalBlue.withOpacity(0.2),
+                                    AurennaTheme.electricViolet.withValues(alpha: 0.2),
+                                    AurennaTheme.crystalBlue.withValues(alpha: 0.2),
                                   ]
                                 : [
-                                    AurennaTheme.mysticBlue.withOpacity(0.1),
-                                    AurennaTheme.voidBlack.withOpacity(0.1),
+                                    AurennaTheme.mysticBlue.withValues(alpha: 0.1),
+                                    AurennaTheme.voidBlack.withValues(alpha: 0.1),
                                   ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: hasSubscription 
-                                ? AurennaTheme.electricViolet.withOpacity(0.5)
-                                : AurennaTheme.silverMist.withOpacity(0.3),
+                                ? AurennaTheme.electricViolet.withValues(alpha: 0.5)
+                                : AurennaTheme.silverMist.withValues(alpha: 0.3),
                             width: 2,
                           ),
                         ),
@@ -461,7 +461,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: AurennaTheme.amberGlow.withOpacity(0.2),
+                                      color: AurennaTheme.amberGlow.withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
@@ -494,7 +494,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: hasSubscription 
                                     ? AurennaTheme.textSecondary
-                                    : AurennaTheme.textSecondary.withOpacity(0.8),
+                                    : AurennaTheme.textSecondary.withValues(alpha: 0.8),
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -527,7 +527,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                           vertical: isSmallScreen ? 12 : 14,
                                         ),
                                         side: BorderSide(
-                                          color: AurennaTheme.amberGlow.withOpacity(0.5),
+                                          color: AurennaTheme.amberGlow.withValues(alpha: 0.5),
                                         ),
                                         foregroundColor: AurennaTheme.amberGlow,
                                       ),
@@ -559,19 +559,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             end: Alignment.bottomRight,
                             colors: hasSubscription 
                                 ? [
-                                    const Color(0xFF7C4DFF).withOpacity(0.2),
-                                    const Color(0xFF536DFE).withOpacity(0.2),
+                                    const Color(0xFF7C4DFF).withValues(alpha: 0.2),
+                                    const Color(0xFF536DFE).withValues(alpha: 0.2),
                                   ]
                                 : [
-                                    AurennaTheme.mysticBlue.withOpacity(0.1),
-                                    AurennaTheme.voidBlack.withOpacity(0.1),
+                                    AurennaTheme.mysticBlue.withValues(alpha: 0.1),
+                                    AurennaTheme.voidBlack.withValues(alpha: 0.1),
                                   ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: hasSubscription 
-                                ? const Color(0xFF7C4DFF).withOpacity(0.5)
-                                : AurennaTheme.silverMist.withOpacity(0.3),
+                                ? const Color(0xFF7C4DFF).withValues(alpha: 0.5)
+                                : AurennaTheme.silverMist.withValues(alpha: 0.3),
                             width: 2,
                           ),
                         ),
@@ -595,7 +595,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: AurennaTheme.amberGlow.withOpacity(0.2),
+                                      color: AurennaTheme.amberGlow.withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
@@ -628,7 +628,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: hasSubscription 
                                     ? AurennaTheme.textSecondary
-                                    : AurennaTheme.textSecondary.withOpacity(0.8),
+                                    : AurennaTheme.textSecondary.withValues(alpha: 0.8),
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -661,7 +661,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                           vertical: isSmallScreen ? 12 : 14,
                                         ),
                                         side: BorderSide(
-                                          color: AurennaTheme.amberGlow.withOpacity(0.5),
+                                          color: AurennaTheme.amberGlow.withValues(alpha: 0.5),
                                         ),
                                         foregroundColor: AurennaTheme.amberGlow,
                                       ),
@@ -684,7 +684,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   child: Text(
                     '✨ May the universe guide your journey ✨',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AurennaTheme.textSecondary.withOpacity(0.7),
+                      color: AurennaTheme.textSecondary.withValues(alpha: 0.7),
                       fontStyle: FontStyle.italic,
                     ),
                   ),
