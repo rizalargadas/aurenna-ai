@@ -7,6 +7,7 @@ enum ReadingType {
   compatibility,
   situationship,
   yesOrNo,
+  pastLife,
 }
 
 class Reading {
@@ -118,6 +119,21 @@ class DrawnCard {
         case 0: return 'Card 1 - Initial Energy';
         case 1: return 'Card 2 - Core Message';
         case 2: return 'Card 3 - Final Verdict';
+        default: return 'Unknown';
+      }
+    } else if (readingType == ReadingType.pastLife) {
+      switch (position) {
+        case 0: return 'Who You Were';
+        case 1: return 'Gender';
+        case 2: return 'Childhood';
+        case 3: return 'Relationship';
+        case 4: return 'Family';
+        case 5: return 'Social Status';
+        case 6: return 'Community Role';
+        case 7: return 'Occupation';
+        case 8: return 'Death';
+        case 9: return 'Lesson Learned';
+        case 10: return 'How It Helps You Now';
         default: return 'Unknown';
       }
     } else {

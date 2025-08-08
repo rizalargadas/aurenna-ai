@@ -673,6 +673,140 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       );
                     },
                   ),
+
+                  const SizedBox(height: 16),
+
+                  // Past Life Reading (Premium)
+                  FutureBuilder<bool>(
+                    future: authService.hasActiveSubscription(),
+                    builder: (context, snapshot) {
+                      final hasSubscription = snapshot.data ?? false;
+                      
+                      return GestureDetector(
+                        onTap: hasSubscription 
+                            ? () => Navigator.pushNamed(context, '/past-life-reading')
+                            : () => Navigator.pushNamed(context, '/premium-upgrade'),
+                        child: Container(
+                        padding: EdgeInsets.all(isSmallScreen ? 20 : 24),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: hasSubscription 
+                                ? [
+                                    AurennaTheme.electricViolet.withValues(alpha: 0.2),
+                                    AurennaTheme.crystalBlue.withValues(alpha: 0.2),
+                                  ]
+                                : [
+                                    AurennaTheme.mysticBlue.withValues(alpha: 0.1),
+                                    AurennaTheme.voidBlack.withValues(alpha: 0.1),
+                                  ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: hasSubscription 
+                                ? AurennaTheme.electricViolet.withValues(alpha: 0.5)
+                                : AurennaTheme.silverMist.withValues(alpha: 0.3),
+                            width: 2,
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '☪️',
+                                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                                    fontSize: isSmallScreen ? 36 : 42,
+                                  ),
+                                ),
+                                if (!hasSubscription) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, 
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AurennaTheme.amberGlow.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      'PREMIUM',
+                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        color: AurennaTheme.amberGlow,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            SizedBox(height: isSmallScreen ? 8 : 12),
+                            Text(
+                              'Past Life Reading',
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                color: hasSubscription 
+                                    ? AurennaTheme.textPrimary
+                                    : AurennaTheme.textSecondary,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: isSmallScreen ? 4 : 6),
+                            Text(
+                              hasSubscription 
+                                  ? 'Discover who you were in a previous incarnation'
+                                  : 'Unlock memories from your soul\'s eternal journey',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: hasSubscription 
+                                    ? AurennaTheme.textSecondary
+                                    : AurennaTheme.textSecondary.withValues(alpha: 0.8),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: isSmallScreen ? 16 : 20),
+                            SizedBox(
+                              width: double.infinity,
+                              child: hasSubscription 
+                                  ? ElevatedButton.icon(
+                                      onPressed: () {
+                                        Navigator.pushNamed(context, '/past-life-reading');
+                                      },
+                                      icon: const Icon(Icons.auto_awesome, size: 20),
+                                      label: const Text('Begin Soul Journey'),
+                                      style: ElevatedButton.styleFrom(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: isSmallScreen ? 12 : 14,
+                                        ),
+                                        backgroundColor: AurennaTheme.electricViolet,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                    )
+                                  : OutlinedButton.icon(
+                                      onPressed: () {
+                                        Navigator.pushNamed(context, '/premium-upgrade');
+                                      },
+                                      icon: const Icon(Icons.lock, size: 18),
+                                      label: const Text('Upgrade to Unlock'),
+                                      style: OutlinedButton.styleFrom(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: isSmallScreen ? 12 : 14,
+                                        ),
+                                        side: BorderSide(
+                                          color: AurennaTheme.silverMist.withValues(alpha: 0.5),
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      );
+                    },
+                  ),
                 ],
                 ),
 

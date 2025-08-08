@@ -124,6 +124,23 @@ class ShareReading {
     );
   }
   
+  /// Shares a past life reading
+  static Future<void> sharePastLifeReading({
+    required String userName,
+    required List<DrawnCard> drawnCards,
+    required String reading,
+  }) async {
+    final question = userName.isNotEmpty 
+        ? 'Past Life Reading for $userName' 
+        : 'Past Life Reading';
+    return shareReading(
+      question: question,
+      drawnCards: drawnCards,
+      reading: reading,
+      readingType: 'Past Life Reading - Soul Journey',
+    );
+  }
+  
   /// Determines reading type based on number of cards
   static String _getReadingTypeFromCards(List<DrawnCard> cards) {
     switch (cards.length) {
