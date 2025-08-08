@@ -115,6 +115,7 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AurennaTheme.voidBlack,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text('Situation Spread'),
         actions: [
@@ -433,15 +434,15 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = constraints.maxWidth > 600 ? 6 : 3;
-        final spacing = 8.0;
+        final spacing = 3.0; // Further reduced to half for optimal spacing
         final cardWidth = (constraints.maxWidth - (crossAxisCount + 1) * spacing) / crossAxisCount;
         final maxCardWidth = 90.0;
         final finalCardWidth = cardWidth < maxCardWidth ? cardWidth : maxCardWidth;
         
         final cardHeight = finalCardWidth * 1.4;
-        final positionLabelHeight = 16.0;
-        final cardNameHeight = 32.0;
-        final totalItemHeight = positionLabelHeight + 8 + cardHeight + 8 + cardNameHeight;
+        final positionLabelHeight = 12.0; // Further reduced for optimal spacing
+        final cardNameHeight = 24.0; // Further reduced for optimal spacing
+        final totalItemHeight = positionLabelHeight + 3 + cardHeight + 3 + cardNameHeight; // Reduced spacing to 3px
         
         final aspectRatio = finalCardWidth / totalItemHeight;
         
@@ -451,7 +452,7 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: spacing,
-            mainAxisSpacing: spacing,
+            mainAxisSpacing: spacing, // This will use the reduced spacing
             childAspectRatio: aspectRatio,
           ),
           itemCount: _drawnCards.length,
@@ -496,7 +497,7 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
           ),
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: 3), // Further reduced to half for optimal spacing
 
         // Card container
         Container(
@@ -582,7 +583,7 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
           ),
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: 3), // Further reduced to half for optimal spacing
 
         // Card name
         SizedBox(
@@ -606,7 +607,7 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
   
   Widget _buildNameInputScreen() {
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,

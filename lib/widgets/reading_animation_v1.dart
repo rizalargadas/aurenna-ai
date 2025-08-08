@@ -482,6 +482,11 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
     final screenWidth = MediaQuery.of(context).size.width;
     final availableWidth = screenWidth * 0.9;
     
+    // Special layout for 6 cards (3+3 arrangement) - Situation Spread
+    if (widget.drawnCards.length == 6) {
+      return [_build6CardLayout(availableWidth)];
+    }
+    
     // Special layout for 5 cards (3-2 arrangement)
     if (widget.drawnCards.length == 5) {
       return [_build5CardLayout(availableWidth)];
@@ -524,6 +529,46 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
         ),
       ),
     ];
+  }
+  
+  Widget _build6CardLayout(double availableWidth) {
+    // Calculate card size for 3+3 layout - bigger cards for Situation Spread
+    final cardWidth = math.min((availableWidth - 32) / 3, 120.0); // Bigger cards, increased from 110 to 120
+    
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(8), // Reduced padding to center better
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // First row - 3 cards
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildCardFront(cardWidth, 0),
+                const SizedBox(width: 12), // Slightly more spacing
+                _buildCardFront(cardWidth, 1),
+                const SizedBox(width: 12),
+                _buildCardFront(cardWidth, 2),
+              ],
+            ),
+            const SizedBox(height: 6), // Further reduced vertical spacing to half
+            // Second row - 3 cards
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildCardFront(cardWidth, 3),
+                const SizedBox(width: 12),
+                _buildCardFront(cardWidth, 4),
+                const SizedBox(width: 12),
+                _buildCardFront(cardWidth, 5),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
   
   Widget _build5CardLayout(double availableWidth) {
