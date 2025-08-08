@@ -379,8 +379,8 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
                   ),
                 ],
               ),
-              child: MysticalLoading(
-                message: widget.statusMessage ?? 'Channeling cosmic energies...',
+              child: const MysticalLoading(
+                message: 'Weaving your cosmic narrative...', // Message in center
                 size: 80,
               ),
             ),
@@ -391,6 +391,12 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
   }
 
   Widget _buildStatusOverlay() {
+    // Only show status overlay during revealing phase
+    // Hide it during generating phase to avoid duplicate text
+    if (widget.phase == ReadingAnimationPhase.generating) {
+      return const SizedBox.shrink();
+    }
+    
     return AnimatedPositioned(
       duration: const Duration(milliseconds: 300),
       bottom: 0,
@@ -498,8 +504,8 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: 8,
-              mainAxisSpacing: 16,
-              childAspectRatio: 0.5, // Show card details
+              mainAxisSpacing: 8,
+              childAspectRatio: 0.45, // Adjusted to prevent overflow
             ),
             itemBuilder: (context, index) {
               return Align(
@@ -623,64 +629,42 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
               ),
             ),
           ),
-          const SizedBox(height: 8),
-
-          // Position name
+          // Compact labels to prevent overflow
+          const SizedBox(height: 2),
           Text(
             drawnCard.positionName,
             style: TextStyle(
               color: AurennaTheme.crystalBlue,
-              fontSize: width * 0.12,
+              fontSize: width * 0.08,
               fontWeight: FontWeight.w600,
+              height: 1.0,
             ),
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-
-          const SizedBox(height: 6),
-
-          // Card name
-          SizedBox(
-            width: width,
-            child: Text(
-              drawnCard.card.name.isNotEmpty
-                  ? drawnCard.card.name
-                  : 'Unknown Card',
-              style: TextStyle(
-                color: AurennaTheme.textPrimary,
-                fontSize: width * 0.11,
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+          Text(
+            drawnCard.card.name,
+            style: TextStyle(
+              color: AurennaTheme.textPrimary,
+              fontSize: width * 0.07,
+              fontWeight: FontWeight.w500,
+              height: 1.0,
             ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-
-          // Reversed indicator if needed
-          if (drawnCard.isReversed) ...[
-            const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: AurennaTheme.amberGlow.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: AurennaTheme.amberGlow.withOpacity(0.3),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                'Reversed',
-                style: TextStyle(
-                  color: AurennaTheme.amberGlow,
-                  fontSize: width * 0.08,
-                  fontWeight: FontWeight.w600,
-                ),
+          if (drawnCard.isReversed)
+            Text(
+              '(R)',
+              style: TextStyle(
+                color: AurennaTheme.amberGlow,
+                fontSize: width * 0.06,
+                fontWeight: FontWeight.w600,
+                height: 1.0,
               ),
             ),
-          ],
         ],
       );
     }

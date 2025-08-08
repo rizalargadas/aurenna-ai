@@ -337,6 +337,7 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AurennaTheme.voidBlack,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text('Comprehensive General Reading'),
         actions: [
@@ -395,7 +396,8 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
         break;
       case 2:
         phase = ReadingAnimationPhase.generating;
-        statusMessage = 'Aurenna is weaving your cosmic narrative...';
+        // No status message during generating phase - radial effect only
+        statusMessage = null;
         break;
       default:
         phase = ReadingAnimationPhase.complete;
@@ -563,13 +565,13 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
 
   Widget _buildCompleteReading() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header
+          // Compact Header
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -579,33 +581,26 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
                   AurennaTheme.electricViolet.withOpacity(0.3),
                 ],
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: AurennaTheme.electricViolet.withOpacity(0.5),
                 width: 1,
               ),
             ),
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.auto_awesome,
                   color: AurennaTheme.electricViolet,
-                  size: 32,
+                  size: 24,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(width: 8),
                 Text(
                   'Comprehensive General Reading',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: AurennaTheme.textPrimary,
                     fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'A complete view of your life\'s energy',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AurennaTheme.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -613,19 +608,19 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
             ),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
 
           Text(
             'Your Life Spread',
-            style: Theme.of(context).textTheme.displaySmall,
+            style: Theme.of(context).textTheme.titleLarge,
             textAlign: TextAlign.center,
           ),
 
-          const SizedBox(height: 32), // Increased from 24 to 32
+          const SizedBox(height: 16),
 
           _buildCardGrid(),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
 
           Row(
             children: [
@@ -749,17 +744,16 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate card size based on screen width
-        final crossAxisCount = constraints.maxWidth > 600 ? 4 : 3;
-        final spacing = 0.25; // Even tighter spacing
-        final cardWidth = (constraints.maxWidth - (crossAxisCount + 1) * spacing) / crossAxisCount;
-        final maxCardWidth = 90.0; // Slightly increased to use the extra space
+        final crossAxisCount = 4; // Always 4 columns for 12 cards (3 rows x 4 cols)
+        final horizontalSpacing = 8.0;
+        final verticalSpacing = 4.0; // Reduced vertical spacing
+        final cardWidth = (constraints.maxWidth - (crossAxisCount + 1) * horizontalSpacing) / crossAxisCount;
+        final maxCardWidth = 85.0; // Bigger cards
         final finalCardWidth = cardWidth < maxCardWidth ? cardWidth : maxCardWidth;
         
-        // Calculate total height needed for each card item
+        // Calculate proper aspect ratio to prevent overflow
         final cardHeight = finalCardWidth * 1.4;
-        final positionLabelHeight = 8.0; // Tighter
-        final cardNameHeight = 10.0; // Tighter  
-        final totalItemHeight = positionLabelHeight + 0.25 + cardHeight + 0.25 + cardNameHeight; // Ultra-minimal gaps
+        final totalItemHeight = cardHeight + 50; // Optimized for labels
         
         final aspectRatio = finalCardWidth / totalItemHeight;
         
@@ -768,8 +762,8 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            crossAxisSpacing: spacing,
-            mainAxisSpacing: spacing,
+            crossAxisSpacing: horizontalSpacing,
+            mainAxisSpacing: verticalSpacing, // Minimal vertical spacing
             childAspectRatio: aspectRatio,
           ),
           itemCount: _drawnCards.length,
@@ -814,7 +808,7 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
           ),
         ),
 
-        const SizedBox(height: 0.25),
+        const SizedBox(height: 4),
 
         // Card container with exact dimensions
         Container(
@@ -900,9 +894,9 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
           ),
         ),
 
-        const SizedBox(height: 8), // 8px spacing between card and card name
+        const SizedBox(height: 5), // 5px spacing as requested
 
-        // Card name
+        // Card name (title)
         SizedBox(
           width: cardWidth,
           child: Text(
@@ -1008,8 +1002,8 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: 8,
-              mainAxisSpacing: 16, // Increased from 8 to 16 for more vertical spacing
-              childAspectRatio: 0.5, // Show card details
+              mainAxisSpacing: 8,
+              childAspectRatio: 0.45, // Adjusted to prevent overflow
             ),
             itemBuilder: (context, index) {
               return Align(
@@ -1138,65 +1132,42 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
               ),
             ),
           ),
-          // Text labels below card
-          const SizedBox(height: 8),
-
-          // Position name
+          // Compact labels to prevent overflow
+          const SizedBox(height: 2),
           Text(
             drawnCard.positionName,
             style: TextStyle(
               color: AurennaTheme.crystalBlue,
-              fontSize: width * 0.12,
+              fontSize: width * 0.08,
               fontWeight: FontWeight.w600,
+              height: 1.0,
             ),
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-
-          const SizedBox(height: 6),
-
-          // Card name
-          SizedBox(
-            width: width,
-            child: Text(
-              drawnCard.card.name.isNotEmpty
-                  ? drawnCard.card.name
-                  : 'Unknown Card',
-              style: TextStyle(
-                color: AurennaTheme.textPrimary,
-                fontSize: width * 0.11,
-                fontWeight: FontWeight.w600,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+          Text(
+            drawnCard.card.name,
+            style: TextStyle(
+              color: AurennaTheme.textPrimary,
+              fontSize: width * 0.07,
+              fontWeight: FontWeight.w500,
+              height: 1.0,
             ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-
-          // Reversed indicator if needed
-          if (drawnCard.isReversed) ...[
-            const SizedBox(height: 6),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: AurennaTheme.amberGlow.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: AurennaTheme.amberGlow.withOpacity(0.3),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                'Reversed',
-                style: TextStyle(
-                  color: AurennaTheme.amberGlow,
-                  fontSize: width * 0.08,
-                  fontWeight: FontWeight.w600,
-                ),
+          if (drawnCard.isReversed)
+            Text(
+              '(R)',
+              style: TextStyle(
+                color: AurennaTheme.amberGlow,
+                fontSize: width * 0.06,
+                fontWeight: FontWeight.w600,
+                height: 1.0,
               ),
             ),
-          ],
         ],
       );
     }
@@ -1240,13 +1211,19 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
   
   Widget _buildNameInputScreen() {
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - 48,
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
               // Mystical header
               Container(
                 padding: const EdgeInsets.all(32),
@@ -1341,9 +1318,12 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
                 ),
                 child: const Text('Begin My Reading'),
               ),
-            ],
-          ),
-        ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
