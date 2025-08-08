@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../config/theme.dart';
 import '../models/reading.dart';
 import '../models/tarot_card.dart';
+import '../utils/reading_messages.dart';
 import 'mystical_loading.dart';
 
 enum ReadingAnimationPhase {
@@ -21,6 +22,7 @@ class ComprehensiveReadingAnimation extends StatefulWidget {
   final VoidCallback? onCardsRevealed;
   final String? statusMessage;
   final ReadingAnimationPhase phase;
+  final String? generationMessage; // Fixed message for generation phase
   final Widget? overlayContent; // For custom overlay content during animation
 
   const ComprehensiveReadingAnimation({
@@ -31,6 +33,7 @@ class ComprehensiveReadingAnimation extends StatefulWidget {
     this.onCardsRevealed,
     this.statusMessage,
     this.phase = ReadingAnimationPhase.shuffling,
+    this.generationMessage,
     this.overlayContent,
   });
 
@@ -379,8 +382,8 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
                   ),
                 ],
               ),
-              child: const MysticalLoading(
-                message: 'Weaving your cosmic narrative...', // Message in center
+              child: MysticalLoading(
+                message: widget.generationMessage ?? 'Channeling universal wisdom...', // Fixed message per session
                 size: 80,
               ),
             ),
@@ -480,7 +483,12 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
     final screenWidth = MediaQuery.of(context).size.width;
     final availableWidth = screenWidth * 0.9;
     
-    // Dynamic grid layout based on card count
+    // Special layout for 5 cards (3-2 arrangement)
+    if (widget.drawnCards.length == 5) {
+      return [_build5CardLayout(availableWidth)];
+    }
+    
+    // Dynamic grid layout for other card counts
     int crossAxisCount;
     if (widget.drawnCards.length <= 3) {
       crossAxisCount = widget.drawnCards.length;
@@ -517,6 +525,43 @@ class _ComprehensiveReadingAnimationState extends State<ComprehensiveReadingAnim
         ),
       ),
     ];
+  }
+  
+  Widget _build5CardLayout(double availableWidth) {
+    // Calculate card size for 3-2 layout - bigger cards
+    final cardWidth = math.min((availableWidth - 32) / 3, 110.0); // Increased from 100 to 110
+    
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // First row - 3 cards
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildCardFront(cardWidth, 0),
+                const SizedBox(width: 8),
+                _buildCardFront(cardWidth, 1),
+                const SizedBox(width: 8),
+                _buildCardFront(cardWidth, 2),
+              ],
+            ),
+            const SizedBox(height: 16), // Increased spacing
+            // Second row - 2 cards
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildCardFront(cardWidth, 3),
+                const SizedBox(width: 8),
+                _buildCardFront(cardWidth, 4),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildCardBack(double width) {

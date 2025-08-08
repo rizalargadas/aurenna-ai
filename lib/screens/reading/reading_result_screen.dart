@@ -66,13 +66,13 @@ class ReadingResultScreen extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AurennaTheme.crystalBlue.withOpacity(0.3),
-                      AurennaTheme.electricViolet.withOpacity(0.3),
+                      AurennaTheme.crystalBlue.withValues(alpha: 0.3),
+                      AurennaTheme.electricViolet.withValues(alpha: 0.3),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AurennaTheme.electricViolet.withOpacity(0.5),
+                    color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
                     width: 1,
                   ),
                 ),
@@ -114,12 +114,13 @@ class ReadingResultScreen extends StatelessWidget {
                   final maxCardWidth = 120.0;
                   final finalCardWidth = cardWidth < maxCardWidth ? cardWidth : maxCardWidth;
                   
-                  return SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: drawnCards.map((drawnCard) {
+                  return Center(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: drawnCards.map((drawnCard) {
                       try {
                         return Padding(
                           padding: const EdgeInsets.only(right: 12.0),
@@ -146,7 +147,8 @@ class ReadingResultScreen extends StatelessWidget {
                           ),
                         );
                       }
-                    }).toList(),
+                        }).toList(),
+                      ),
                     ),
                   );
                 },
@@ -158,7 +160,7 @@ class ReadingResultScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Divider(
-                      color: AurennaTheme.electricViolet.withOpacity(0.3),
+                      color: AurennaTheme.electricViolet.withValues(alpha: 0.3),
                       thickness: 1,
                     ),
                   ),
@@ -172,7 +174,7 @@ class ReadingResultScreen extends StatelessWidget {
                   ),
                   Expanded(
                     child: Divider(
-                      color: AurennaTheme.electricViolet.withOpacity(0.3),
+                      color: AurennaTheme.electricViolet.withValues(alpha: 0.3),
                       thickness: 1,
                     ),
                   ),
@@ -195,12 +197,12 @@ class ReadingResultScreen extends StatelessWidget {
                   color: AurennaTheme.mysticBlue,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AurennaTheme.silverMist.withOpacity(0.1),
+                    color: AurennaTheme.silverMist.withValues(alpha: 0.1),
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: AurennaTheme.silverMist.withOpacity(0.05),
+                      color: AurennaTheme.silverMist.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -216,7 +218,7 @@ class ReadingResultScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Divider(color: AurennaTheme.silverMist.withOpacity(0.2)),
+                    Divider(color: AurennaTheme.silverMist.withValues(alpha: 0.2)),
                     const SizedBox(height: 16),
                     Text(
                       'Remember: The cards offer guidance, but you always have the power to choose your own path.',
@@ -307,7 +309,7 @@ class ReadingResultScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: AurennaTheme.crystalBlue.withOpacity(0.2),
+            color: AurennaTheme.crystalBlue.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
@@ -332,7 +334,7 @@ class ReadingResultScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: borderColor.withOpacity(0.3),
+                color: borderColor.withValues(alpha: 0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
               ),
@@ -397,7 +399,7 @@ class ReadingResultScreen extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: AurennaTheme.electricViolet.withOpacity(0.9),
+                        color: AurennaTheme.electricViolet.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(

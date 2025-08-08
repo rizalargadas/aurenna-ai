@@ -6,6 +6,7 @@ import '../../models/reading.dart';
 import '../../models/tarot_card.dart';
 import '../../services/auth_service.dart';
 import '../../services/tarot_service.dart';
+import '../../utils/reading_messages.dart';
 import '../../widgets/mystical_loading.dart';
 import '../../widgets/reading_animation_v1.dart';
 import 'reading_result_screen.dart';
@@ -49,6 +50,9 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
   final _nameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String _userName = '';
+  
+  // Generation message selected once per session
+  String _generationMessage = '';
 
   @override
   void initState() {
@@ -56,6 +60,9 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
     
     // Don't start animations yet - wait for user input
     _showNameInput = true;
+    
+    // Select generation message once for this session
+    _generationMessage = ReadingMessages.getRandomGenerationMessage();
     
     // Floating animation controller
     _floatController = AnimationController(
@@ -392,7 +399,7 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
         break;
       case 1:
         phase = ReadingAnimationPhase.revealing;
-        statusMessage = 'Your cards have been revealed';
+        statusMessage = ReadingMessages.getRandomCardRevealMessage();
         break;
       case 2:
         phase = ReadingAnimationPhase.generating;
@@ -409,6 +416,7 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
       drawnCards: _drawnCards,
       phase: phase,
       statusMessage: statusMessage,
+      generationMessage: _generationMessage,
       onShuffleComplete: _onShuffleComplete,
       onCardsRevealed: _onCardsRevealed,
     );

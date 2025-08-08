@@ -6,6 +6,7 @@ import '../../models/reading.dart';
 import '../../models/tarot_card.dart';
 import '../../services/auth_service.dart';
 import '../../services/tarot_service.dart';
+import '../../utils/reading_messages.dart';
 import '../../widgets/mystical_loading.dart';
 import '../../widgets/reading_animation_v1.dart';
 
@@ -36,10 +37,16 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
   final _questionController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String _question = '';
+  
+  // Generation message selected once per session
+  String _generationMessage = '';
 
   @override
   void initState() {
     super.initState();
+    
+    // Select generation message once for this session
+    _generationMessage = ReadingMessages.getRandomGenerationMessage();
     
     _showQuestionInput = true;
     
@@ -354,11 +361,11 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
     switch (_currentStep) {
       case 1:
         phase = ReadingAnimationPhase.shuffling;
-        statusMessage = 'The cards are revealing your answer...';
+        statusMessage = ReadingMessages.getRandomCardRevealMessage();
         break;
       case 2:
         phase = ReadingAnimationPhase.generating;
-        statusMessage = 'Aurenna is divining your cosmic verdict...';
+        statusMessage = null; // No bottom text, just radial effect
         break;
       default:
         phase = ReadingAnimationPhase.complete;
@@ -370,6 +377,7 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
       drawnCards: _drawnCards,
       phase: phase,
       statusMessage: statusMessage,
+      generationMessage: _generationMessage,
       onShuffleComplete: () {
         if (mounted && !_disposed) {
           // Draw 3 cards for Yes/No reading

@@ -4,6 +4,7 @@ import '../../config/theme.dart';
 import '../../models/reading.dart';
 import '../../services/auth_service.dart';
 import '../../services/tarot_service.dart';
+import '../../utils/reading_messages.dart';
 import '../../widgets/reading_animation_v1.dart';
 
 class SituationshipReadingScreen extends StatefulWidget {
@@ -27,11 +28,17 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
   final _formKey = GlobalKey<FormState>();
   String _yourName = '';
   String _theirName = '';
+  
+  // Generation message selected once per session
+  String _generationMessage = '';
 
   @override
   void initState() {
     super.initState();
     _showNameInput = true;
+    
+    // Select generation message once for this session
+    _generationMessage = ReadingMessages.getRandomGenerationMessage();
   }
 
   @override
@@ -161,11 +168,11 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
         break;
       case 1:
         phase = ReadingAnimationPhase.revealing;
-        statusMessage = 'Your situation cards have been revealed';
+        statusMessage = ReadingMessages.getRandomCardRevealMessage();
         break;
       case 2:
         phase = ReadingAnimationPhase.generating;
-        statusMessage = 'Aurenna is decoding your undefined connection...';
+        statusMessage = null; // No bottom text, just radial effect
         break;
       default:
         phase = ReadingAnimationPhase.complete;
@@ -177,6 +184,7 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
       drawnCards: _drawnCards,
       phase: phase,
       statusMessage: statusMessage,
+      generationMessage: _generationMessage,
       onShuffleComplete: _onShuffleComplete,
       onCardsRevealed: _onCardsRevealed,
     );

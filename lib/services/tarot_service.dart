@@ -290,43 +290,43 @@ Instructions:
 6. Wrap it up with a powerful summary that leaves them feeling more confident, seen, and ready to take on life.
 
 FORMAT (seperate each card interpretation their own paragraph):
-**Mind - [CARD Drawn]**
+✨ Mind - [CARD Drawn]
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-**Body - [CARD Drawn]**
+✨ Body - [CARD Drawn]
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-**Spirit - [CARD Drawn]**
+✨ Spirit - [CARD Drawn]
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-**Friends & Family - [CARD Drawn]**
+✨ Friends & Family - [CARD Drawn]
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-**You - [CARD Drawn]**
+✨ You - [CARD Drawn]
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-**Blessings - [CARD Drawn]**
+✨ Blessings - [CARD Drawn]
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-**Challenges - [CARD Drawn]**
+✨ Challenges - [CARD Drawn]
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-**Advice - [CARD Drawn]**
+✨ Advice - [CARD Drawn]
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-**Romance - [CARD Drawn]**
+✨ Romance - [CARD Drawn]
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-**Hobbies - [CARD Drawn]**
+✨ Hobbies - [CARD Drawn]
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-**Career - [CARD Drawn]**
+✨ Career - [CARD Drawn]
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-**Finances - [CARD Drawn]**
+✨ Finances - [CARD Drawn]
 Interpretation of the card in the context of its position. 3 to 5 sentences long.
 
-**CONCLUSION:**
+☪️ CONCLUSION ☪️ 
 Wrap it up with a powerful summary that leaves them feeling more confident, seen, and ready to take on life.
 
 Tone: Think mystic therapist meets frank bestfriend.
@@ -427,22 +427,27 @@ Instructions:
 
 FORMAT (separate each card interpretation into their own paragraph):
 
-**Your Feelings - [CARD Drawn]**
+✨ Your Feelings - [CARD Drawn]
 Interpretation of the card in the context of their feelings toward their partner. 3 to 5 sentences long.
 
-**Partner's Feelings - [CARD Drawn]**
+
+✨ Partner's Feelings - [CARD Drawn]
 Interpretation of the card in the context of their partner's feelings toward them. 3 to 5 sentences long.
 
-**Dominant Characteristic - [CARD Drawn]**
+
+✨ Dominant Characteristic - [CARD Drawn]
 Interpretation of the card as the main energy/theme defining this relationship. 3 to 5 sentences long.
 
-**Challenges - [CARD Drawn]**
+
+✨ Challenges - [CARD Drawn]
 Interpretation of the card as the primary obstacle or area of tension in this connection. 3 to 5 sentences long.
 
-**Potential - [CARD Drawn]**
+
+✨ Potential - [CARD Drawn]
 Interpretation of the card as what this relationship could become with effort and understanding. 3 to 5 sentences long.
 
-**LOVE VERDICT:**
+
+✨ LOVE VERDICT:
 Wrap it up with honest, empowering insights about this connection. Give them clarity on whether to lean in, step back, or pivot. Leave them feeling confident about their next move in love.
 
 Tone: Think relationship therapist meets psychic bestfriend with a wine glass.
@@ -547,25 +552,25 @@ Instructions:
 
 FORMAT (separate each card interpretation into their own paragraph):
 
-**Your Current Energy - [CARD Drawn]**
+✨ Your Current Energy - [CARD Drawn]
 Interpretation of where they're at emotionally in this undefined situation. 3 to 5 sentences long.
 
-**Their Feelings - [CARD Drawn]**
+✨ Their Feelings - [CARD Drawn]
 Interpretation of what this person actually feels about them (beyond the surface). 3 to 5 sentences long.
 
-**Their Thoughts - [CARD Drawn]**
+✨ Their Thoughts - [CARD Drawn]
 Interpretation of what's going through their person's mind about this connection. 3 to 5 sentences long.
 
-**Their Intentions - [CARD Drawn]**
+✨ Their Intentions - [CARD Drawn]
 Interpretation of what this person actually wants or plans to do. 3 to 5 sentences long.
 
-**Their Actions/Plan - [CARD Drawn]**
+✨ Their Actions/Plan - [CARD Drawn]
 Interpretation of the concrete steps (or lack thereof) this person will take. 3 to 5 sentences long.
 
-**Advice for This Situationship - [CARD Drawn]**
+✨ Advice for This Situationship - [CARD Drawn]
 Interpretation of the best path forward for their highest good. 3 to 5 sentences long.
 
-**THE SITUATIONSHIP VERDICT:**
+☪️ THE SITUATIONSHIP VERDICT: ☪️ 
 Cut through the confusion with crystal-clear guidance. Tell them exactly what this connection is, where it's headed, and what they should do about it. No mixed messages—just the truth they need to make the right choice for themselves.
 
 Tone: Think dating coach meets psychic bestfriend who's tired of watching you get played.
@@ -957,21 +962,18 @@ Instructions:
 
 FORMAT:
 
-**🔮 Card 1 – [Card Position/Theme]**
-**[CARD NAME] – [Upright/Reversed]**
+✨ Card 1 – [CARD NAME] – [Upright/Reversed]
 Interpretation of why this card is a Yes/No/Maybe for their specific question. Include the energy and message. 3-4 sentences with personality and insight.
 
-**🔮 Card 2 – [Card Position/Theme]**
-**[CARD NAME] – [Upright/Reversed]**
+✨ Card 2 – [CARD NAME] – [Upright/Reversed]
 Interpretation of why this card is a Yes/No/Maybe for their specific question. Include the energy and message. 3-4 sentences with personality and insight.
 
-**🔮 Card 3 – [Card Position/Theme]**
-**[CARD NAME] – [Upright/Reversed]**
+✨ Card 3 – [CARD NAME] – [Upright/Reversed]
 Interpretation of why this card is a Yes/No/Maybe for their specific question. Include the energy and message. 3-4 sentences with personality and insight.
 
-**✨ VERDICT: [X] Yes cards + [X] No cards + [X] Maybe cards = [YES/NO/MAYBE] ✨**
+✨ VERDICT: [X] Yes cards + [X] No cards + [X] Maybe cards = [YES/NO/MAYBE]
 
-**The Final Word:** 
+☪️ The Final Word ☪️ 
 Clear, empowering guidance on how to move forward with this answer. What should they do with this cosmic intel? 2-3 sentences that leave them feeling confident about their next steps.
 
 Tone: Think intuitive life coach meets cosmic bestfriend with a direct line to the universe.

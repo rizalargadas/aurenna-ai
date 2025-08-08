@@ -10,6 +10,7 @@ class SimpleCardShuffle extends StatefulWidget {
   final List<DrawnCard>? drawnCards;
   final int cardCount;
   final bool showCardDetails; // Whether to show card names and positions
+  final String? revealMessage; // Message to show during card reveal
 
   const SimpleCardShuffle({
     super.key,
@@ -18,6 +19,7 @@ class SimpleCardShuffle extends StatefulWidget {
     this.drawnCards,
     this.cardCount = 3, // Default to 3 cards
     this.showCardDetails = true, // Default to showing details
+    this.revealMessage, // Optional reveal message
   });
 
   @override
@@ -36,7 +38,6 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
 
   bool _isShuffling = true;
   bool _cardsSelected = false;
-  int _currentRevealIndex = 0;
 
   @override
   void initState() {
@@ -152,20 +153,18 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
   }
 
   Future<void> _revealCards() async {
-    for (int i = 0; i < widget.cardCount; i++) {
-      if (!mounted) return;
-
-      setState(() {
-        _currentRevealIndex = i;
-      });
-
-      _cardRevealController.forward(from: 0);
-      await Future.delayed(
-        const Duration(milliseconds: 800),
-      ); // Slightly faster reveal interval
+    // Reveal all cards instantly and wait 3 seconds before next phase
+    if (!mounted) return;
+    
+    _cardRevealController.forward(from: 0);
+    
+    // Wait 3 seconds before moving to generation phase
+    await Future.delayed(const Duration(milliseconds: 3000));
+    
+    // Now call onCardsRevealed to move to generation phase
+    if (mounted) {
+      widget.onCardsRevealed?.call();
     }
-
-    widget.onCardsRevealed?.call();
   }
 
   @override
@@ -195,6 +194,10 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
 
           // Selected cards moving to center
           if (_cardsSelected) ..._buildSelectedCards(),
+          
+          // Reveal message at bottom during card reveal
+          if (_cardsSelected && widget.revealMessage != null)
+            _buildRevealMessage(),
         ],
       ),
     );
@@ -257,6 +260,7 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
         Center(
           child: Row(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: _selectedCardIndices.asMap().entries.map((entry) {
               final index = entry.key;
@@ -313,7 +317,7 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
         boxShadow: [
           // Simple shadow for shuffling cards - no magical glow
           BoxShadow(
-            color: Colors.black.withOpacity(0.3),
+            color: Colors.black.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -370,16 +374,16 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
               boxShadow: [
                 // Subtle mystical glow effect
                 BoxShadow(
-                  color: AurennaTheme.electricViolet.withOpacity(
-                    0.2,
+                  color: AurennaTheme.electricViolet.withValues(
+                    alpha: 0.2,
                   ), // Reduced from 0.4
                   blurRadius: 12, // Reduced from 20
                   spreadRadius: 1, // Reduced from 3
                   offset: const Offset(0, 0),
                 ),
                 BoxShadow(
-                  color: AurennaTheme.cosmicPurple.withOpacity(
-                    0.3,
+                  color: AurennaTheme.cosmicPurple.withValues(
+                    alpha: 0.3,
                   ), // Reduced from 0.6
                   blurRadius: 8, // Reduced from 15
                   spreadRadius: 0, // Reduced from 1
@@ -387,7 +391,7 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
                 ),
                 // Soft depth shadow
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2), // Reduced from 0.3
+                  color: Colors.black.withValues(alpha: 0.2), // Reduced from 0.3
                   blurRadius: 6, // Reduced from 8
                   offset: const Offset(0, 3), // Reduced from 4
                 ),
@@ -478,10 +482,10 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AurennaTheme.amberGlow.withOpacity(0.15),
+                  color: AurennaTheme.amberGlow.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: AurennaTheme.amberGlow.withOpacity(0.3),
+                    color: AurennaTheme.amberGlow.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -509,7 +513,7 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
         gradient: AurennaTheme.mysticalGradient,
         boxShadow: [
           BoxShadow(
-            color: AurennaTheme.electricViolet.withOpacity(0.5),
+            color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
             blurRadius: 20,
             spreadRadius: 2,
           ),
@@ -569,10 +573,10 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
                 height: 2 + (math.sin((_shuffleController.value * 2 * math.pi) + index) * 1),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AurennaTheme.silverMist.withOpacity(0.8),
+                  color: AurennaTheme.silverMist.withValues(alpha: 0.8),
                   boxShadow: [
                     BoxShadow(
-                      color: AurennaTheme.electricViolet.withOpacity(0.3),
+                      color: AurennaTheme.electricViolet.withValues(alpha: 0.3),
                       blurRadius: 4,
                       spreadRadius: 1,
                     ),
@@ -584,6 +588,31 @@ class _SimpleCardShuffleState extends State<SimpleCardShuffle>
         },
       );
     });
+  }
+  
+  Widget _buildRevealMessage() {
+    return Positioned(
+      bottom: 80,
+      left: 24,
+      right: 24,
+      child: SafeArea(
+        child: Text(
+          widget.revealMessage!,
+          style: TextStyle(
+            color: AurennaTheme.silverMist,
+            fontSize: 18,
+            fontWeight: FontWeight.w500,
+            shadows: [
+              Shadow(
+                color: Colors.black.withValues(alpha: 0.8),
+                blurRadius: 10,
+              ),
+            ],
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
   }
 }
 

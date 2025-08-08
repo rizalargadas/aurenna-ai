@@ -1,9 +1,11 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../models/reading.dart';
 import '../../services/auth_service.dart';
 import '../../services/tarot_service.dart';
+import '../../utils/reading_messages.dart';
 import '../../widgets/reading_animation_v1.dart';
 
 class CompatibilityReadingScreen extends StatefulWidget {
@@ -27,11 +29,17 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
   final _formKey = GlobalKey<FormState>();
   String _yourName = '';
   String _partnerName = '';
+  
+  // Generation message selected once per session
+  String _generationMessage = '';
 
   @override
   void initState() {
     super.initState();
     _showNameInput = true;
+    
+    // Select generation message once for this session
+    _generationMessage = ReadingMessages.getRandomGenerationMessage();
   }
 
   @override
@@ -120,6 +128,7 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AurennaTheme.voidBlack,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text('Love Compatibility Reading'),
         actions: [
@@ -174,11 +183,11 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
         break;
       case 1:
         phase = ReadingAnimationPhase.revealing;
-        statusMessage = 'Your love cards have been revealed';
+        statusMessage = ReadingMessages.getRandomCardRevealMessage();
         break;
       case 2:
         phase = ReadingAnimationPhase.generating;
-        statusMessage = 'Aurenna is reading your romantic compatibility...';
+        statusMessage = null; // No bottom text, just radial effect
         break;
       default:
         phase = ReadingAnimationPhase.complete;
@@ -190,6 +199,7 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
       drawnCards: _drawnCards,
       phase: phase,
       statusMessage: statusMessage,
+      generationMessage: _generationMessage,
       onShuffleComplete: _onShuffleComplete,
       onCardsRevealed: _onCardsRevealed,
     );
@@ -425,32 +435,35 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
   Widget _buildCardGrid() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 600 ? 5 : 5;
-        final spacing = 8.0;
-        final cardWidth = (constraints.maxWidth - (crossAxisCount + 1) * spacing) / crossAxisCount;
-        final maxCardWidth = 90.0;
-        final finalCardWidth = cardWidth < maxCardWidth ? cardWidth : maxCardWidth;
+        // Calculate card size for 3-2 layout
+        final availableWidth = constraints.maxWidth;
+        final cardWidth = math.min((availableWidth - 32) / 3, 110.0); // Bigger cards
         
-        final cardHeight = finalCardWidth * 1.4;
-        final positionLabelHeight = 16.0;
-        final cardNameHeight = 32.0;
-        final totalItemHeight = positionLabelHeight + 8 + cardHeight + 8 + cardNameHeight;
-        
-        final aspectRatio = finalCardWidth / totalItemHeight;
-        
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            crossAxisSpacing: spacing,
-            mainAxisSpacing: spacing,
-            childAspectRatio: aspectRatio,
-          ),
-          itemCount: _drawnCards.length,
-          itemBuilder: (context, index) {
-            return _buildCompatibilityCard(_drawnCards[index], finalCardWidth);
-          },
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // First row - 3 cards
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildCompatibilityCard(_drawnCards[0], cardWidth),
+                const SizedBox(width: 8),
+                _buildCompatibilityCard(_drawnCards[1], cardWidth),
+                const SizedBox(width: 8),
+                _buildCompatibilityCard(_drawnCards[2], cardWidth),
+              ],
+            ),
+            const SizedBox(height: 16),
+            // Second row - 2 cards
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildCompatibilityCard(_drawnCards[3], cardWidth),
+                const SizedBox(width: 8),
+                _buildCompatibilityCard(_drawnCards[4], cardWidth),
+              ],
+            ),
+          ],
         );
       },
     );
@@ -599,13 +612,19 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
   
   Widget _buildNameInputScreen() {
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight - 48,
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
               // Mystical header
               Container(
                 padding: const EdgeInsets.all(32),
@@ -724,9 +743,12 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
                 ),
                 child: const Text('Reveal Our Connection'),
               ),
-            ],
-          ),
-        ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
