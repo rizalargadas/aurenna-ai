@@ -19,6 +19,10 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
   bool _isLoading = true;
   bool _hasError = false;
   String _errorMessage = '';
+  
+  // Bulk selection state
+  bool _isSelectionMode = false;
+  Set<String> _selectedReadings = {};
 
   @override
   void initState() {
@@ -96,6 +100,150 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
         ),
       ),
     );
+  }
+
+  void _toggleSelectionMode() {
+    setState(() {
+      _isSelectionMode = !_isSelectionMode;
+      if (!_isSelectionMode) {
+        _selectedReadings.clear();
+      }
+    });
+  }
+
+  void _toggleSelection(String readingId) {
+    setState(() {
+      if (_selectedReadings.contains(readingId)) {
+        _selectedReadings.remove(readingId);
+      } else {
+        _selectedReadings.add(readingId);
+      }
+    });
+  }
+
+  void _selectAll() {
+    setState(() {
+      if (_selectedReadings.length == _readings.length) {
+        // If all are selected, deselect all
+        _selectedReadings.clear();
+      } else {
+        // Select all readings
+        _selectedReadings = _readings.map((reading) => reading.id).toSet();
+      }
+    });
+  }
+
+  void _deleteSelectedReadings() async {
+    if (_selectedReadings.isEmpty) return;
+
+    // Show confirmation dialog for bulk delete
+    final confirmed = await _showBulkDeleteConfirmationDialog(_selectedReadings.length);
+    if (!confirmed || !mounted) return;
+
+    try {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final userId = authService.currentUser?.id;
+      
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
+
+      // Create list of reading IDs to delete
+      final readingIdsToDelete = List<String>.from(_selectedReadings);
+      
+      // Delete readings one by one (could be optimized with batch delete in the future)
+      int successCount = 0;
+      List<String> failedReadings = [];
+      
+      for (String readingId in readingIdsToDelete) {
+        try {
+          await TarotService.deleteReading(readingId, userId);
+          successCount++;
+        } catch (e) {
+          failedReadings.add(readingId);
+        }
+      }
+
+      // Update UI by removing successfully deleted readings
+      if (mounted) {
+        setState(() {
+          _readings.removeWhere((reading) => 
+            readingIdsToDelete.contains(reading.id) && 
+            !failedReadings.contains(reading.id)
+          );
+          _selectedReadings.clear();
+          _isSelectionMode = false;
+        });
+
+        // Show result message
+        if (failedReadings.isEmpty) {
+          // All deletions successful
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                  const SizedBox(width: 8),
+                  Text('$successCount readings deleted successfully'),
+                ],
+              ),
+              backgroundColor: AurennaTheme.crystalBlue,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          );
+        } else {
+          // Some deletions failed
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.warning, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      const Text('Bulk Delete Results', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text('$successCount readings deleted successfully'),
+                  Text('${failedReadings.length} readings could not be deleted'),
+                ],
+              ),
+              backgroundColor: Colors.orange.shade700,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                const SizedBox(width: 8),
+                Expanded(child: Text('Failed to delete readings: ${e.toString()}')),
+              ],
+            ),
+            backgroundColor: Colors.red.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+      }
+    }
   }
 
   void _deleteReading(String readingId) async {
@@ -209,6 +357,71 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
     }
   }
 
+  Future<bool> _showBulkDeleteConfirmationDialog(int count) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AurennaTheme.mysticBlue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: AurennaTheme.amberGlow,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Delete $count Readings?',
+                style: TextStyle(
+                  color: AurennaTheme.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            'Are you sure you want to delete $count readings? This action cannot be undone.',
+            style: TextStyle(
+              color: AurennaTheme.textSecondary,
+              fontSize: 16,
+              height: 1.4,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: AurennaTheme.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade600,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'Delete All',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        );
+      },
+    ) ?? false;
+  }
+
   Future<bool> _showDeleteConfirmationDialog() async {
     return await showDialog<bool>(
       context: context,
@@ -293,14 +506,75 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Reading History'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadReadings,
-            tooltip: 'Refresh',
-          ),
-        ],
+        title: _isSelectionMode 
+          ? Text('${_selectedReadings.length} selected')
+          : const Text('Reading History'),
+        leading: _isSelectionMode 
+          ? IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: _toggleSelectionMode,
+              tooltip: 'Cancel selection',
+            )
+          : null,
+        actions: _isSelectionMode 
+          ? [
+              if (_readings.isNotEmpty)
+                IconButton(
+                  icon: Icon(
+                    _selectedReadings.length == _readings.length 
+                      ? Icons.deselect 
+                      : Icons.select_all
+                  ),
+                  onPressed: _selectAll,
+                  tooltip: _selectedReadings.length == _readings.length 
+                    ? 'Deselect all' 
+                    : 'Select all',
+                ),
+              if (_selectedReadings.isNotEmpty)
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: _deleteSelectedReadings,
+                  tooltip: 'Delete selected',
+                ),
+            ]
+          : [
+              if (_readings.isNotEmpty)
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert),
+                  onSelected: (value) {
+                    switch (value) {
+                      case 'select':
+                        _toggleSelectionMode();
+                        break;
+                      case 'refresh':
+                        _loadReadings();
+                        break;
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'select',
+                      child: Row(
+                        children: [
+                          Icon(Icons.checklist, size: 20),
+                          SizedBox(width: 8),
+                          Text('Select readings'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'refresh',
+                      child: Row(
+                        children: [
+                          Icon(Icons.refresh, size: 20),
+                          SizedBox(width: 8),
+                          Text('Refresh'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+            ],
       ),
       body: _buildBody(),
     );
@@ -442,6 +716,8 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
   }
 
   Widget _buildReadingCard(Reading reading) {
+    final isSelected = _selectedReadings.contains(reading.id);
+    
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 4,
@@ -460,16 +736,28 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
             ],
           ),
           border: Border.all(
-            color: AurennaTheme.electricViolet.withValues(alpha: 0.1),
-            width: 1,
+            color: isSelected 
+              ? AurennaTheme.electricViolet.withValues(alpha: 0.5)
+              : AurennaTheme.electricViolet.withValues(alpha: 0.1),
+            width: isSelected ? 2 : 1,
           ),
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => _showReading(reading),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
+          onTap: _isSelectionMode 
+            ? () => _toggleSelection(reading.id)
+            : () => _showReading(reading),
+          onLongPress: !_isSelectionMode 
+            ? () {
+                _toggleSelectionMode();
+                _toggleSelection(reading.id);
+              }
+            : null,
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header with date and menu
@@ -484,30 +772,31 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
                         ),
                       ),
                     ),
-                    PopupMenuButton<String>(
-                      icon: Icon(
-                        Icons.more_vert,
-                        color: AurennaTheme.textSecondary,
-                        size: 20,
-                      ),
-                      onSelected: (value) {
-                        if (value == 'delete') {
-                          _deleteReading(reading.id);
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete_outline, size: 20),
-                              SizedBox(width: 8),
-                              Text('Delete'),
-                            ],
-                          ),
+                    if (!_isSelectionMode)
+                      PopupMenuButton<String>(
+                        icon: Icon(
+                          Icons.more_vert,
+                          color: AurennaTheme.textSecondary,
+                          size: 20,
                         ),
-                      ],
-                    ),
+                        onSelected: (value) {
+                          if (value == 'delete') {
+                            _deleteReading(reading.id);
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete_outline, size: 20),
+                                SizedBox(width: 8),
+                                Text('Delete'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
                 
@@ -585,12 +874,14 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
                 
                 const SizedBox(height: 16),
                 
-                // Tap to view full reading
+                // Tap to view full reading or selection hint
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      'Tap to view full reading',
+                      _isSelectionMode 
+                        ? 'Tap to select/deselect'
+                        : 'Tap to view full reading',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                         color: AurennaTheme.crystalBlue,
                         fontWeight: FontWeight.w500,
@@ -598,7 +889,7 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
                     ),
                     const SizedBox(width: 4),
                     Icon(
-                      Icons.arrow_forward_ios,
+                      _isSelectionMode ? Icons.touch_app : Icons.arrow_forward_ios,
                       color: AurennaTheme.crystalBlue,
                       size: 12,
                     ),
@@ -607,8 +898,35 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
               ],
             ),
           ),
-        ),
-      ),
-    );
+          // Selection checkbox overlay
+          if (_isSelectionMode)
+            Positioned(
+              top: 16,
+              right: 16,
+              child: Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: isSelected 
+                    ? AurennaTheme.electricViolet 
+                    : AurennaTheme.mysticBlue,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AurennaTheme.electricViolet,
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  isSelected ? Icons.check : null,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ],
+        ), // closes InkWell child (Stack)
+      ), // closes InkWell
+    ), // closes Container (Card's child)
+    ); // closes Card
   }
 }
