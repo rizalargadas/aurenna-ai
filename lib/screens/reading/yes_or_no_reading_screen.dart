@@ -79,7 +79,15 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
     _drawnCards = TarotService.drawThreeCardsForYesOrNo();
     
     setState(() {
-      _currentStep = 2; // Move to generating phase
+      _currentStep = 2; // Move to revealing phase
+    });
+  }
+
+  void _onCardsRevealed() {
+    if (_disposed || !mounted) return;
+    
+    setState(() {
+      _currentStep = 3; // Move to generating phase
     });
     
     // Start generating reading after a brief pause
@@ -96,7 +104,7 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
     setState(() {
       _isGenerating = true;
       _errorMessage = '';
-      _currentStep = 2;
+      _currentStep = 3; // Generating phase is now step 3
     });
 
     try {
@@ -121,7 +129,7 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
           _aiReading = reading;
           _isGenerating = false;
           _isComplete = true;
-          _currentStep = 3; // Move to complete phase
+          _currentStep = 4; // Move to complete phase
         });
         
         // Save reading to history
@@ -203,7 +211,7 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
               // Main content
               if (_showQuestionInput)
                 _buildQuestionInput()
-              else if (_currentStep == 3 && _isComplete)
+              else if (_currentStep == 4 && _isComplete)
                 _buildReadingResult()
               else
                 _buildAnimationPhase(),
@@ -358,9 +366,12 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
     switch (_currentStep) {
       case 1:
         phase = ReadingAnimationPhase.shuffling;
-        statusMessage = ReadingMessages.getRandomCardRevealMessage();
         break;
       case 2:
+        phase = ReadingAnimationPhase.revealing;
+        statusMessage = ReadingMessages.getRandomCardRevealMessage();
+        break;
+      case 3:
         phase = ReadingAnimationPhase.generating;
         statusMessage = null; // No bottom text, just radial effect
         break;
@@ -375,25 +386,8 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
       phase: phase,
       statusMessage: statusMessage,
       generationMessage: _generationMessage,
-      onShuffleComplete: () {
-        if (mounted && !_disposed) {
-          // Draw 3 cards for Yes/No reading
-          _drawnCards = TarotService.drawThreeCardsForYesOrNo();
-          setState(() {
-            _currentStep = 2; // Move to generating phase
-          });
-          
-          // Start generating reading after a brief pause
-          Future.delayed(const Duration(milliseconds: 500), () {
-            if (mounted && !_disposed) {
-              _generateReading();
-            }
-          });
-        }
-      },
-      onCardsRevealed: () {
-        // This callback is not used for Yes/No reading since we move to generating immediately
-      },
+      onShuffleComplete: _onShuffleComplete,
+      onCardsRevealed: _onCardsRevealed,
     );
   }
 
