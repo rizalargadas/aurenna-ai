@@ -184,7 +184,7 @@ class TarotService {
         DrawnCard(
           card: deck[i],
           position:
-              i, // 0: Current Situation, 1: How to Progress, 2: Challenges Ahead, 3: Opportunities, 4: Future Glimpse
+              i, // 0: Current Situation, 1: How to Progress, 2: Challenges, 3: Opportunities, 4: Future
           isReversed: random.nextBool(), // 50% chance of being reversed
           readingType: ReadingType.career,
         ),
@@ -940,9 +940,14 @@ Alright, decision time. Here's what the cards are screaming: [State the clear ve
   // Generate career reading using OpenAI
   static Future<String> generateCareerReading(
     List<DrawnCard> cards, {
-    String? userName,
+    String? name,
+    String? currentJob,
   }) async {
-    final prompt = _buildCareerPrompt(cards, userName: userName);
+    final prompt = _buildCareerPrompt(
+      cards,
+      name: name,
+      currentJob: currentJob,
+    );
 
     try {
       final response = await http.post(
@@ -1014,7 +1019,7 @@ SPECIFIC opportunities coming their way. New role? Side hustle? Unexpected offer
 ✨ Glimpse Into Your Future - [CARD Drawn] ✨
 Where they're actually headed based on current trajectory. Be specific—promotion, career change, or same desk different year? Include rough timeline. 3 to 5 sentences long.
 
-## ☪️ YOUR CAREER TRUTH BOMB: ☪️
+☪️ YOUR CAREER TRUTH BOMB: ☪️
 Okay, let's cut through the corporate BS: [Sum up their actual career situation in one blunt sentence]. [Connect the dots between where they are and where they're headed]. [Call out the main thing holding them back—fear, comfort, lack of strategy?]. [Give them 2-3 specific action steps with deadlines—"Apply to 5 jobs by Friday," "Schedule that coffee chat THIS week," "Start that side project you keep talking about"]. Look, you didn't pull these cards to hear "trust the process." You came here because you know something needs to change. The cards are basically screaming that [main message]. Your future self is either thanking you for taking action NOW or still reading career tarot spreads in the same damn cubicle. Choice is yours.
 
 **Tone:** Think psychic best friend who's watched you complain about work for too long and is ready to help you actually DO something about it.
@@ -1298,12 +1303,17 @@ Okay, let's cut through the corporate BS: [Sum up their actual career situation 
   // Build the prompt for career reading
   static String _buildCareerPrompt(
     List<DrawnCard> cards, {
-    String? userName,
+    String? name,
+    String? currentJob,
   }) {
     final buffer = StringBuffer();
 
-    if (userName != null && userName.isNotEmpty) {
-      buffer.writeln('5-Card Career Reading for $userName:\n');
+    if (name != null && name.isNotEmpty) {
+      buffer.writeln('5-Card Career Reading for $name:');
+      if (currentJob != null && currentJob.isNotEmpty) {
+        buffer.writeln('Current Role: $currentJob');
+      }
+      buffer.writeln();
     } else {
       buffer.writeln('5-Card Career Reading:\n');
     }

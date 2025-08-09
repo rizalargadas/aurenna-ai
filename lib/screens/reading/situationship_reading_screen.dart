@@ -7,6 +7,7 @@ import '../../services/tarot_service.dart';
 import '../../utils/reading_messages.dart';
 import '../../utils/share_reading.dart';
 import '../../widgets/reading_animation_v1.dart';
+import '../../widgets/tarot_spread_grid.dart';
 
 class SituationshipReadingScreen extends StatefulWidget {
   const SituationshipReadingScreen({super.key});
@@ -309,7 +310,12 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
 
           const SizedBox(height: 32),
 
-          _buildCardGrid(),
+          TarotSpreadGrid(
+            cards: _drawnCards,
+            crossAxisCount: 3, // 6 cards in 3 columns for situationship
+            minCardWidth: 90,
+            maxCardWidth: 120,
+          ),
 
           const SizedBox(height: 32),
 

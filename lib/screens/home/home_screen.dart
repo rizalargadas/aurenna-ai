@@ -1026,8 +1026,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             SizedBox(height: isSmallScreen ? 4 : 6),
                             Text(
                               hasSubscription 
-                                  ? 'Get unfiltered truth about your professional path'
-                                  : 'Unlock brutally honest career guidance',
+                                  ? 'Get brutally honest guidance about your career path'
+                                  : 'Unlock professional insights and career strategy',
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: hasSubscription 
                                     ? AurennaTheme.textSecondary

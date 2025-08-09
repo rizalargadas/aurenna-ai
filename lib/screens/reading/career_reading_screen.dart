@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
@@ -8,6 +7,7 @@ import '../../services/tarot_service.dart';
 import '../../utils/reading_messages.dart';
 import '../../utils/share_reading.dart';
 import '../../widgets/reading_animation_v1.dart';
+import '../../widgets/tarot_spread_grid.dart';
 
 class CareerReadingScreen extends StatefulWidget {
   const CareerReadingScreen({super.key});
@@ -24,10 +24,12 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
   int _currentStep = 0; // 0: shuffling, 1: cards revealed, 2: generating reading, 3: complete
   
   // User input
-  bool _showNameInput = true;
+  bool _showInfoInput = true;
   final _nameController = TextEditingController();
+  final _currentJobController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  String _userName = '';
+  String _name = '';
+  String _currentJob = '';
   
   // Generation message selected once per session
   String _generationMessage = '';
@@ -35,7 +37,7 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
   @override
   void initState() {
     super.initState();
-    _showNameInput = true;
+    _showInfoInput = true;
     
     // Select generation message once for this session
     _generationMessage = ReadingMessages.getRandomGenerationMessage();
@@ -44,6 +46,7 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _currentJobController.dispose();
     super.dispose();
   }
 
@@ -65,7 +68,8 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
       // Generate AI reading
       _aiReading = await TarotService.generateCareerReading(
         _drawnCards,
-        userName: _userName,
+        name: _name,
+        currentJob: _currentJob,
       );
 
       // Save reading to database
@@ -75,7 +79,7 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
       if (userId != null) {
         await TarotService.saveReading(
           userId: userId,
-          question: 'Career Reading${_userName.isNotEmpty ? ' for $_userName' : ''}',
+          question: 'Career Guidance for $_name',
           drawnCards: _drawnCards,
           aiReading: _aiReading,
           authService: authService,
@@ -95,13 +99,14 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
   }
 
   Future<void> _startReading() async {
-    // Validate and save name first
-    if (_showNameInput) {
+    // Validate and save info first
+    if (_showInfoInput) {
       if (!_formKey.currentState!.validate()) return;
       
       setState(() {
-        _userName = _nameController.text.trim();
-        _showNameInput = false;
+        _name = _nameController.text.trim();
+        _currentJob = _currentJobController.text.trim();
+        _showInfoInput = false;
         _currentStep = 0; // Start shuffling
       });
     }
@@ -121,7 +126,8 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
               onPressed: () async {
                 try {
                   await ShareReading.shareCareerReading(
-                    userName: _userName,
+                    name: _name,
+                    currentJob: _currentJob,
                     drawnCards: _drawnCards,
                     reading: _aiReading,
                   );
@@ -157,8 +163,8 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
       return _buildErrorState();
     }
     
-    if (_showNameInput) {
-      return _buildNameInputScreen();
+    if (_showInfoInput) {
+      return _buildInfoInputScreen();
     }
 
     // For completed state, show reading directly
@@ -256,13 +262,13 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AurennaTheme.electricViolet.withValues(alpha: 0.3),
                   AurennaTheme.crystalBlue.withValues(alpha: 0.3),
+                  AurennaTheme.electricViolet.withValues(alpha: 0.3),
                 ],
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
+                color: AurennaTheme.crystalBlue.withValues(alpha: 0.5),
                 width: 1,
               ),
             ),
@@ -282,12 +288,20 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                if (_userName.isNotEmpty) ...[ 
-                  const SizedBox(height: 4),
+                const SizedBox(height: 4),
+                Text(
+                  _name.isNotEmpty ? 'For $_name' : 'Professional Guidance',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AurennaTheme.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                if (_currentJob.isNotEmpty) ...[
+                  const SizedBox(height: 2),
                   Text(
-                    'Professional Guidance for $_userName',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AurennaTheme.textSecondary,
+                    _currentJob,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AurennaTheme.textSecondary.withValues(alpha: 0.8),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -299,16 +313,33 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
           const SizedBox(height: 32),
 
           Text(
-            'Your Career Path Spread',
+            'Your Career Reading',
             style: Theme.of(context).textTheme.displaySmall,
             textAlign: TextAlign.center,
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
 
-          _buildCardGrid(),
+          // Card grid container
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: AurennaTheme.mysticBlue.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: AurennaTheme.silverMist.withValues(alpha: 0.08),
+                width: 1,
+              ),
+            ),
+            child: TarotSpreadGrid(
+              cards: _drawnCards,
+              crossAxisCount: 3, // 5 cards in flexible layout
+              minCardWidth: 90,
+              maxCardWidth: 130,
+            ),
+          ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 20),
 
           Row(
             children: [
@@ -321,7 +352,7 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Icon(
-                  Icons.work_outline,
+                  Icons.work,
                   color: AurennaTheme.crystalBlue,
                   size: 20,
                 ),
@@ -338,7 +369,7 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
           const SizedBox(height: 32),
 
           Text(
-            'Your Professional Truth',
+            'Your Career Truth Bomb',
             style: Theme.of(context).textTheme.displaySmall,
             textAlign: TextAlign.center,
           ),
@@ -372,7 +403,7 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
                 Divider(color: AurennaTheme.silverMist.withValues(alpha: 0.2)),
                 const SizedBox(height: 16),
                 Text(
-                  'Your career path is yours to create. Trust your professional intuition.',
+                  'Your career is in your hands. The cards show possibilities, but your actions create reality.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AurennaTheme.textSecondary,
                     fontStyle: FontStyle.italic,
@@ -415,7 +446,7 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
 
           Center(
             child: Text(
-              '💼 Your professional success is written in the stars 💼',
+              '💼 May success follow your path 💼',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: AurennaTheme.textSecondary,
                 fontStyle: FontStyle.italic,
@@ -427,298 +458,131 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
     );
   }
 
-  Widget _buildCardGrid() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Calculate card size for 3-2 layout (3 on top, 2 on bottom)
-        final availableWidth = constraints.maxWidth;
-        final cardWidth = math.min((availableWidth - 24) / 3, 95.0);
-        
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // First row - 3 cards
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildCareerCard(_drawnCards[0], cardWidth),
-                const SizedBox(width: 12),
-                _buildCareerCard(_drawnCards[1], cardWidth),
-                const SizedBox(width: 12),
-                _buildCareerCard(_drawnCards[2], cardWidth),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Second row - 2 cards
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildCareerCard(_drawnCards[3], cardWidth),
-                const SizedBox(width: 12),
-                _buildCareerCard(_drawnCards[4], cardWidth),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildCareerCard(DrawnCard drawnCard, double cardWidth) {
-    final borderColor = drawnCard.isReversed
-        ? AurennaTheme.electricViolet
-        : AurennaTheme.crystalBlue;
-    final cardHeight = cardWidth * 1.4;
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Position name
-        Container(
-          width: cardWidth,
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-          decoration: BoxDecoration(
-            color: AurennaTheme.crystalBlue.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            drawnCard.positionName,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AurennaTheme.crystalBlue,
-              fontWeight: FontWeight.w600,
-              fontSize: 10,
-              height: 1.1,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        // Card container
-        Container(
-          width: cardWidth,
-          height: cardHeight,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: borderColor.withValues(alpha: 0.2),
-                blurRadius: 6,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              // Card image
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Transform.rotate(
-                  angle: drawnCard.isReversed ? 3.14159 : 0,
-                  child: Image.asset(
-                    drawnCard.card.imagePath,
-                    width: cardWidth,
-                    height: cardHeight,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: cardWidth,
-                        height: cardHeight,
-                        decoration: BoxDecoration(
-                          color: AurennaTheme.mysticBlue,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.all(6.0),
-                        child: Center(
-                          child: Text(
-                            drawnCard.card.name,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: AurennaTheme.textPrimary,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              // Reversed indicator
-              if (drawnCard.isReversed)
-                Positioned(
-                  bottom: 4,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AurennaTheme.electricViolet.withValues(alpha: 0.9),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'R',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Colors.white,
-                          fontSize: 8,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        // Card name
-        SizedBox(
-          width: cardWidth,
-          child: Text(
-            drawnCard.card.name,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AurennaTheme.textPrimary,
-              fontSize: 9,
-              fontWeight: FontWeight.w500,
-              height: 1.2,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-  
-  Widget _buildNameInputScreen() {
+  Widget _buildInfoInputScreen() {
     return SafeArea(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight - 48,
-              ),
-              child: Form(
-                key: _formKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Mystical header
+              Container(
+                padding: const EdgeInsets.all(32),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AurennaTheme.crystalBlue.withValues(alpha: 0.3),
+                      AurennaTheme.electricViolet.withValues(alpha: 0.3),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AurennaTheme.crystalBlue.withValues(alpha: 0.5),
+                    width: 1,
+                  ),
+                ),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Professional header
-                    Container(
-                      padding: const EdgeInsets.all(32),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AurennaTheme.electricViolet.withValues(alpha: 0.3),
-                            AurennaTheme.crystalBlue.withValues(alpha: 0.3),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
-                          width: 1,
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.work_outline,
-                            color: AurennaTheme.crystalBlue,
-                            size: 48,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Career Reading',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              color: AurennaTheme.textPrimary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Get the unfiltered truth about your professional path',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AurennaTheme.textSecondary,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
+                    Icon(
+                      Icons.work_outline,
+                      color: AurennaTheme.crystalBlue,
+                      size: 48,
                     ),
-                    
-                    const SizedBox(height: 48),
-                    
-                    // Name input
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: 'Your Name (Optional)',
-                        hintText: 'Enter your name for personalized guidance',
-                        prefixIcon: Icon(
-                          Icons.person_outline,
-                          color: AurennaTheme.crystalBlue,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      validator: (value) {
-                        // Optional field, no validation needed
-                        return null;
-                      },
-                      onFieldSubmitted: (_) => _startReading(),
-                    ),
-                    
                     const SizedBox(height: 16),
-                    
                     Text(
-                      'The cards will reveal your current career situation and what you need to do next',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AurennaTheme.textSecondary,
-                        fontStyle: FontStyle.italic,
+                      'Career Reading',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: AurennaTheme.textPrimary,
+                        fontWeight: FontWeight.bold,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    
-                    const SizedBox(height: 32),
-                    
-                    // Start button
-                    ElevatedButton(
-                      onPressed: _startReading,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 48,
-                          vertical: 16,
-                        ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Get brutally honest guidance about your professional path',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AurennaTheme.textSecondary,
                       ),
-                      child: const Text('Get Career Guidance'),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
-            ),
-          );
-        },
+              
+              const SizedBox(height: 48),
+              
+              // Name input
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: 'Your Name',
+                  hintText: 'Enter your name',
+                  prefixIcon: Icon(
+                    Icons.person_outline,
+                    color: AurennaTheme.crystalBlue,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter your name';
+                  }
+                  return null;
+                },
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Current job input
+              TextFormField(
+                controller: _currentJobController,
+                decoration: InputDecoration(
+                  labelText: 'Current Role (Optional)',
+                  hintText: 'e.g. Software Engineer, Teacher, Student',
+                  prefixIcon: Icon(
+                    Icons.work_outline,
+                    color: AurennaTheme.electricViolet,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onFieldSubmitted: (_) => _startReading(),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              Text(
+                'The cards will reveal your professional truth',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AurennaTheme.textSecondary,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              
+              const SizedBox(height: 32),
+              
+              // Start button
+              ElevatedButton(
+                onPressed: _startReading,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 48,
+                    vertical: 16,
+                  ),
+                ),
+                child: const Text('Get Career Guidance'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

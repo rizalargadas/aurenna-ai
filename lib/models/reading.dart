@@ -150,9 +150,9 @@ class DrawnCard {
       switch (position) {
         case 0: return 'Current Situation';
         case 1: return 'How to Progress';
-        case 2: return 'Challenges Ahead';
+        case 2: return 'Challenges';
         case 3: return 'Opportunities';
-        case 4: return 'Future Glimpse';
+        case 4: return 'Future';
         default: return 'Unknown';
       }
     } else {

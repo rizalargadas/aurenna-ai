@@ -126,6 +126,23 @@ class ShareReading {
     );
   }
   
+  /// Shares a career reading
+  static Future<void> shareCareerReading({
+    required String name,
+    required String currentJob,
+    required List<DrawnCard> drawnCards,
+    required String reading,
+  }) async {
+    final jobInfo = currentJob.isNotEmpty ? ' ($currentJob)' : '';
+    final question = 'Career guidance for $name$jobInfo';
+    return shareReading(
+      question: question,
+      drawnCards: drawnCards,
+      reading: reading,
+      readingType: 'Career Reading',
+    );
+  }
+  
   /// Shares a general reading
   static Future<void> shareGeneralReading({
     required String question,
