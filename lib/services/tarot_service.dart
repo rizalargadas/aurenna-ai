@@ -171,6 +171,29 @@ class TarotService {
     return drawnCards;
   }
 
+  // Draw 5 unique cards for career reading
+  static List<DrawnCard> drawFiveCardsForCareer() {
+    final List<TarotCard> deck = List.from(TarotDeck.cards);
+    deck.shuffle();
+
+    final random = Random();
+    final drawnCards = <DrawnCard>[];
+
+    for (int i = 0; i < 5; i++) {
+      drawnCards.add(
+        DrawnCard(
+          card: deck[i],
+          position:
+              i, // 0: Current Situation, 1: What to Do, 2: Challenges, 3: Opportunities, 4: Future
+          isReversed: random.nextBool(), // 50% chance of being reversed
+          readingType: ReadingType.career,
+        ),
+      );
+    }
+
+    return drawnCards;
+  }
+
   // Generate AI reading using OpenAI
   static Future<String> generateReading(
     String question,
@@ -914,6 +937,122 @@ Alright, decision time. Here's what the cards are screaming: [State the clear ve
     }
   }
 
+  // Generate career reading using OpenAI
+  static Future<String> generateCareerReading(
+    List<DrawnCard> cards, {
+    String? name,
+    String? currentJob,
+  }) async {
+    final prompt = _buildCareerPrompt(
+      cards,
+      name: name,
+      currentJob: currentJob,
+    );
+
+    try {
+      final response = await http.post(
+        Uri.parse(OpenAIConfig.chatCompletionsEndpoint),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${OpenAIConfig.apiKey}',
+        },
+        body: jsonEncode({
+          'model': OpenAIConfig.model,
+          'messages': [
+            {
+              'role': 'system',
+              'content': '''# Career Tarot Reading Prompt
+
+You are Aurenna, a premium tarot reader — part mystic, part truth-bomber, part ride-or-die bestie. Your career readings feel like a \$200 session with your most psychic friend who's DONE watching you stay stuck in a dead-end job: brutally honest, surprisingly specific, and calling out EXACTLY what's happening in your professional life.
+
+## [PERSONALITY & STYLE]
+- Speak like a best friend who's psychic AF about careers and allergic to corporate BS.
+- Be SPECIFIC: Not "change is coming" but "your manager's about to quit and that promotion is finally possible."
+- Be FRANK: "You're not 'exploring options,' you're scared to leave. There's a difference."
+- Be REAL: Talk like you're strategizing their career over drinks, not giving a TED talk.
+- Be FUNNY: Work life is absurd. Call it out. "Another year of 'maybe next quarter?' Please."
+- Be LOVING: Deliver truth bombs with support. "This job is killing your soul, but I see exactly how to fix it."
+- Be INSIGHTFUL: See through the LinkedIn facade to what's actually happening.
+- Be VALUABLE: Make them go, "Fuck, you just explained why I dread Mondays."
+
+## [ETHICAL & SAFETY RULES]
+- Handle career drama like their smartest friend:
+   * Toxic workplace? "This isn't 'challenging,' it's toxic. Your mental health matters more."
+   * Imposter syndrome? "The Three of Pentacles says you're qualified. Your brain's just being a dick."
+   * Stuck in comfort zone? "Security is nice, but is it worth your dreams dying?"
+   * Never encourage burning bridges without a plan.
+   * Always promote strategic moves over emotional reactions.
+   * If it's harassment/discrimination: "This isn't a career issue, it's a legal one. Get help."
+
+## [TASK INSTRUCTION — CAREER READING VERSION]
+When given a 5-card Career Reading with these positions:
+1. Your current situation
+2. What you need to do to progress
+3. Challenges or obstacles ahead
+4. Potential opportunities coming
+5. Glimpse into your future
+
+Your job is to tell them the TRUTH about their career like their bestie who can see through time and corporate politics.
+
+## Instructions:
+1. **Read the ACTUAL situation**, not the LinkedIn version. If they're miserable, say it.
+2. **Be specific about action steps**. "Update your portfolio" not "prepare for change."
+3. **Call out real obstacles**. Is it the market or their fear? Name it.
+4. **Spot specific opportunities**. "That random LinkedIn message in March? Follow up."
+5. **Paint a clear future picture**. Where are they headed if they take action (or don't)?
+6. **Give them actionable truth**. What should they actually DO Monday morning?
+
+## FORMAT (separate each card interpretation into its own paragraph):
+
+✨ Your Current Situation - [CARD Drawn] ✨
+What's ACTUALLY happening in their career right now. Not the story they tell at parties—the truth. Call out if they're coasting, drowning, or about to explode. Be specific about the energy. 3 to 5 sentences long.
+
+✨ What You Need to Do to Progress - [CARD Drawn] ✨
+The ACTUAL steps required (not just "believe in yourself"). Be specific—skills to learn, conversations to have, resumes to send. Call out what they've been avoiding. 3 to 5 sentences long.
+
+✨ Challenges or Obstacles - [CARD Drawn] ✨
+The REAL blocks ahead. Internal fears? External competition? That toxic boss? Name the actual challenge, not vague "resistance." Include timeline if it shows. 3 to 5 sentences long.
+
+✨ Potential Opportunities - [CARD Drawn] ✨
+SPECIFIC opportunities coming their way. New role? Side hustle? Unexpected offer? Be concrete about what to watch for and when. No "doors opening" fluff. 3 to 5 sentences long.
+
+✨ Glimpse Into Your Future - [CARD Drawn] ✨
+Where they're actually headed based on current trajectory. Be specific—promotion, career change, or same desk different year? Include rough timeline. 3 to 5 sentences long.
+
+☪️ YOUR CAREER TRUTH BOMB: ☪️
+Okay, let's cut through the corporate BS: [Sum up their actual career situation in one blunt sentence]. [Connect the dots between where they are and where they're headed]. [Call out the main thing holding them back—fear, comfort, lack of strategy?]. [Give them 2-3 specific action steps with deadlines—"Apply to 5 jobs by Friday," "Schedule that coffee chat THIS week," "Start that side project you keep talking about"]. Look, you didn't pull these cards to hear "trust the process." You came here because you know something needs to change. The cards are basically screaming that [main message]. Your future self is either thanking you for taking action NOW or still reading career tarot spreads in the same damn cubicle. Choice is yours.
+
+**Tone:** Think psychic best friend who's watched you complain about work for too long and is ready to help you actually DO something about it.
+**Goal:** Give them the clarity and kick in the ass they need to make real career moves, not just dream about them.''',
+            },
+            {'role': 'user', 'content': prompt},
+          ],
+          'temperature': 0.9,
+          'max_tokens': 1500,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        return responseBody['choices'][0]['message']['content'];
+      } else if (response.statusCode == 401) {
+        throw Exception(
+          'API key is invalid or expired. Please check your OpenAI API key.',
+        );
+      } else if (response.statusCode == 429) {
+        throw Exception('Too many requests. Please try again in a moment.');
+      } else if (response.statusCode == 500 || response.statusCode == 503) {
+        throw Exception(
+          'The AI service is temporarily unavailable. Please try again later.',
+        );
+      } else {
+        throw Exception('Unable to generate reading. Please try again.');
+      }
+    } catch (e) {
+      throw Exception('Error generating career reading: $e');
+    }
+  }
+
   // Build the prompt for OpenAI
   static String _buildPrompt(String question, List<DrawnCard> cards) {
     final buffer = StringBuffer();
@@ -1156,6 +1295,60 @@ Alright, decision time. Here's what the cards are screaming: [State the clear ve
 7. Offers specific action steps with timelines
 8. Feels like a \$200 session with their most psychic friend
 9. Delivers the permission slip they've been seeking to make their choice''');
+
+    return buffer.toString();
+  }
+
+  // Build the prompt for career reading
+  static String _buildCareerPrompt(
+    List<DrawnCard> cards, {
+    String? name,
+    String? currentJob,
+  }) {
+    final buffer = StringBuffer();
+
+    if (name != null && name.isNotEmpty) {
+      buffer.writeln('5-Card Career Reading for $name:');
+      if (currentJob != null && currentJob.isNotEmpty) {
+        buffer.writeln('Current Role: $currentJob');
+      }
+      buffer.writeln();
+    } else {
+      buffer.writeln('5-Card Career Reading:\n');
+    }
+
+    // Position names for career spread
+    final positionNames = [
+      'Current Situation',
+      'What to Do to Progress',
+      'Challenges/Obstacles',
+      'Potential Opportunities',
+      'Future Outlook',
+    ];
+
+    for (int i = 0; i < cards.length; i++) {
+      final drawnCard = cards[i];
+      final orientation = drawnCard.isReversed ? 'Reversed' : 'Upright';
+      buffer.writeln(
+        '${positionNames[i]} - ${drawnCard.card.fullName} ($orientation)',
+      );
+      buffer.writeln('Meaning: ${drawnCard.meaning}');
+      buffer.writeln('Keywords: ${drawnCard.card.keywords}');
+      buffer.writeln('Description: ${drawnCard.card.description}\n');
+    }
+
+    buffer.writeln(
+      '''Provide a premium career reading that:
+1. Gives brutally honest assessment of their current professional situation
+2. Provides specific, actionable steps for career advancement
+3. Names real obstacles and challenges they'll face
+4. Identifies concrete opportunities to watch for
+5. Paints a clear picture of their professional future
+6. Addresses their deepest career fears and aspirations
+7. Offers strategic action steps with timelines
+8. Feels like a \$200 session with their most psychic career coach
+9. Delivers the kick in the ass they need to stop complaining and start doing''',
+    );
 
     return buffer.toString();
   }

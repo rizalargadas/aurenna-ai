@@ -9,6 +9,7 @@ enum ReadingType {
   yesOrNo,
   pastLife,
   relationshipDecision,
+  career,
 }
 
 class Reading {
@@ -143,6 +144,15 @@ class DrawnCard {
         case 1: return 'Reasons to Stay';
         case 2: return 'Reasons to Leave';
         case 3: return 'Advice';
+        default: return 'Unknown';
+      }
+    } else if (readingType == ReadingType.career) {
+      switch (position) {
+        case 0: return 'Current Situation';
+        case 1: return 'How to Progress';
+        case 2: return 'Challenges';
+        case 3: return 'Opportunities';
+        case 4: return 'Future';
         default: return 'Unknown';
       }
     } else {

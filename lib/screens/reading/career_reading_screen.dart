@@ -9,74 +9,77 @@ import '../../utils/share_reading.dart';
 import '../../widgets/reading_animation_v1.dart';
 import '../../widgets/tarot_spread_grid.dart';
 
-class RelationshipDecisionScreen extends StatefulWidget {
-  const RelationshipDecisionScreen({super.key});
+class CareerReadingScreen extends StatefulWidget {
+  const CareerReadingScreen({super.key});
 
   @override
-  State<RelationshipDecisionScreen> createState() =>
-      _RelationshipDecisionScreenState();
+  State<CareerReadingScreen> createState() => _CareerReadingScreenState();
 }
 
-class _RelationshipDecisionScreenState
-    extends State<RelationshipDecisionScreen> {
+class _CareerReadingScreenState extends State<CareerReadingScreen> {
   List<DrawnCard> _drawnCards = [];
   String _aiReading = '';
   bool _isComplete = false;
   String _errorMessage = '';
-  int _currentStep =
-      0; // 0: shuffling, 1: cards revealed, 2: generating reading, 3: complete
-
+  int _currentStep = 0; // 0: shuffling, 1: cards revealed, 2: generating reading, 3: complete
+  
   // User input
-  bool _showNameInput = true;
-  final _yourNameController = TextEditingController();
-  final _partnerNameController = TextEditingController();
+  bool _showInfoInput = true;
+  final _nameController = TextEditingController();
+  final _currentJobController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  String _yourName = '';
-  String _partnerName = '';
-
+  String _name = '';
+  String _currentJob = '';
+  
   // Generation message selected once per session
   String _generationMessage = '';
 
   @override
   void initState() {
     super.initState();
-    _showNameInput = true;
+    _showInfoInput = true;
+    
+    // Select generation message once for this session
     _generationMessage = ReadingMessages.getRandomGenerationMessage();
   }
 
   @override
   void dispose() {
-    _yourNameController.dispose();
-    _partnerNameController.dispose();
+    _nameController.dispose();
+    _currentJobController.dispose();
     super.dispose();
   }
 
   void _onShuffleComplete() {
-    _drawnCards = TarotService.drawFourCardsForDecision();
+    // Draw the 5 cards when shuffle completes
+    _drawnCards = TarotService.drawFiveCardsForCareer();
     setState(() {
-      _currentStep = 1;
+      _currentStep = 1; // Move to revealing phase
     });
   }
 
   void _onCardsRevealed() async {
     if (!mounted) return;
-
+    
+    // Move to generation phase
     setState(() => _currentStep = 2);
 
     try {
-      _aiReading = await TarotService.generateRelationshipDecisionReading(
+      // Generate AI reading
+      _aiReading = await TarotService.generateCareerReading(
         _drawnCards,
-        yourName: _yourName,
-        partnerName: _partnerName,
+        name: _name,
+        currentJob: _currentJob,
       );
 
+      // Save reading to database
       final authService = Provider.of<AuthService>(context, listen: false);
       final userId = authService.currentUser?.id;
-
+      
       if (userId != null) {
         await TarotService.saveReading(
           userId: userId,
-          question: 'Relationship Decision: $_yourName & $_partnerName',
+          question: 'Career Guidance for $_name',
           drawnCards: _drawnCards,
           aiReading: _aiReading,
           authService: authService,
@@ -85,8 +88,9 @@ class _RelationshipDecisionScreenState
 
       setState(() {
         _isComplete = true;
-        _currentStep = 3;
+        _currentStep = 3; // Move to completed state
       });
+
     } catch (e) {
       setState(() {
         _errorMessage = 'Failed to generate reading: ${e.toString()}';
@@ -95,13 +99,14 @@ class _RelationshipDecisionScreenState
   }
 
   Future<void> _startReading() async {
-    if (_showNameInput) {
+    // Validate and save info first
+    if (_showInfoInput) {
       if (!_formKey.currentState!.validate()) return;
-
+      
       setState(() {
-        _yourName = _yourNameController.text.trim();
-        _partnerName = _partnerNameController.text.trim();
-        _showNameInput = false;
+        _name = _nameController.text.trim();
+        _currentJob = _currentJobController.text.trim();
+        _showInfoInput = false;
         _currentStep = 0; // Start shuffling
       });
     }
@@ -113,16 +118,16 @@ class _RelationshipDecisionScreenState
       backgroundColor: AurennaTheme.voidBlack,
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: const Text('Relationship Decision'),
+        title: const Text('Career Reading'),
         actions: [
           if (_isComplete)
             IconButton(
               icon: const Icon(Icons.share),
               onPressed: () async {
                 try {
-                  await ShareReading.shareRelationshipDecisionReading(
-                    person1: _yourName,
-                    person2: _partnerName,
+                  await ShareReading.shareCareerReading(
+                    name: _name,
+                    currentJob: _currentJob,
                     drawnCards: _drawnCards,
                     reading: _aiReading,
                   );
@@ -147,7 +152,9 @@ class _RelationshipDecisionScreenState
             ),
         ],
       ),
-      body: SafeArea(child: _buildBody()),
+      body: SafeArea(
+        child: _buildBody(),
+      ),
     );
   }
 
@@ -155,18 +162,20 @@ class _RelationshipDecisionScreenState
     if (_errorMessage.isNotEmpty) {
       return _buildErrorState();
     }
-
-    if (_showNameInput) {
-      return _buildNameInputScreen();
+    
+    if (_showInfoInput) {
+      return _buildInfoInputScreen();
     }
 
+    // For completed state, show reading directly
     if (_currentStep == 3 || _isComplete) {
       return _buildCompleteReading();
     }
-
+    
+    // Use the reusable animation widget
     ReadingAnimationPhase phase;
     String? statusMessage;
-
+    
     switch (_currentStep) {
       case 0:
         phase = ReadingAnimationPhase.shuffling;
@@ -177,13 +186,13 @@ class _RelationshipDecisionScreenState
         break;
       case 2:
         phase = ReadingAnimationPhase.generating;
-        statusMessage = null;
+        statusMessage = null; // No bottom text, just radial effect
         break;
       default:
         phase = ReadingAnimationPhase.complete;
         break;
     }
-
+    
     return ComprehensiveReadingAnimation(
       cardCount: 78,
       drawnCards: _drawnCards,
@@ -253,26 +262,26 @@ class _RelationshipDecisionScreenState
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AurennaTheme.amberGlow.withValues(alpha: 0.3),
+                  AurennaTheme.crystalBlue.withValues(alpha: 0.3),
                   AurennaTheme.electricViolet.withValues(alpha: 0.3),
                 ],
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: AurennaTheme.amberGlow.withValues(alpha: 0.5),
+                color: AurennaTheme.crystalBlue.withValues(alpha: 0.5),
                 width: 1,
               ),
             ),
             child: Column(
               children: [
                 Icon(
-                  Icons.favorite_outline,
-                  color: AurennaTheme.amberGlow,
+                  Icons.work_outline,
+                  color: AurennaTheme.crystalBlue,
                   size: 32,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Relationship Decision',
+                  'Career Reading',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: AurennaTheme.textPrimary,
                     fontWeight: FontWeight.bold,
@@ -281,12 +290,22 @@ class _RelationshipDecisionScreenState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '$_yourName & $_partnerName',
+                  _name.isNotEmpty ? 'For $_name' : 'Professional Guidance',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AurennaTheme.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
+                if (_currentJob.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    _currentJob,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AurennaTheme.textSecondary.withValues(alpha: 0.8),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ],
             ),
           ),
@@ -294,14 +313,14 @@ class _RelationshipDecisionScreenState
           const SizedBox(height: 32),
 
           Text(
-            'Your Decision Reading',
+            'Your Career Reading',
             style: Theme.of(context).textTheme.displaySmall,
             textAlign: TextAlign.center,
           ),
 
           const SizedBox(height: 20),
 
-          // Soft grouping container for the 2x2 grid
+          // Card grid container
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
@@ -314,9 +333,9 @@ class _RelationshipDecisionScreenState
             ),
             child: TarotSpreadGrid(
               cards: _drawnCards,
-              crossAxisCount: 2,
-              minCardWidth: 120,
-              maxCardWidth: 156,
+              crossAxisCount: 3, // 5 cards in flexible layout
+              minCardWidth: 90,
+              maxCardWidth: 130,
             ),
           ),
 
@@ -326,21 +345,21 @@ class _RelationshipDecisionScreenState
             children: [
               Expanded(
                 child: Divider(
-                  color: AurennaTheme.amberGlow.withValues(alpha: 0.3),
+                  color: AurennaTheme.crystalBlue.withValues(alpha: 0.3),
                   thickness: 1,
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Icon(
-                  Icons.favorite,
-                  color: AurennaTheme.amberGlow,
+                  Icons.work,
+                  color: AurennaTheme.crystalBlue,
                   size: 20,
                 ),
               ),
               Expanded(
                 child: Divider(
-                  color: AurennaTheme.amberGlow.withValues(alpha: 0.3),
+                  color: AurennaTheme.crystalBlue.withValues(alpha: 0.3),
                   thickness: 1,
                 ),
               ),
@@ -350,7 +369,7 @@ class _RelationshipDecisionScreenState
           const SizedBox(height: 32),
 
           Text(
-            'Your Relationship Verdict',
+            'Your Career Truth Bomb',
             style: Theme.of(context).textTheme.displaySmall,
             textAlign: TextAlign.center,
           ),
@@ -384,7 +403,7 @@ class _RelationshipDecisionScreenState
                 Divider(color: AurennaTheme.silverMist.withValues(alpha: 0.2)),
                 const SizedBox(height: 16),
                 Text(
-                  'Trust your intuition. The cards have spoken, but the decision is yours.',
+                  'Your career is in your hands. The cards show possibilities, but your actions create reality.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AurennaTheme.textSecondary,
                     fontStyle: FontStyle.italic,
@@ -427,7 +446,7 @@ class _RelationshipDecisionScreenState
 
           Center(
             child: Text(
-              '💕 May clarity guide your heart 💕',
+              '💼 May success follow your path 💼',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: AurennaTheme.textSecondary,
                 fontStyle: FontStyle.italic,
@@ -439,8 +458,7 @@ class _RelationshipDecisionScreenState
     );
   }
 
-
-  Widget _buildNameInputScreen() {
+  Widget _buildInfoInputScreen() {
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -457,36 +475,35 @@ class _RelationshipDecisionScreenState
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AurennaTheme.amberGlow.withValues(alpha: 0.3),
+                      AurennaTheme.crystalBlue.withValues(alpha: 0.3),
                       AurennaTheme.electricViolet.withValues(alpha: 0.3),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: AurennaTheme.amberGlow.withValues(alpha: 0.5),
+                    color: AurennaTheme.crystalBlue.withValues(alpha: 0.5),
                     width: 1,
                   ),
                 ),
                 child: Column(
                   children: [
                     Icon(
-                      Icons.favorite_border,
-                      color: AurennaTheme.amberGlow,
+                      Icons.work_outline,
+                      color: AurennaTheme.crystalBlue,
                       size: 48,
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Relationship Decision',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(
-                            color: AurennaTheme.textPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      'Career Reading',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: AurennaTheme.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Let the cards guide your heart\'s biggest decision',
+                      'Get brutally honest guidance about your professional path',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AurennaTheme.textSecondary,
                       ),
@@ -495,17 +512,18 @@ class _RelationshipDecisionScreenState
                   ],
                 ),
               ),
-
+              
               const SizedBox(height: 48),
-
+              
+              // Name input
               TextFormField(
-                controller: _yourNameController,
+                controller: _nameController,
                 decoration: InputDecoration(
                   labelText: 'Your Name',
                   hintText: 'Enter your name',
                   prefixIcon: Icon(
                     Icons.person_outline,
-                    color: AurennaTheme.amberGlow,
+                    color: AurennaTheme.crystalBlue,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -518,44 +536,40 @@ class _RelationshipDecisionScreenState
                   return null;
                 },
               ),
-
+              
               const SizedBox(height: 16),
-
+              
+              // Current job input
               TextFormField(
-                controller: _partnerNameController,
+                controller: _currentJobController,
                 decoration: InputDecoration(
-                  labelText: 'Partner\'s Name',
-                  hintText: 'Enter their name',
+                  labelText: 'Current Role (Optional)',
+                  hintText: 'e.g. Software Engineer, Teacher, Student',
                   prefixIcon: Icon(
-                    Icons.favorite_outline,
+                    Icons.work_outline,
                     color: AurennaTheme.electricViolet,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter their name';
-                  }
-                  return null;
-                },
                 onFieldSubmitted: (_) => _startReading(),
               ),
-
+              
               const SizedBox(height: 16),
-
+              
               Text(
-                'The cards will reveal whether to stay or go',
+                'The cards will reveal your professional truth',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: AurennaTheme.textSecondary,
                   fontStyle: FontStyle.italic,
                 ),
                 textAlign: TextAlign.center,
               ),
-
+              
               const SizedBox(height: 32),
-
+              
+              // Start button
               ElevatedButton(
                 onPressed: _startReading,
                 style: ElevatedButton.styleFrom(
@@ -564,7 +578,7 @@ class _RelationshipDecisionScreenState
                     vertical: 16,
                   ),
                 ),
-                child: const Text('Get My Answer'),
+                child: const Text('Get Career Guidance'),
               ),
             ],
           ),
@@ -572,8 +586,9 @@ class _RelationshipDecisionScreenState
       ),
     );
   }
-
+  
   Widget _buildFormattedReading() {
+    // Simple text display
     return SelectableText(
       _aiReading,
       style: Theme.of(context).textTheme.bodyLarge?.copyWith(

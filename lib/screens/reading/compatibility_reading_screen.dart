@@ -8,6 +8,7 @@ import '../../services/tarot_service.dart';
 import '../../utils/reading_messages.dart';
 import '../../utils/share_reading.dart';
 import '../../widgets/reading_animation_v1.dart';
+import '../../widgets/tarot_spread_grid.dart';
 
 class CompatibilityReadingScreen extends StatefulWidget {
   const CompatibilityReadingScreen({super.key});
@@ -311,7 +312,12 @@ class _CompatibilityReadingScreenState extends State<CompatibilityReadingScreen>
 
           const SizedBox(height: 32),
 
-          _buildCardGrid(),
+          TarotSpreadGrid(
+            cards: _drawnCards,
+            crossAxisCount: 3, // 5 cards in flexible layout
+            minCardWidth: 90,
+            maxCardWidth: 130,
+          ),
 
           const SizedBox(height: 32),
 
