@@ -143,6 +143,23 @@ class ShareReading {
     );
   }
   
+  /// Shares a career change reading
+  static Future<void> shareCareerChangeReading({
+    required String name,
+    required String currentSituation,
+    required List<DrawnCard> drawnCards,
+    required String reading,
+  }) async {
+    final situationInfo = currentSituation.isNotEmpty ? ' - $currentSituation' : '';
+    final question = 'Career change guidance for $name$situationInfo';
+    return shareReading(
+      question: question,
+      drawnCards: drawnCards,
+      reading: reading,
+      readingType: 'Career Change Reading',
+    );
+  }
+  
   /// Shares a general reading
   static Future<void> shareGeneralReading({
     required String question,
@@ -180,6 +197,9 @@ class ShareReading {
       case 1:
         return 'Single Card Reading';
       case 3:
+        if (cards.first.readingType == ReadingType.careerChange) {
+          return 'Career Change Reading';
+        }
         return 'Three-Card Reading';
       case 5:
         return cards.first.readingType == ReadingType.career 
