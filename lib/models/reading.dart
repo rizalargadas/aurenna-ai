@@ -8,6 +8,7 @@ enum ReadingType {
   situationship,
   yesOrNo,
   pastLife,
+  relationshipDecision,
 }
 
 class Reading {
@@ -134,6 +135,14 @@ class DrawnCard {
         case 8: return 'Death';
         case 9: return 'Lesson Learned';
         case 10: return 'How It Helps You Now';
+        default: return 'Unknown';
+      }
+    } else if (readingType == ReadingType.relationshipDecision) {
+      switch (position) {
+        case 0: return 'Current State';
+        case 1: return 'Reasons to Stay';
+        case 2: return 'Reasons to Leave';
+        case 3: return 'Advice';
         default: return 'Unknown';
       }
     } else {

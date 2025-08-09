@@ -110,6 +110,22 @@ class ShareReading {
     );
   }
   
+  /// Shares a relationship decision reading
+  static Future<void> shareRelationshipDecisionReading({
+    required String person1,
+    required String person2,
+    required List<DrawnCard> drawnCards,
+    required String reading,
+  }) async {
+    final question = 'Relationship decision for $person1 and $person2';
+    return shareReading(
+      question: question,
+      drawnCards: drawnCards,
+      reading: reading,
+      readingType: 'Relationship Decision Reading',
+    );
+  }
+  
   /// Shares a general reading
   static Future<void> shareGeneralReading({
     required String question,

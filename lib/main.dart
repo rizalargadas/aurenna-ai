@@ -11,6 +11,7 @@ import 'screens/reading/compatibility_reading_screen.dart';
 import 'screens/reading/situationship_reading_screen.dart';
 import 'screens/reading/yes_or_no_reading_screen.dart';
 import 'screens/reading/past_life_reading_screen.dart';
+import 'screens/reading/relationship_decision_screen.dart';
 import 'screens/premium/premium_upgrade_screen.dart';
 import 'services/auth_service.dart';
 import 'providers/theme_provider.dart';
@@ -79,6 +80,7 @@ class _MaterialAppWithThemeState extends State<_MaterialAppWithTheme> {
             '/situationship-reading': (context) => const SituationshipReadingScreen(),
             '/yes-or-no-reading': (context) => const YesOrNoReadingScreen(),
             '/past-life-reading': (context) => const PastLifeReadingScreen(),
+            '/relationship-decision': (context) => const RelationshipDecisionScreen(),
             '/premium-upgrade': (context) => const PremiumUpgradeScreen(),
           },
         );
