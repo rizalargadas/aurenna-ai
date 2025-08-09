@@ -13,7 +13,9 @@
       "Bash(mv:*)",
       "Bash(find:*)",
       "Bash(flutter clean:*)",
-      "Bash(dart analyze:*)"
+      "Bash(dart analyze:*)",
+      "Bash(rm:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }
