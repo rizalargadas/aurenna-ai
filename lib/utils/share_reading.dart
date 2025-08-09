@@ -174,23 +174,6 @@ class ShareReading {
     );
   }
   
-  /// Shares a career reading
-  static Future<void> shareCareerReading({
-    required String userName,
-    required List<DrawnCard> drawnCards,
-    required String reading,
-  }) async {
-    final question = userName.isNotEmpty 
-        ? 'Career Reading for $userName' 
-        : 'Career Reading';
-    return shareReading(
-      question: question,
-      drawnCards: drawnCards,
-      reading: reading,
-      readingType: 'Career Reading - Professional Guidance',
-    );
-  }
-  
   /// Determines reading type based on number of cards
   static String _getReadingTypeFromCards(List<DrawnCard> cards) {
     switch (cards.length) {
