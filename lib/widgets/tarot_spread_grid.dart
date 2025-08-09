@@ -7,6 +7,7 @@ class TarotSpreadGrid extends StatelessWidget {
   final int crossAxisCount;
   final double minCardWidth;
   final double maxCardWidth;
+  final double? customMainAxisSpacing;
 
   const TarotSpreadGrid({
     super.key,
@@ -14,6 +15,7 @@ class TarotSpreadGrid extends StatelessWidget {
     required this.crossAxisCount,
     this.minCardWidth = 120,
     this.maxCardWidth = 156,
+    this.customMainAxisSpacing,
   });
 
   @override
@@ -22,7 +24,7 @@ class TarotSpreadGrid extends StatelessWidget {
       builder: (context, constraints) {
         final w = constraints.maxWidth;
         final gutterX = w >= 360 ? 16.0 : 12.0;
-        final gutterY = gutterX * 0.75;
+        final gutterY = customMainAxisSpacing ?? (gutterX * 0.75);
 
         final rawWidth = (w - (crossAxisCount - 1) * gutterX) / crossAxisCount;
         final cardWidth = rawWidth.clamp(minCardWidth, maxCardWidth);

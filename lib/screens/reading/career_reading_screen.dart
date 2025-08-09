@@ -336,6 +336,7 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
               crossAxisCount: 3, // 5 cards in flexible layout
               minCardWidth: 90,
               maxCardWidth: 130,
+              customMainAxisSpacing: 22.0, // Add extra 10px spacing between rows (12px default + 10px)
             ),
           ),
 
