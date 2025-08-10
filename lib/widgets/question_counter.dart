@@ -128,20 +128,7 @@ class QuestionCounter extends StatelessWidget {
           const SizedBox(height: 8),
           TextButton(
             onPressed: () {
-              // TODO: Navigate to payment screen in Week 4
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text(
-                    'Payment coming in Week 4! 💳',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  backgroundColor: AurennaTheme.stardustPurple,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              );
+              Navigator.pushNamed(context, '/premium-upgrade');
             },
             child: Text(
               isEmpty ? 'Go unlimited' : 'Get more questions',

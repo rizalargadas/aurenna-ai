@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'config/theme.dart';
 import 'config/app_themes.dart';
 import 'config/supabase.dart';
@@ -15,11 +16,15 @@ import 'screens/reading/relationship_decision_screen.dart';
 import 'screens/reading/career_reading_screen.dart';
 import 'screens/reading/career_change_screen.dart';
 import 'screens/premium/premium_upgrade_screen.dart';
+import 'screens/premium/payment_success_screen.dart';
 import 'services/auth_service.dart';
 import 'providers/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
 
   // Initialize Supabase
   await SupabaseConfig.initialize();
@@ -86,6 +91,7 @@ class _MaterialAppWithThemeState extends State<_MaterialAppWithTheme> {
             '/career-reading': (context) => const CareerReadingScreen(),
             '/career-change': (context) => const CareerChangeScreen(),
             '/premium-upgrade': (context) => const PremiumUpgradeScreen(),
+            '/payment-success': (context) => const PaymentSuccessScreen(),
           },
         );
       },

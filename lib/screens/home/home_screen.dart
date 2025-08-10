@@ -37,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> _refreshData() async {
     final authService = Provider.of<AuthService>(context, listen: false);
     await authService.refreshQuestionCount();
+    await authService.hasActiveSubscription(); // Refresh subscription status
   }
 
   @override
@@ -605,10 +606,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     required Color borderColor,
     required bool isSmallScreen,
   }) {
-    return FutureBuilder<bool>(
-      future: authService.hasActiveSubscription(),
-      builder: (context, snapshot) {
-        final hasSubscription = snapshot.data ?? false;
+    return Consumer<AuthService>(
+      builder: (context, authService, child) {
+        final hasSubscription = authService.cachedSubscriptionStatus ?? false;
         
         return GestureDetector(
           onTap: hasSubscription 

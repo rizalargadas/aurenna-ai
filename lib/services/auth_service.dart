@@ -162,4 +162,7 @@ class AuthService extends ChangeNotifier {
       return _cachedSubscriptionStatus ?? false;
     }
   }
+
+  // Public getter for cached subscription status
+  bool? get cachedSubscriptionStatus => _cachedSubscriptionStatus;
 }

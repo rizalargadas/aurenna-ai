@@ -1,11 +1,67 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../config/theme.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/question_counter.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
+
+  Future<void> _resetSubscription(BuildContext context) async {
+    try {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final userId = authService.currentUser?.id;
+      
+      if (userId == null) {
+        throw Exception('User not logged in');
+      }
+
+      // Reset subscription status in database
+      await Supabase.instance.client.from('users').update({
+        'subscription_status': 'free',
+        'subscription_start_date': null,
+        'subscription_end_date': null,
+        'subscription_plan': null,
+        'payment_method': null,
+        'paypal_payment_id': null,
+        'paypal_payer_id': null,
+        'free_questions_remaining': 3, // Reset free questions too
+      }).eq('id', userId);
+
+      // Refresh auth service
+      await authService.hasActiveSubscription();
+      await authService.refreshQuestionCount();
+
+      // Check if context is still mounted before showing snackbar
+      if (!context.mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('✅ Subscription reset! You\'re back to free tier.'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
+    } catch (e) {
+      // Check if context is still mounted before showing error snackbar
+      if (!context.mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error resetting subscription: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,6 +194,57 @@ class SettingsScreen extends StatelessWidget {
                               style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: AurennaTheme.textSecondary),
                             ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/premium-upgrade');
+                                },
+                                icon: const Icon(Icons.upgrade, size: 18),
+                                label: const Text('Upgrade to Premium'),
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ] else ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              'Enjoy unlimited premium readings!',
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AurennaTheme.crystalBlue),
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                onPressed: () {
+                                  // TODO: Add subscription management
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: const Text('Subscription management coming soon!'),
+                                      backgroundColor: AurennaTheme.cosmicPurple,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.manage_accounts, size: 18),
+                                label: const Text('Manage Subscription'),
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ],
                       );
@@ -232,6 +339,71 @@ class SettingsScreen extends StatelessWidget {
             ),
 
             const SizedBox(height: 32),
+
+            // Developer Testing - Reset Subscription Button
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '🧪 Developer Testing',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        final shouldReset = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Reset Subscription?'),
+                            content: const Text(
+                              'This will reset your account to free tier for testing purposes. Continue?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('Cancel'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text('Reset'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (shouldReset == true && context.mounted) {
+                          await _resetSubscription(context);
+                        }
+                      },
+                      icon: const Icon(Icons.refresh, color: Colors.orange, size: 18),
+                      label: const Text('Reset to Free Account'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.orange,
+                        side: const BorderSide(color: Colors.orange),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
 
             // Sign Out Button
             ElevatedButton(
