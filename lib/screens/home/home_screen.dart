@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../config/theme.dart';
 import '../../services/auth_service.dart';
 import '../settings/settings_screen.dart';
 import '../reading/question_screen.dart';
+import '../reading/card_of_the_day_screen.dart';
 import '../../widgets/question_counter.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -59,6 +61,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             
             // Question Counter
             SliverToBoxAdapter(child: _buildQuestionCounter(isSmallScreen)),
+            
+            // Card of the Day
+            SliverToBoxAdapter(child: _buildCardOfTheDay(isSmallScreen)),
             
             // Featured Reading
             SliverToBoxAdapter(child: _buildFeaturedReading(isSmallScreen, isTablet)),
@@ -183,6 +188,287 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       margin: EdgeInsets.fromLTRB(24, isSmallScreen ? 20 : 24, 24, 0),
       child: Center(
         child: QuestionCounter(showUpgradeButton: true),
+      ),
+    );
+  }
+
+  String _getTimeUntilNextCard() {
+    final now = DateTime.now();
+    final tomorrow = DateTime(now.year, now.month, now.day + 1);
+    final difference = tomorrow.difference(now);
+    
+    final hours = difference.inHours;
+    final minutes = difference.inMinutes % 60;
+    
+    if (hours > 0) {
+      return '$hours hour${hours > 1 ? 's' : ''} and $minutes minute${minutes > 1 ? 's' : ''}';
+    } else {
+      return '$minutes minute${minutes > 1 ? 's' : ''}';
+    }
+  }
+
+  Future<void> _handleCardOfTheDay() async {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final userId = authService.currentUser?.id;
+    
+    if (userId == null) return;
+    
+    // Check if already drawn today
+    final prefs = await SharedPreferences.getInstance();
+    final lastDrawKey = 'daily_card_last_draw_$userId';
+    final lastDrawDate = prefs.getString(lastDrawKey);
+    
+    final today = DateTime.now();
+    final todayString = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+    
+    if (lastDrawDate == todayString) {
+      // Show sassy alert - already drawn today
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: AurennaTheme.voidBlack,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
+                width: 2,
+              ),
+            ),
+            title: Row(
+              children: [
+                Icon(
+                  Icons.schedule,
+                  color: AurennaTheme.electricViolet,
+                  size: 28,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    '⏰ Hold Up, Speed Racer!',
+                    style: TextStyle(
+                      color: AurennaTheme.textPrimary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'It\'s called Card of the DAY, not Card of the Hour, bestie! 💅',
+                  style: TextStyle(
+                    color: AurennaTheme.textPrimary,
+                    fontSize: 16,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'The universe doesn\'t do instant replays. One cosmic download per 24 hours, that\'s the rules!',
+                  style: TextStyle(
+                    color: AurennaTheme.textSecondary,
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AurennaTheme.cosmicPurple.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AurennaTheme.cosmicPurple.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.timer_outlined,
+                        color: AurennaTheme.cosmicPurple,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Come back in:',
+                              style: TextStyle(
+                                color: AurennaTheme.textSecondary,
+                                fontSize: 12,
+                              ),
+                            ),
+                            Text(
+                              _getTimeUntilNextCard(),
+                              style: TextStyle(
+                                color: AurennaTheme.electricViolet,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AurennaTheme.electricViolet,
+                        AurennaTheme.cosmicPurple,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Fine, I\'ll Wait 🙄',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+    } else {
+      // Haven't drawn today - navigate to the screen
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const CardOfTheDayScreen(),
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildCardOfTheDay(bool isSmallScreen) {
+    return Container(
+      margin: EdgeInsets.fromLTRB(24, isSmallScreen ? 20 : 24, 24, 0),
+      child: GestureDetector(
+        onTap: _handleCardOfTheDay,
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AurennaTheme.electricViolet.withOpacity(0.2),
+                AurennaTheme.cosmicPurple.withOpacity(0.1),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: AurennaTheme.electricViolet.withOpacity(0.3),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AurennaTheme.electricViolet.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Icon
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AurennaTheme.electricViolet,
+                      AurennaTheme.cosmicPurple,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.auto_awesome,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              
+              const SizedBox(width: 16),
+              
+              // Text content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '🌅 Card of the Day',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: AurennaTheme.textPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AurennaTheme.electricViolet.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AurennaTheme.electricViolet.withOpacity(0.4),
+                            ),
+                          ),
+                          child: Text(
+                            'FREE',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AurennaTheme.electricViolet,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Your daily cosmic check-in. Pull one card for guidance.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AurennaTheme.textSecondary,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Arrow
+              Icon(
+                Icons.arrow_forward_ios,
+                color: AurennaTheme.textSecondary,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

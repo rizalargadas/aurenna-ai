@@ -11,6 +11,7 @@ enum ReadingType {
   relationshipDecision,
   career,
   careerChange,
+  cardOfTheDay,
 }
 
 class Reading {

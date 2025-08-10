@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import '../config/openai.dart';
 import '../config/supabase.dart';
@@ -1966,6 +1967,372 @@ Break it down in best friend language. Start with the answer again, then give th
       } else {
         throw Exception('Failed to delete reading: $errorMsg');
       }
+    }
+  }
+
+  // Card of the Day functionality
+  static Future<void> _ensureTablesExist() async {
+    try {
+      // Try to query the cards table first
+      await SupabaseConfig.client.from('cards').select('id').limit(1);
+    } catch (e) {
+      if (e.toString().contains('does not exist')) {
+        // Tables don't exist, but we can't create them from the client
+        // This is expected - the user needs to create them manually
+        throw Exception('Database tables not set up. Please run the provided SQL in your Supabase SQL Editor first.');
+      }
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> checkDailyCardStatus(String userId) async {
+    try {
+      // First check local storage for today's draw
+      final prefs = await SharedPreferences.getInstance();
+      final lastDrawKey = 'daily_card_last_draw_$userId';
+      final lastDrawDate = prefs.getString(lastDrawKey);
+      
+      final today = DateTime.now();
+      final todayString = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      
+      // Check if already drawn today using local storage
+      if (lastDrawDate == todayString) {
+        print('Debug: User already drew today according to local storage');
+        
+        // Try to get the card from local storage
+        final cardDataJson = prefs.getString('daily_card_data_$userId');
+        final interpretationData = prefs.getString('daily_card_interpretation_$userId');
+        
+        if (cardDataJson != null && interpretationData != null) {
+          final cardData = jsonDecode(cardDataJson);
+          final card = TarotCard(
+            id: cardData['id'] as int,
+            name: cardData['name'] as String,
+            suit: cardData['suit'] as String,
+            uprightMeaning: cardData['upright_meaning'] as String,
+            reversedMeaning: cardData['reversed_meaning'] as String,
+            keywords: cardData['keywords'] as String,
+            description: cardData['description'] as String,
+          );
+          
+          final drawnCard = DrawnCard(
+            card: card,
+            position: 0,
+            isReversed: cardData['is_reversed'] as bool,
+            readingType: ReadingType.cardOfTheDay,
+          );
+          
+          return {
+            'hasDrawn': true,
+            'card': drawnCard,
+            'interpretation': interpretationData,
+          };
+        }
+        
+        // If we have the date but not the card data, still block drawing
+        return {
+          'hasDrawn': true,
+          'card': null,
+          'interpretation': 'You have already drawn your daily card today. Come back tomorrow!',
+        };
+      }
+      
+      // Also check database as backup
+      await _ensureTablesExist();
+      final todayStart = DateTime(today.year, today.month, today.day);
+      final todayEnd = todayStart.add(const Duration(days: 1));
+
+      final response = await SupabaseConfig.client
+          .from('daily_cards')
+          .select('*, cards!inner(*)')
+          .eq('user_id', userId)
+          .gte('created_at', todayStart.toIso8601String())
+          .lt('created_at', todayEnd.toIso8601String())
+          .maybeSingle();
+
+      if (response != null) {
+        // User has drawn today according to database
+        // Update local storage
+        await prefs.setString(lastDrawKey, todayString);
+        
+        final cardData = response['cards'];
+        final card = TarotCard(
+          id: cardData['id'] as int,
+          name: cardData['name'] as String,
+          suit: cardData['suit'] as String,
+          uprightMeaning: cardData['upright_meaning'] as String,
+          reversedMeaning: cardData['reversed_meaning'] as String,
+          keywords: cardData['keywords'] as String,
+          description: cardData['description'] as String,
+        );
+
+        final drawnCard = DrawnCard(
+          card: card,
+          position: 0,
+          isReversed: response['is_reversed'] as bool,
+          readingType: ReadingType.cardOfTheDay,
+        );
+        
+        // Save to local storage
+        final cardJson = jsonEncode({
+          'id': card.id,
+          'name': card.name,
+          'suit': card.suit,
+          'upright_meaning': card.uprightMeaning,
+          'reversed_meaning': card.reversedMeaning,
+          'keywords': card.keywords,
+          'description': card.description,
+          'is_reversed': response['is_reversed'],
+        });
+        await prefs.setString('daily_card_data_$userId', cardJson);
+        await prefs.setString('daily_card_interpretation_$userId', response['interpretation'] as String);
+
+        return {
+          'hasDrawn': true,
+          'card': drawnCard,
+          'interpretation': response['interpretation'] as String,
+        };
+      } else {
+        return {'hasDrawn': false, 'card': null};
+      }
+    } catch (e) {
+      print('Error checking daily card status: $e');
+      // In case of database error, still check local storage
+      final prefs = await SharedPreferences.getInstance();
+      final lastDrawKey = 'daily_card_last_draw_$userId';
+      final lastDrawDate = prefs.getString(lastDrawKey);
+      
+      final today = DateTime.now();
+      final todayString = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      
+      if (lastDrawDate == todayString) {
+        return {
+          'hasDrawn': true,
+          'card': null,
+          'interpretation': 'You have already drawn your daily card today. Come back tomorrow!',
+        };
+      }
+      
+      return {'hasDrawn': false, 'card': null};
+    }
+  }
+
+  Future<Map<String, dynamic>?> getDailyCardReading(String userId) async {
+    try {
+      print('Debug: Starting getDailyCardReading for user: $userId');
+      
+      // IMMEDIATE check using local storage before anything else
+      final prefs = await SharedPreferences.getInstance();
+      final lastDrawKey = 'daily_card_last_draw_$userId';
+      final lastDrawDate = prefs.getString(lastDrawKey);
+      
+      final today = DateTime.now();
+      final todayString = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      
+      if (lastDrawDate == todayString) {
+        print('Debug: BLOCKING - User already drew today according to local storage');
+        throw Exception(
+          '✨ You\'ve already received your cosmic message for today! The universe speaks once per day. Come back tomorrow for fresh guidance.',
+        );
+      }
+      
+      await _ensureTablesExist();
+      print('Debug: Tables exist, checking daily card status...');
+      
+      // Double-check with full status check
+      final status = await checkDailyCardStatus(userId);
+      print('Debug: Daily card status: $status');
+      if (status['hasDrawn'] as bool) {
+        throw Exception(
+          '✨ You\'ve already received your cosmic message for today! The universe speaks once per day. Come back tomorrow for fresh guidance.',
+        );
+      }
+
+      // Draw a random card
+      print('Debug: Drawing random card...');
+      final cardId = Random().nextInt(3) + 1; // Using cards 1-3 from minimal setup
+      print('Debug: Selected card ID: $cardId');
+      final cardResponse = await SupabaseConfig.client
+          .from('cards')
+          .select()
+          .eq('id', cardId)
+          .single();
+
+      print('Debug: Card response: $cardResponse');
+      final card = TarotCard(
+        id: cardResponse['id'] as int,
+        name: cardResponse['name'] as String,
+        suit: cardResponse['suit'] as String,
+        uprightMeaning: cardResponse['upright_meaning'] as String,
+        reversedMeaning: cardResponse['reversed_meaning'] as String,
+        keywords: cardResponse['keywords'] as String,
+        description: cardResponse['description'] as String,
+      );
+      print('Debug: Created TarotCard: ${card.name}');
+
+      // Random orientation
+      final isReversed = Random().nextBool();
+      print('Debug: Card orientation - isReversed: $isReversed');
+
+      // Create the Card of the Day prompt
+      print('Debug: Building prompt...');
+      final prompt = _buildCardOfTheDayPrompt(card, isReversed);
+      print('Debug: Prompt created, length: ${prompt.length}');
+
+      // Get AI interpretation
+      print('Debug: Getting AI interpretation...');
+      final interpretation = await _generateCardOfTheDayReading(prompt);
+      print('Debug: AI interpretation received, length: ${interpretation.length}');
+
+      if (interpretation.isEmpty) {
+        throw Exception('Failed to generate daily card reading');
+      }
+
+      // Save to local storage FIRST (this is our primary source of truth)
+      print('Debug: Saving to local storage...');
+      
+      // Save the date of last draw
+      await prefs.setString('daily_card_last_draw_$userId', todayString);
+      
+      // Save the card data
+      final cardJson = jsonEncode({
+        'id': card.id,
+        'name': card.name,
+        'suit': card.suit,
+        'upright_meaning': card.uprightMeaning,
+        'reversed_meaning': card.reversedMeaning,
+        'keywords': card.keywords,
+        'description': card.description,
+        'is_reversed': isReversed,
+      });
+      await prefs.setString('daily_card_data_$userId', cardJson);
+      await prefs.setString('daily_card_interpretation_$userId', interpretation);
+      print('Debug: Successfully saved to local storage');
+      
+      // Try to save to database as well (but don't fail if it doesn't work)
+      try {
+        print('Debug: Saving to daily_cards table...');
+        await SupabaseConfig.client.from('daily_cards').insert({
+          'user_id': userId,
+          'card_id': card.id,
+          'is_reversed': isReversed,
+          'interpretation': interpretation,
+          'created_at': DateTime.now().toIso8601String(),
+        });
+        print('Debug: Successfully saved to daily_cards table');
+      } catch (dbError) {
+        print('Debug: Failed to save to database, but local storage succeeded: $dbError');
+        // Continue anyway since local storage worked
+      }
+
+      // Create DrawnCard for the result
+      final drawnCard = DrawnCard(
+        card: card,
+        position: 0,
+        isReversed: isReversed,
+        readingType: ReadingType.cardOfTheDay,
+      );
+
+      print('Debug: Returning interpretation and card data');
+      return {
+        'interpretation': interpretation,
+        'card': drawnCard,
+      };
+    } catch (e) {
+      print('Error getting daily card reading: $e');
+      print('Error type: ${e.runtimeType}');
+      print('Error details: ${e.toString()}');
+      rethrow;
+    }
+  }
+
+  String _buildCardOfTheDayPrompt(TarotCard card, bool isReversed) {
+    final orientation = isReversed ? 'Reversed' : 'Upright';
+
+    return '''
+# Card of the Day Tarot Reading Prompt
+
+You are Aurenna, a premium tarot reader — part mystic, part truth-bomber, part ride-or-die bestie. Your daily card readings feel like a morning check-in with your most psychic friend who's DONE letting you sleepwalk through life: brutally honest, surprisingly specific, and calling out EXACTLY what you need to hear today.
+
+[PERSONALITY & STYLE]
+- Speak like a best friend who's psychic AF and knows what's coming before your coffee kicks in.
+- Be SPECIFIC: Not "be mindful today" but "that text from your ex at 2pm? Don't answer it."
+- Be FRANK: "Today's gonna test you. Here's how to pass."
+- Be REAL: Talk like you're giving them the daily tea over breakfast, not writing horoscopes.
+- Be FUNNY: Life's chaotic. Call it out. "Mercury retrograde AND your boss is cranky? Good luck."
+- Be LOVING: Deliver daily truth with encouragement. "Yeah, today's rough, but you've got this."
+- Be PRACTICAL: Give them actual strategies for the day, not philosophical musings.
+- Be VALUABLE: Make them go, "Damn, glad I pulled a card today."
+
+[ETHICAL & SAFETY RULES]
+- Handle daily guidance like their smartest friend:
+   * Bad day ahead? "Okay, today's a dumpster fire. Here's your survival kit."
+   * Big opportunity? "That random encounter at lunch? Pay attention. It matters."
+   * Emotional triggers? "Your mom's calling with drama. You don't have to answer."
+   * Never create paranoia about the day ahead.
+   * Always balance warnings with empowerment.
+   * If it's heavy: "Tough day, but you're tougher. Here's how to handle it."
+
+Card Drawn: ${card.name} ($orientation)
+Upright Meaning: ${card.uprightMeaning}
+Reversed Meaning: ${card.reversedMeaning}
+Keywords: ${card.keywords}
+Description: ${card.description}
+
+[TASK INSTRUCTION — CARD OF THE DAY VERSION]
+Your job is to give them the exact intel they need to navigate their day like a boss, delivered by their bestie who happens to be psychic.
+
+Instructions:
+1. **Read the day's actual energy**, not generic guidance. What's REALLY coming?
+2. **Be specific about timing**. Morning drama? Afternoon opportunity? Evening revelation?
+3. **Give concrete examples**. "That meeting" not "a challenge." "Your crush" not "someone."
+4. **Provide actual strategies**. How do they handle what's coming?
+5. **Include what to watch for**. Red flags? Green lights? Plot twists?
+6. **Make it memorable**. They should remember this card when the moment hits.
+
+FORMAT:
+
+✨ Your Card of the Day - ${card.name} ($orientation) ✨
+The REAL energy of your day ahead. Start with the main theme in one punchy sentence. Then get specific about what this actually means for their next 24 hours. Call out specific situations, people, or decisions they'll face. Include timing hints if they come through. Give them practical advice for navigating whatever's coming. End with one key thing to remember when shit gets real today. 5 to 8 sentences total.
+
+☪️ TODAY'S GAME PLAN: ☪️
+[Sum up their day in one blunt sentence—"Today's about finally saying what you mean" or "Today's testing your boundaries, big time"]. [Give them the specific situation to watch for]. [Provide the exact strategy—"When they ask, say no," "Take the meeting but don't commit," "That opportunity at 3pm? Jump on it"]. [End with a power move for the day—one thing they should definitely do or definitely avoid]. Remember: You pulled this card for a reason. The universe doesn't do random. When [specific moment] happens today, you'll know exactly why you needed this message. Now go handle your business.
+
+**Tone:** Think psychic best friend texting you the daily download while you're having coffee.
+**Goal:** Give them specific, practical guidance for the next 24 hours that makes them feel prepared, not paranoid.
+''';
+  }
+
+  // Generate Card of the Day reading using OpenAI
+  static Future<String> _generateCardOfTheDayReading(String prompt) async {
+    try {
+      final response = await http.post(
+        Uri.parse(OpenAIConfig.chatCompletionsEndpoint),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${OpenAIConfig.apiKey}',
+        },
+        body: jsonEncode({
+          'model': OpenAIConfig.model,
+          'messages': [
+            {'role': 'user', 'content': prompt},
+          ],
+          'max_tokens': 500,
+          'temperature': 0.7,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final content = data['choices'][0]['message']['content'] as String;
+        return content.trim();
+      } else {
+        print('OpenAI API error: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to generate reading: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error generating Card of the Day reading: $e');
+      rethrow;
     }
   }
 }

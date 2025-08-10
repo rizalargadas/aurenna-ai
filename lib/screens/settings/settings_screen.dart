@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../config/theme.dart';
 import '../../services/auth_service.dart';
@@ -8,7 +9,38 @@ import '../../widgets/question_counter.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
-  Future<void> _resetSubscription(BuildContext context) async {
+  Future<bool> _verifyDeveloperPassword(BuildContext context) async {
+    final TextEditingController passwordController = TextEditingController();
+    
+    final password = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Developer Access'),
+        content: TextField(
+          controller: passwordController,
+          obscureText: true,
+          decoration: const InputDecoration(
+            labelText: 'Enter developer password',
+            hintText: 'Password required',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, null),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, passwordController.text),
+            child: const Text('Verify'),
+          ),
+        ],
+      ),
+    );
+    
+    return password == 'mobile2026';
+  }
+
+  Future<void> _resetDailyCard(BuildContext context) async {
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
       final userId = authService.currentUser?.id;
@@ -17,21 +49,106 @@ class SettingsScreen extends StatelessWidget {
         throw Exception('User not logged in');
       }
 
-      // Reset subscription status in database
-      await Supabase.instance.client.from('users').update({
+      // Clear local storage (SharedPreferences) first - this is the primary source
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('daily_card_last_draw_$userId');
+      await prefs.remove('daily_card_data_$userId');
+      await prefs.remove('daily_card_interpretation_$userId');
+
+      // Also delete from database (backup)
+      final today = DateTime.now();
+      final todayStart = DateTime(today.year, today.month, today.day);
+      final todayEnd = todayStart.add(const Duration(days: 1));
+
+      try {
+        await Supabase.instance.client
+            .from('daily_cards')
+            .delete()
+            .eq('user_id', userId)
+            .gte('created_at', todayStart.toIso8601String())
+            .lt('created_at', todayEnd.toIso8601String());
+      } catch (dbError) {
+        // Database deletion failed, but local storage was cleared, which is the primary source
+        print('Database deletion failed but local storage cleared: $dbError');
+      }
+
+      // Check if context is still mounted before showing snackbar
+      if (!context.mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('✅ Daily card reset! You can draw again.'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
+    } catch (e) {
+      print('Debug: Error resetting daily card: $e');
+      
+      // If the daily_cards table doesn't exist, show a helpful message
+      if (e.toString().contains('does not exist') || e.toString().contains('daily_cards')) {
+        // Check if context is still mounted before showing snackbar
+        if (!context.mounted) return;
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('⚠️ Daily cards table not set up yet. This is normal for testing - just use the Card of the Day normally to create your first card.'),
+            backgroundColor: Colors.orange,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+        return;
+      }
+      
+      // Check if context is still mounted before showing error snackbar
+      if (!context.mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ Error resetting daily card: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _resetSubscription(BuildContext context) async {
+    try {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final userId = authService.currentUser?.id;
+      
+      print('Debug: Starting subscription reset for user: $userId');
+      
+      if (userId == null) {
+        throw Exception('User not logged in');
+      }
+
+      // Reset subscription status in database (only update fields we know exist)
+      print('Debug: Updating users table...');
+      final updateResponse = await Supabase.instance.client.from('users').update({
         'subscription_status': 'free',
-        'subscription_start_date': null,
-        'subscription_end_date': null,
-        'subscription_plan': null,
-        'payment_method': null,
-        'paypal_payment_id': null,
-        'paypal_payer_id': null,
         'free_questions_remaining': 3, // Reset free questions too
       }).eq('id', userId);
+      
+      print('Debug: Update response: $updateResponse');
 
-      // Refresh auth service
+      // Refresh auth service to clear cached data
+      print('Debug: Refreshing auth service...');
       await authService.hasActiveSubscription();
       await authService.refreshQuestionCount();
+      
+      print('Debug: Reset completed successfully');
 
       // Check if context is still mounted before showing snackbar
       if (!context.mounted) return;
@@ -47,12 +164,50 @@ class SettingsScreen extends StatelessWidget {
         ),
       );
     } catch (e) {
+      print('Debug: Error in reset: $e');
+      
+      // If the error is that the user record doesn't exist, try to create one
+      if (e.toString().contains('No rows updated') || e.toString().contains('not exist')) {
+        try {
+          final authService = Provider.of<AuthService>(context, listen: false);
+          final userId = authService.currentUser?.id;
+          
+          print('Debug: Trying to insert user record...');
+          await Supabase.instance.client.from('users').insert({
+            'id': userId,
+            'subscription_status': 'free',
+            'free_questions_remaining': 3,
+            'created_at': DateTime.now().toIso8601String(),
+          });
+          
+          // Refresh auth service
+          await authService.hasActiveSubscription();
+          await authService.refreshQuestionCount();
+          
+          if (!context.mounted) return;
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('✅ User record created and reset to free tier.'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          );
+          return;
+        } catch (insertError) {
+          print('Debug: Insert also failed: $insertError');
+        }
+      }
+      
       // Check if context is still mounted before showing error snackbar
       if (!context.mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error resetting subscription: $e'),
+          content: Text('❌ Error resetting subscription: $e'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -340,7 +495,7 @@ class SettingsScreen extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // Developer Testing - Reset Subscription Button
+            // Developer Testing - Password Protected
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -358,15 +513,37 @@ class SettingsScreen extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Password protected developer tools',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.orange.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Reset to Free Account
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: () async {
+                        // Verify password first
+                        final isVerified = await _verifyDeveloperPassword(context);
+                        if (!isVerified) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('❌ Invalid password'),
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                          return;
+                        }
+
                         final shouldReset = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('Reset Subscription?'),
+                            title: const Text('Reset to Free Account?'),
                             content: const Text(
                               'This will reset your account to free tier for testing purposes. Continue?',
                             ),
@@ -389,6 +566,63 @@ class SettingsScreen extends StatelessWidget {
                       },
                       icon: const Icon(Icons.refresh, color: Colors.orange, size: 18),
                       label: const Text('Reset to Free Account'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.orange,
+                        side: const BorderSide(color: Colors.orange),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Reset Daily Card
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        // Verify password first
+                        final isVerified = await _verifyDeveloperPassword(context);
+                        if (!isVerified) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('❌ Invalid password'),
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                          return;
+                        }
+
+                        final shouldReset = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Reset Daily Card?'),
+                            content: const Text(
+                              'This will reset today\'s Card of the Day so you can draw again. Continue?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('Cancel'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text('Reset'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (shouldReset == true && context.mounted) {
+                          await _resetDailyCard(context);
+                        }
+                      },
+                      icon: const Icon(Icons.auto_awesome, color: Colors.orange, size: 18),
+                      label: const Text('Reset Daily Card'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.orange,
                         side: const BorderSide(color: Colors.orange),
