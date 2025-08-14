@@ -277,8 +277,7 @@ class AuthService extends ChangeNotifier {
           .single();
 
       final status = response['subscription_status'];
-      final isActive =
-          status == 'paypal_active' || status == 'google_pay_active';
+      final isActive = status == 'paypal_active';
 
       // Update cache and notify if changed
       if (_cachedSubscriptionStatus != isActive) {
