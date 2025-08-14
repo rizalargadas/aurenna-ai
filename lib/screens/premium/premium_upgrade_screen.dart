@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../services/paypal_service.dart';
 import '../../services/auth_service.dart';
+import '../../models/subscription_plan.dart';
 
 class PremiumUpgradeScreen extends StatefulWidget {
   const PremiumUpgradeScreen({super.key});
@@ -17,6 +18,9 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
   late AnimationController _floatController;
   late Animation<double> _glowAnimation;
   late Animation<double> _floatAnimation;
+  
+  // Plan selection
+  SubscriptionPlan _selectedPlan = SubscriptionPlan.monthly;
   
   // Coupon code controller
   final TextEditingController _couponController = TextEditingController();
@@ -125,8 +129,8 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
                 
                 const SizedBox(height: 40),
                 
-                // Pricing card
-                _buildPricingCard(),
+                // Plan selection
+                _buildPlanSelection(),
                 
                 const SizedBox(height: 24),
                 
@@ -292,81 +296,152 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
     );
   }
 
-  Widget _buildPricingCard() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AurennaTheme.electricViolet.withValues(alpha: 0.2),
-            AurennaTheme.cosmicPurple.withValues(alpha: 0.2),
+  Widget _buildPlanSelection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Choose Your Plan',
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            color: AurennaTheme.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 20),
+        ...SubscriptionPlan.values.map((plan) => _buildPlanOption(plan)).toList(),
+      ],
+    );
+  }
+
+  Widget _buildPlanOption(SubscriptionPlan plan) {
+    final isSelected = _selectedPlan == plan;
+    final finalPrice = plan.price - (_selectedPlan == plan ? _discountAmount : 0);
+    
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedPlan = plan;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: isSelected ? LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AurennaTheme.electricViolet.withValues(alpha: 0.2),
+              AurennaTheme.cosmicPurple.withValues(alpha: 0.2),
+            ],
+          ) : null,
+          color: isSelected ? null : AurennaTheme.mysticBlue.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected 
+              ? AurennaTheme.electricViolet 
+              : AurennaTheme.electricViolet.withValues(alpha: 0.3),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? AurennaTheme.electricViolet : AurennaTheme.textSecondary,
+                  width: 2,
+                ),
+                color: isSelected ? AurennaTheme.electricViolet : Colors.transparent,
+              ),
+              child: isSelected
+                ? const Icon(
+                    Icons.check,
+                    size: 12,
+                    color: Colors.white,
+                  )
+                : null,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        plan.name,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AurennaTheme.textPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (plan.savingsText.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AurennaTheme.amberGlow,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            plan.savingsText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    plan.description,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AurennaTheme.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (_discountAmount > 0 && isSelected) ...[
+                        Text(
+                          '\$${plan.price.toStringAsFixed(2)}',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: AurennaTheme.textSecondary,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      Text(
+                        '\$${finalPrice.toStringAsFixed(2)}',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: AurennaTheme.electricViolet,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (plan != SubscriptionPlan.monthly) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          '(\$${plan.monthlyEquivalent.toStringAsFixed(2)}/month)',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AurennaTheme.amberGlow,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
-          width: 2,
-        ),
-      ),
-      child: Column(
-        children: [
-          Text(
-            'Premium Monthly',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: AurennaTheme.textPrimary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (_discountAmount > 0) ...[
-                Text(
-                  '₱179',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AurennaTheme.textSecondary,
-                    decoration: TextDecoration.lineThrough,
-                  ),
-                ),
-                const SizedBox(width: 8),
-              ],
-              Text(
-                '₱${(179 - _discountAmount).toStringAsFixed(0)}',
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                  color: AurennaTheme.electricViolet,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                '/month',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AurennaTheme.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AurennaTheme.amberGlow.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              _discountAmount > 0 
-                ? '✨ ${_discountPercentage.toStringAsFixed(0)}% OFF - $_couponMessage'
-                : '✨ Unlimited Premium Readings',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: AurennaTheme.amberGlow,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -532,7 +607,7 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
     });
 
     final paypalService = PayPalService();
-    final couponDetails = await paypalService.validateCoupon(code);
+    final couponDetails = await paypalService.validateCoupon(code, planPrice: _selectedPlan.price);
 
     setState(() {
       _isValidatingCoupon = false;
@@ -588,6 +663,7 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
       final success = await paypalService.startSubscription(
         context,
         couponCode: _appliedCoupon,
+        selectedPlan: _selectedPlan,
       );
       
       // Dismiss loading
@@ -602,7 +678,8 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
             arguments: {
               'couponCode': _appliedCoupon,
               'discountAmount': _discountAmount,
-              'finalPrice': 179.0 - _discountAmount,
+              'finalPrice': _selectedPlan.price - _discountAmount,
+              'selectedPlan': _selectedPlan,
             },
           );
         }

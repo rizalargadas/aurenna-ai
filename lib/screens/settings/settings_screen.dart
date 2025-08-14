@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../config/theme.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/question_counter.dart';
+import '../../models/subscription_plan.dart';
 import '../auth/login_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -375,31 +376,101 @@ class SettingsScreen extends StatelessWidget {
                                   ?.copyWith(color: AurennaTheme.crystalBlue),
                             ),
                             const SizedBox(height: 12),
-                            SizedBox(
-                              width: double.infinity,
-                              child: OutlinedButton.icon(
-                                onPressed: () {
-                                  // TODO: Add subscription management
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: const Text('Subscription management coming soon!'),
-                                      backgroundColor: AurennaTheme.cosmicPurple,
-                                      behavior: SnackBarBehavior.floating,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                    ),
-                                  );
-                                },
-                                icon: const Icon(Icons.manage_accounts, size: 18),
-                                label: const Text('Manage Subscription'),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  shape: RoundedRectangleBorder(
+                            // Show subscription plan and remaining days
+                            FutureBuilder<List<dynamic>>(
+                              future: Future.wait([
+                                authService.getRemainingPremiumDays(),
+                                authService.getCurrentSubscriptionPlan(),
+                              ]),
+                              builder: (context, snapshot) {
+                                final remainingDays = snapshot.data?[0] as int? ?? 0;
+                                final currentPlan = snapshot.data?[1] as SubscriptionPlan?;
+                                
+                                return Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: AurennaTheme.crystalBlue.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AurennaTheme.crystalBlue.withValues(alpha: 0.3),
+                                    ),
                                   ),
-                                ),
-                              ),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.diamond,
+                                            color: AurennaTheme.crystalBlue,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            currentPlan?.name ?? 'Premium',
+                                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                              color: AurennaTheme.crystalBlue,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          if (currentPlan != null && currentPlan.savingsText.isNotEmpty) ...[
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: AurennaTheme.amberGlow,
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                currentPlan.savingsText,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 9,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.schedule,
+                                            color: AurennaTheme.crystalBlue,
+                                            size: 16,
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            remainingDays > 1 
+                                              ? '$remainingDays days remaining'
+                                              : remainingDays == 1
+                                                ? '1 day remaining'
+                                                : 'Premium expires today',
+                                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                              color: AurennaTheme.crystalBlue,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        remainingDays > 0
+                                          ? 'Your ${currentPlan?.description ?? 'premium'} subscription is active'
+                                          : 'Renew to continue premium access',
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: AurennaTheme.textSecondary,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ],

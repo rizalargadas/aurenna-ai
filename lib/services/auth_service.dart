@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../config/supabase.dart';
+import '../models/subscription_plan.dart';
 
 class AuthService extends ChangeNotifier {
   final SupabaseClient _supabase = SupabaseConfig.client;
@@ -272,12 +274,34 @@ class AuthService extends ChangeNotifier {
 
       final response = await _supabase
           .from('users')
-          .select('subscription_status')
+          .select('subscription_status, subscription_end_date')
           .eq('id', userId)
           .single();
 
       final status = response['subscription_status'];
-      final isActive = status == 'paypal_active';
+      final endDateStr = response['subscription_end_date'] as String?;
+      
+      // Check if subscription is active and not expired
+      bool isActive = false;
+      if (status == 'paypal_active') {
+        if (endDateStr != null) {
+          final endDate = DateTime.parse(endDateStr);
+          final now = DateTime.now();
+          
+          if (now.isBefore(endDate)) {
+            isActive = true;
+          } else {
+            // Subscription expired, update status to free
+            await _supabase.from('users').update({
+              'subscription_status': 'free',
+            }).eq('id', userId);
+            isActive = false;
+          }
+        } else {
+          // No end date set (legacy), keep active
+          isActive = true;
+        }
+      }
 
       // Update cache and notify if changed
       if (_cachedSubscriptionStatus != isActive) {
@@ -295,4 +319,104 @@ class AuthService extends ChangeNotifier {
 
   // Public getter for cached subscription status
   bool? get cachedSubscriptionStatus => _cachedSubscriptionStatus;
+
+  // Get remaining premium days
+  Future<int> getRemainingPremiumDays() async {
+    try {
+      final userId = currentUser?.id;
+      if (userId == null) return 0;
+
+      final response = await _supabase
+          .from('users')
+          .select('subscription_status, subscription_end_date, subscription_start_date')
+          .eq('id', userId)
+          .single();
+
+      final status = response['subscription_status'];
+      final endDateStr = response['subscription_end_date'] as String?;
+      final startDateStr = response['subscription_start_date'] as String?;
+
+      debugPrint('Debug getRemainingPremiumDays:');
+      debugPrint('  Status: $status');
+      debugPrint('  End date: $endDateStr');
+      debugPrint('  Start date: $startDateStr');
+
+      if (status == 'paypal_active') {
+        if (endDateStr != null) {
+          final endDate = DateTime.parse(endDateStr);
+          final now = DateTime.now();
+          
+          // Calculate days remaining, accounting for time zones and ensuring we include today
+          final endDateMidnight = DateTime(endDate.year, endDate.month, endDate.day);
+          final nowMidnight = DateTime(now.year, now.month, now.day);
+          final difference = endDateMidnight.difference(nowMidnight);
+          
+          final remainingDays = difference.inDays + 1; // +1 to include today
+          
+          debugPrint('  End date midnight: $endDateMidnight');
+          debugPrint('  Now midnight: $nowMidnight');
+          debugPrint('  Difference: ${difference.inDays}');
+          debugPrint('  Remaining days (with +1): $remainingDays');
+          
+          return remainingDays > 0 ? remainingDays : 0;
+        } else if (startDateStr != null) {
+          // Fallback: calculate based on start date + 30 days
+          final startDate = DateTime.parse(startDateStr);
+          final calculatedEndDate = startDate.add(const Duration(days: 30));
+          final now = DateTime.now();
+          
+          final calculatedEndMidnight = DateTime(calculatedEndDate.year, calculatedEndDate.month, calculatedEndDate.day);
+          final nowMidnight = DateTime(now.year, now.month, now.day);
+          final difference = calculatedEndMidnight.difference(nowMidnight);
+          
+          final remainingDays = difference.inDays + 1;
+          
+          debugPrint('  Calculated end from start: $calculatedEndDate');
+          debugPrint('  Remaining days (fallback): $remainingDays');
+          
+          return remainingDays > 0 ? remainingDays : 0;
+        }
+      }
+
+      return 0;
+    } catch (e) {
+      debugPrint('Error in getRemainingPremiumDays: $e');
+      return 0;
+    }
+  }
+
+  // Get current subscription plan
+  Future<SubscriptionPlan?> getCurrentSubscriptionPlan() async {
+    try {
+      final userId = currentUser?.id;
+      if (userId == null) return null;
+
+      final response = await _supabase
+          .from('users')
+          .select('subscription_status, subscription_plan')
+          .eq('id', userId)
+          .single();
+
+      final status = response['subscription_status'];
+      final planId = response['subscription_plan'] as String?;
+
+      if (status == 'paypal_active' && planId != null) {
+        switch (planId) {
+          case 'premium_monthly':
+            return SubscriptionPlan.monthly;
+          case 'premium_quarterly':
+            return SubscriptionPlan.quarterly;
+          case 'premium_yearly':
+            return SubscriptionPlan.yearly;
+          default:
+            return SubscriptionPlan.monthly; // fallback
+        }
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint('Error getting current subscription plan: $e');
+      return null;
+    }
+  }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_paypal_payment/flutter_paypal_payment.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/subscription_plan.dart';
 import 'auth_service.dart';
 
 class CouponDetails {
@@ -35,26 +36,32 @@ class PayPalService {
 
   // Subscription details
   static const String subscriptionPlanId = 'aurenna_premium_monthly';
-  static const double basePrice = 179.00;
-  static const String currency = 'PHP';
+  static const double basePrice = 6.99;
+  static const String currency = 'USD';
 
   // Predefined coupon codes
   static final Map<String, Map<String, dynamic>> _coupons = {
     'WELCOME50': {
       'discount_percentage': 50.0,
-      'description': '50% off first month',
+      'description': '50% off your subscription',
       'max_uses': 1,
       'expires': DateTime(2025, 12, 31),
     },
     'AURENNA20': {
       'discount_percentage': 20.0,
-      'description': '20% off monthly subscription',
+      'description': '20% off any subscription plan',
       'max_uses': null,
       'expires': DateTime(2025, 12, 31),
     },
     'AURENNA90': {
       'discount_percentage': 90.0,
-      'description': '90% off monthly subscription',
+      'description': '90% off any subscription plan',
+      'max_uses': null,
+      'expires': DateTime(2026, 12, 31),
+    },
+    'AURENNA99': {
+      'discount_percentage': 99.0,
+      'description': '99% off any subscription plan',
       'max_uses': null,
       'expires': DateTime(2026, 12, 31),
     },
@@ -73,7 +80,7 @@ class PayPalService {
   };
 
   // Validate coupon code
-  Future<CouponDetails> validateCoupon(String code) async {
+  Future<CouponDetails> validateCoupon(String code, {required double planPrice}) async {
     try {
       final upperCode = code.toUpperCase().trim();
 
@@ -129,7 +136,7 @@ class PayPalService {
       }
 
       final discountPercentage = coupon['discount_percentage'] as double;
-      final discountAmount = basePrice * (discountPercentage / 100);
+      final discountAmount = planPrice * (discountPercentage / 100);
 
       return CouponDetails(
         code: upperCode,
@@ -153,6 +160,7 @@ class PayPalService {
   Future<bool> startSubscription(
     BuildContext context, {
     String? couponCode,
+    SubscriptionPlan selectedPlan = SubscriptionPlan.monthly,
   }) async {
     try {
       final userId = _authService.currentUser?.id;
@@ -162,17 +170,19 @@ class PayPalService {
 
       // Check if PayPal credentials are configured
       if (clientId.isEmpty || secretKey.isEmpty) {
-        throw Exception('PayPal credentials not configured. Please add your PayPal Client ID and Secret Key to the .env file.');
+        throw Exception(
+          'PayPal credentials not configured. Please add your PayPal Client ID and Secret Key to the .env file.',
+        );
       }
 
-      double finalPrice = basePrice;
+      double finalPrice = selectedPlan.price;
       CouponDetails? couponDetails;
 
       // Validate and apply coupon if provided
       if (couponCode != null && couponCode.isNotEmpty) {
-        couponDetails = await validateCoupon(couponCode);
+        couponDetails = await validateCoupon(couponCode, planPrice: selectedPlan.price);
         if (couponDetails.isValid) {
-          finalPrice = basePrice - couponDetails.discountAmount;
+          finalPrice = selectedPlan.price - couponDetails.discountAmount;
         } else {
           throw Exception('Invalid coupon: ${couponDetails.message}');
         }
@@ -190,7 +200,7 @@ class PayPalService {
       if (finalPrice <= 0) {
         debugPrint('- Free subscription path taken');
         // Directly update subscription without payment
-        await _handleFreeSubscription(userId, couponDetails!);
+        await _handleFreeSubscription(userId, couponDetails!, selectedPlan);
         return true;
       }
 
@@ -211,19 +221,19 @@ class PayPalService {
                   "currency": currency,
                 },
                 "description":
-                    "Aurenna Premium Monthly Subscription${couponDetails?.isValid == true ? ' (${couponDetails!.code} applied)' : ''}",
+                    "Aurenna Premium ${selectedPlan.name} Subscription${couponDetails?.isValid == true ? ' (${couponDetails!.code} applied)' : ''}",
                 "item_list": {
                   "items": [
                     {
-                      "name": couponDetails?.isValid == true 
-                          ? "Aurenna Premium - ${couponDetails!.code} (${couponDetails.discountPercentage.toStringAsFixed(0)}% OFF)"
-                          : "Aurenna Premium - Monthly",
+                      "name": couponDetails?.isValid == true
+                          ? "Aurenna Premium ${selectedPlan.name} - ${couponDetails!.code} (${couponDetails.discountPercentage.toStringAsFixed(0)}% OFF)"
+                          : "Aurenna Premium - ${selectedPlan.name}",
                       "quantity": 1,
                       "price": finalPrice.toStringAsFixed(2),
                       "currency": currency,
                       "description": couponDetails?.isValid == true
                           ? "Premium subscription with ${couponDetails!.discountPercentage.toStringAsFixed(0)}% discount"
-                          : "Unlimited premium tarot readings for 1 month",
+                          : "Unlimited premium tarot readings for ${selectedPlan.description}",
                     },
                   ],
                 },
@@ -236,6 +246,7 @@ class PayPalService {
                 userId,
                 couponDetails,
                 finalPrice,
+                selectedPlan,
               );
               if (context.mounted) Navigator.pop(context, true);
             },
@@ -261,15 +272,20 @@ class PayPalService {
   Future<void> _handleFreeSubscription(
     String userId,
     CouponDetails couponDetails,
+    SubscriptionPlan selectedPlan,
   ) async {
     try {
-      // Update user subscription status in Supabase
+      // Update user subscription status in Supabase with expiration
+      final subscriptionEndDate = DateTime.now().add(
+        Duration(days: selectedPlan.durationInDays),
+      );
       await _supabase
           .from('users')
           .update({
             'subscription_status': 'paypal_active',
             'subscription_start_date': DateTime.now().toIso8601String(),
-            'subscription_plan': 'premium_monthly',
+            'subscription_end_date': subscriptionEndDate.toIso8601String(),
+            'subscription_plan': selectedPlan.planId,
             'payment_method': 'coupon',
             'paypal_payment_id':
                 'COUPON_${couponDetails.code}_${DateTime.now().millisecondsSinceEpoch}',
@@ -281,7 +297,7 @@ class PayPalService {
       await _supabase.from('payments').insert({
         'user_id': userId,
         'amount': 0,
-        'original_amount': basePrice,
+        'original_amount': selectedPlan.price,
         'discount_amount': couponDetails.discountAmount,
         'coupon_code': couponDetails.code,
         'currency': currency,
@@ -322,6 +338,7 @@ class PayPalService {
     String userId,
     CouponDetails? couponDetails,
     double finalPrice,
+    SubscriptionPlan selectedPlan,
   ) async {
     try {
       // Extract payment details
@@ -330,13 +347,17 @@ class PayPalService {
           params['PayerID'] ?? params['data']?['payer']?['payer_id'] ?? '';
       final status = params['status'] ?? 'completed';
 
-      // Update user subscription status in Supabase
+      // Update user subscription status in Supabase with expiration
+      final subscriptionEndDate = DateTime.now().add(
+        Duration(days: selectedPlan.durationInDays),
+      );
       await _supabase
           .from('users')
           .update({
             'subscription_status': 'paypal_active',
             'subscription_start_date': DateTime.now().toIso8601String(),
-            'subscription_plan': 'premium_monthly',
+            'subscription_end_date': subscriptionEndDate.toIso8601String(),
+            'subscription_plan': selectedPlan.planId,
             'payment_method': 'paypal',
             'paypal_payment_id': paymentId,
             'paypal_payer_id': payerId,
@@ -347,7 +368,7 @@ class PayPalService {
       await _supabase.from('payments').insert({
         'user_id': userId,
         'amount': finalPrice,
-        'original_amount': basePrice,
+        'original_amount': selectedPlan.price,
         'discount_amount': couponDetails?.discountAmount ?? 0,
         'coupon_code': couponDetails?.code,
         'currency': currency,

@@ -19,7 +19,9 @@
       "WebFetch(domain:pub.dev)",
       "Bash(flutter run:*)",
       "Bash(git restore:*)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(flutter:*)",
+      "Bash(dart test:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
