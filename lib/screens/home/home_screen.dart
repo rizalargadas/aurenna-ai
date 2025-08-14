@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../config/theme.dart';
 import '../../services/auth_service.dart';
 import '../settings/settings_screen.dart';
@@ -58,31 +59,45 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           slivers: [
             // Hero Section
             SliverToBoxAdapter(child: _buildHeroSection(isSmallScreen)),
-            
+
             // Question Counter
             SliverToBoxAdapter(child: _buildQuestionCounter(isSmallScreen)),
-            
+
             // Card of the Day
             SliverToBoxAdapter(child: _buildCardOfTheDay(isSmallScreen)),
-            
+
             // Featured Reading
-            SliverToBoxAdapter(child: _buildFeaturedReading(isSmallScreen, isTablet)),
-            
+            SliverToBoxAdapter(
+              child: _buildFeaturedReading(isSmallScreen, isTablet),
+            ),
+
             // Categories Header
             SliverToBoxAdapter(child: _buildCategoriesHeader(isSmallScreen)),
-            
+
             // Love & Relationships Section
-            SliverToBoxAdapter(child: _buildLoveSection(authService, isSmallScreen, isTablet)),
-            
+            SliverToBoxAdapter(
+              child: _buildLoveSection(authService, isSmallScreen, isTablet),
+            ),
+
             // Career & Growth Section
-            SliverToBoxAdapter(child: _buildCareerSection(authService, isSmallScreen, isTablet)),
-            
+            SliverToBoxAdapter(
+              child: _buildCareerSection(authService, isSmallScreen, isTablet),
+            ),
+
             // Spiritual & Mystical Section
-            SliverToBoxAdapter(child: _buildSpiritualSection(authService, isSmallScreen, isTablet)),
-            
+            SliverToBoxAdapter(
+              child: _buildSpiritualSection(
+                authService,
+                isSmallScreen,
+                isTablet,
+              ),
+            ),
+
             // Other Readings Section
-            SliverToBoxAdapter(child: _buildOtherSection(authService, isSmallScreen, isTablet)),
-            
+            SliverToBoxAdapter(
+              child: _buildOtherSection(authService, isSmallScreen, isTablet),
+            ),
+
             // Footer
             SliverToBoxAdapter(child: _buildFooter(isSmallScreen)),
           ],
@@ -116,7 +131,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsScreen(),
+                  ),
                 );
               },
             ),
@@ -152,26 +169,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
             child: Column(
               children: [
-                Text(
-                  '✨',
-                  style: TextStyle(fontSize: isSmallScreen ? 32 : 40),
-                ),
+                Text('✨', style: TextStyle(fontSize: isSmallScreen ? 32 : 40)),
                 SizedBox(height: isSmallScreen ? 8 : 12),
                 Text(
-                  'Welcome back, mystic soul!',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: AurennaTheme.textPrimary,
+                  'Good to see you again!',
+                  style: GoogleFonts.cinzel(
+                    fontSize: 28,
                     fontWeight: FontWeight.w600,
+                    color: AurennaTheme.textPrimary,
                     letterSpacing: 0.5,
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'The universe has messages waiting for you',
+                  'Your cards are feeling chatty — shall we?',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AurennaTheme.textSecondary.withValues(alpha: 0.8),
-                    fontStyle: FontStyle.italic,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -186,9 +200,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget _buildQuestionCounter(bool isSmallScreen) {
     return Container(
       margin: EdgeInsets.fromLTRB(24, isSmallScreen ? 20 : 24, 24, 0),
-      child: Center(
-        child: QuestionCounter(showUpgradeButton: true),
-      ),
+      child: Center(child: QuestionCounter(showUpgradeButton: true)),
     );
   }
 
@@ -196,10 +208,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final now = DateTime.now();
     final tomorrow = DateTime(now.year, now.month, now.day + 1);
     final difference = tomorrow.difference(now);
-    
+
     final hours = difference.inHours;
     final minutes = difference.inMinutes % 60;
-    
+
     if (hours > 0) {
       return '$hours hour${hours > 1 ? 's' : ''} and $minutes minute${minutes > 1 ? 's' : ''}';
     } else {
@@ -210,17 +222,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> _handleCardOfTheDay() async {
     final authService = Provider.of<AuthService>(context, listen: false);
     final userId = authService.currentUser?.id;
-    
+
     if (userId == null) return;
-    
+
     // Check if already drawn today
     final prefs = await SharedPreferences.getInstance();
     final lastDrawKey = 'daily_card_last_draw_$userId';
     final lastDrawDate = prefs.getString(lastDrawKey);
-    
+
     final today = DateTime.now();
-    final todayString = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
-    
+    final todayString =
+        '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+
     if (lastDrawDate == todayString) {
       // Show sassy alert - already drawn today
       if (mounted) {
@@ -325,7 +338,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -353,9 +369,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (mounted) {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => const CardOfTheDayScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const CardOfTheDayScreen()),
         );
       }
     }
@@ -410,9 +424,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   size: 24,
                 ),
               ),
-              
+
               const SizedBox(width: 16),
-              
+
               // Text content
               Expanded(
                 child: Column(
@@ -422,28 +436,35 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       children: [
                         Text(
                           '🌅 Card of the Day',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AurennaTheme.textPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: AurennaTheme.textPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                         const SizedBox(width: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: AurennaTheme.electricViolet.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: AurennaTheme.electricViolet.withOpacity(0.4),
+                              color: AurennaTheme.electricViolet.withOpacity(
+                                0.4,
+                              ),
                             ),
                           ),
                           child: Text(
                             'FREE',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AurennaTheme.electricViolet,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: AurennaTheme.electricViolet,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ),
                       ],
@@ -459,7 +480,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ],
                 ),
               ),
-              
+
               // Arrow
               Icon(
                 Icons.arrow_forward_ios,
@@ -504,7 +525,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ],
           ),
           const SizedBox(height: 16),
-          
+
           // Three-Card Reading - Enhanced Hero Card
           Container(
             padding: EdgeInsets.all(isSmallScreen ? 24 : 28),
@@ -542,19 +563,25 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                     const SizedBox(width: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.green.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: Colors.green.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Text(
                         'FREE',
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 11,
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
                       ),
                     ),
                   ],
@@ -562,9 +589,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 SizedBox(height: isSmallScreen ? 16 : 20),
                 Text(
                   'Three-Card Reading',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: AurennaTheme.textPrimary,
+                  style: GoogleFonts.outfit(
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
+                    color: AurennaTheme.textPrimary,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -593,18 +621,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const QuestionScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const QuestionScreen(),
+                        ),
                       );
                     },
                     icon: const Icon(Icons.auto_awesome, size: 20),
                     label: const Text('Ask the Cards'),
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: isSmallScreen ? 16 : 18),
+                      padding: EdgeInsets.symmetric(
+                        vertical: isSmallScreen ? 16 : 18,
+                      ),
                       backgroundColor: AurennaTheme.electricViolet,
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       elevation: 8,
-                      shadowColor: AurennaTheme.electricViolet.withValues(alpha: 0.5),
+                      shadowColor: AurennaTheme.electricViolet.withValues(
+                        alpha: 0.5,
+                      ),
                     ),
                   ),
                 ),
@@ -662,7 +698,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildLoveSection(AuthService authService, bool isSmallScreen, bool isTablet) {
+  Widget _buildLoveSection(
+    AuthService authService,
+    bool isSmallScreen,
+    bool isTablet,
+  ) {
     return _buildSection(
       title: '💕 Love & Relationships',
       subtitle: 'Matters of the heart',
@@ -715,7 +755,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildCareerSection(AuthService authService, bool isSmallScreen, bool isTablet) {
+  Widget _buildCareerSection(
+    AuthService authService,
+    bool isSmallScreen,
+    bool isTablet,
+  ) {
     return _buildSection(
       title: '💼 Career & Growth',
       subtitle: 'Professional guidance',
@@ -754,7 +798,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildSpiritualSection(AuthService authService, bool isSmallScreen, bool isTablet) {
+  Widget _buildSpiritualSection(
+    AuthService authService,
+    bool isSmallScreen,
+    bool isTablet,
+  ) {
     return _buildSection(
       title: '☪️ Spiritual & Mystical',
       subtitle: 'Journey into the unknown',
@@ -789,11 +837,29 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           borderColor: AurennaTheme.electricViolet,
           isSmallScreen: isSmallScreen,
         ),
+        SizedBox(height: isSmallScreen ? 12 : 16),
+        _buildPremiumCard(
+          authService: authService,
+          title: 'Divine Timing Spread',
+          description: 'Know exactly when to make your move with cosmic precision',
+          icon: '⏰',
+          route: '/divine-timing-reading',
+          colors: [
+            AurennaTheme.stardustPurple.withValues(alpha: 0.2),
+            AurennaTheme.crystalBlue.withValues(alpha: 0.2),
+          ],
+          borderColor: AurennaTheme.stardustPurple,
+          isSmallScreen: isSmallScreen,
+        ),
       ],
     );
   }
 
-  Widget _buildOtherSection(AuthService authService, bool isSmallScreen, bool isTablet) {
+  Widget _buildOtherSection(
+    AuthService authService,
+    bool isSmallScreen,
+    bool isTablet,
+  ) {
     return _buildSection(
       title: '❓ Quick Guidance',
       subtitle: 'Direct answers',
@@ -895,9 +961,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return Consumer<AuthService>(
       builder: (context, authService, child) {
         final hasSubscription = authService.cachedSubscriptionStatus ?? false;
-        
+
         return GestureDetector(
-          onTap: hasSubscription 
+          onTap: hasSubscription
               ? () => Navigator.pushNamed(context, route)
               : () => Navigator.pushNamed(context, '/premium-upgrade'),
           child: Container(
@@ -906,14 +972,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: hasSubscription ? colors : [
-                  AurennaTheme.mysticBlue.withValues(alpha: 0.1),
-                  AurennaTheme.voidBlack.withValues(alpha: 0.1),
-                ],
+                colors: hasSubscription
+                    ? colors
+                    : [
+                        AurennaTheme.mysticBlue.withValues(alpha: 0.1),
+                        AurennaTheme.voidBlack.withValues(alpha: 0.1),
+                      ],
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: hasSubscription 
+                color: hasSubscription
                     ? borderColor.withValues(alpha: 0.4)
                     : AurennaTheme.silverMist.withValues(alpha: 0.2),
                 width: 1.5,
@@ -924,7 +992,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: hasSubscription 
+                    color: hasSubscription
                         ? borderColor.withValues(alpha: 0.2)
                         : AurennaTheme.silverMist.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -944,39 +1012,52 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           Expanded(
                             child: Text(
                               title,
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: hasSubscription 
-                                    ? AurennaTheme.textPrimary
-                                    : AurennaTheme.textSecondary,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(
+                                    color: hasSubscription
+                                        ? AurennaTheme.textPrimary
+                                        : AurennaTheme.textSecondary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
                           ),
                           if (!hasSubscription)
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
-                                color: AurennaTheme.amberGlow.withValues(alpha: 0.2),
+                                color: AurennaTheme.amberGlow.withValues(
+                                  alpha: 0.2,
+                                ),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 'PREMIUM',
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: AurennaTheme.amberGlow,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 9,
-                                ),
+                                style: Theme.of(context).textTheme.labelSmall
+                                    ?.copyWith(
+                                      color: AurennaTheme.amberGlow,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 9,
+                                    ),
                               ),
                             ),
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        hasSubscription ? description : 'Unlock ${title.toLowerCase()}',
+                        hasSubscription
+                            ? description
+                            : 'Unlock ${title.toLowerCase()}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: hasSubscription 
-                              ? AurennaTheme.textSecondary.withValues(alpha: 0.9)
-                              : AurennaTheme.textSecondary.withValues(alpha: 0.7),
+                          color: hasSubscription
+                              ? AurennaTheme.textSecondary.withValues(
+                                  alpha: 0.9,
+                                )
+                              : AurennaTheme.textSecondary.withValues(
+                                  alpha: 0.7,
+                                ),
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -986,7 +1067,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
                 Icon(
                   hasSubscription ? Icons.arrow_forward_ios : Icons.lock,
-                  color: hasSubscription 
+                  color: hasSubscription
                       ? borderColor.withValues(alpha: 0.7)
                       : AurennaTheme.textSecondary.withValues(alpha: 0.5),
                   size: 16,

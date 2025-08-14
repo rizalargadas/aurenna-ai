@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../config/theme.dart';
 import '../../services/tarot_service.dart';
 import '../../services/auth_service.dart';
+import '../../services/error_handler.dart';
 import '../../models/reading.dart';
 import 'reading_result_screen.dart';
 
@@ -316,57 +317,56 @@ class _CardOfTheDayScreenState extends State<CardOfTheDayScreen>
     } catch (e) {
       debugPrint('Card of the Day Error: $e');
       if (mounted) {
-        // Show detailed error dialog instead of brief snackbar
+        // Show user-friendly error dialog
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Card Drawing Error'),
+            backgroundColor: AurennaTheme.voidBlack,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: AurennaTheme.cosmicPurple.withValues(alpha: 0.5),
+                width: 2,
+              ),
+            ),
+            title: Text(
+              ErrorHandler.getErrorTitle(e),
+              style: TextStyle(
+                color: AurennaTheme.textPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('There was an error drawing your daily card:'),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
-                    ),
-                    child: Text(
-                      '$e',
-                      style: const TextStyle(
-                        fontFamily: 'monospace',
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Common solutions:\n'
-                    '• Make sure you ran the database setup SQL\n'
-                    '• Check your internet connection\n'
-                    '• Try again in a few seconds',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                ],
+              child: Text(
+                ErrorHandler.getUserFriendlyMessage(e),
+                style: TextStyle(
+                  color: AurennaTheme.textPrimary,
+                  fontSize: 16,
+                  height: 1.4,
+                ),
               ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
+                child: Text(
+                  'Got It',
+                  style: TextStyle(color: AurennaTheme.textSecondary),
+                ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  // Try again
-                  _drawDailyCard();
-                },
-                child: const Text('Try Again'),
-              ),
+              if (!ErrorHandler.isNetworkError(e)) // Only show retry for non-network errors
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _drawDailyCard();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AurennaTheme.cosmicPurple,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Try Again'),
+                ),
             ],
           ),
         );

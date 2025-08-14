@@ -15,8 +15,13 @@
       "Bash(flutter clean:*)",
       "Bash(dart analyze:*)",
       "Bash(rm:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "WebFetch(domain:pub.dev)",
+      "Bash(flutter run:*)",
+      "Bash(git restore:*)",
+      "Bash(true)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   }
 }

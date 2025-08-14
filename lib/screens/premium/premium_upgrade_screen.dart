@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:pay/pay.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../services/paypal_service.dart';
+import '../../services/google_pay_service.dart';
 import '../../services/auth_service.dart';
 
 class PremiumUpgradeScreen extends StatefulWidget {
@@ -372,6 +376,12 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
   }
 
   Widget _buildUpgradeButtons() {
+    final finalPrice = 179.0 - _discountAmount;
+    final paymentItems = GooglePayService.getPaymentItems(
+      'Aurenna AI Premium Annual',
+      finalPrice,
+    );
+    
     return Column(
       children: [
         SizedBox(
@@ -389,20 +399,8 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
           ),
         ),
         const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: _startGooglePaySubscription,
-            icon: const Icon(Icons.account_balance_wallet),
-            label: const Text('Subscribe with Google Pay'),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ),
+        // Google Pay / Apple Pay Button
+        _buildMobilePayButton(paymentItems),
       ],
     );
   }
@@ -661,17 +659,254 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
     }
   }
 
-  void _startGooglePaySubscription() {
-    // TODO: Implement Google Pay subscription
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Google Pay subscription coming soon! 📱'),
-        backgroundColor: AurennaTheme.cosmicPurple,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+  
+  void _onGooglePayResult(Map<String, dynamic> result) async {
+    // Process the payment result
+    GooglePayService.onGooglePayResult(result);
+    
+    // Show loading while processing
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => const Center(
+        child: CircularProgressIndicator(
+          color: AurennaTheme.electricViolet,
         ),
       ),
+    );
+    
+    try {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final userId = authService.currentUser?.id;
+      
+      if (userId == null) {
+        throw Exception('User not logged in');
+      }
+      
+      final supabase = Supabase.instance.client;
+      final finalPrice = 179.0 - _discountAmount;
+      
+      // Extract payment token from result
+      final paymentToken = result['paymentMethodData']?['tokenizationData']?['token'] ?? 
+                          result.toString();
+      
+      // Safely truncate token if needed (store first 100 chars max)
+      final tokenToStore = paymentToken.toString().length > 100 
+          ? paymentToken.toString().substring(0, 100)
+          : paymentToken.toString();
+      
+      // Update user subscription status in Supabase
+      await supabase
+          .from('users')
+          .update({
+            'subscription_status': 'google_pay_active',
+            'subscription_start_date': DateTime.now().toIso8601String(),
+            'subscription_plan': 'premium_annual',
+            'payment_method': 'google_pay',
+          })
+          .eq('id', userId);
+      
+      // Store payment record
+      await supabase.from('payments').insert({
+        'user_id': userId,
+        'amount': finalPrice,
+        'original_amount': 179.0,
+        'discount_amount': _discountAmount,
+        'coupon_code': _appliedCoupon,
+        'currency': 'PHP',
+        'payment_method': 'google_pay',
+        'payment_id': 'GPAY_${DateTime.now().millisecondsSinceEpoch}',
+        'payer_id': tokenToStore, // Store truncated token as payer_id
+        'status': 'completed',
+        'created_at': DateTime.now().toIso8601String(),
+      });
+      
+      // Record coupon usage if applicable
+      if (_appliedCoupon != null) {
+        try {
+          await supabase.from('coupon_usage').insert({
+            'user_id': userId,
+            'coupon_code': _appliedCoupon,
+            'discount_amount': _discountAmount,
+            'used_at': DateTime.now().toIso8601String(),
+          });
+        } catch (e) {
+          // Coupon usage table might not exist
+          debugPrint('Error recording coupon usage: $e');
+        }
+      }
+      
+      // Refresh auth service subscription status
+      await authService.hasActiveSubscription();
+      
+      // Dismiss loading
+      if (mounted) Navigator.pop(context);
+      
+      // Navigate to success screen
+      if (mounted) {
+        Navigator.pushReplacementNamed(
+          context,
+          '/payment-success',
+          arguments: {
+            'couponCode': _appliedCoupon,
+            'discountAmount': _discountAmount,
+            'finalPrice': finalPrice,
+            'paymentMethod': 'Google Pay',
+          },
+        );
+      }
+    } catch (e) {
+      // Dismiss loading
+      if (mounted) Navigator.pop(context);
+      
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment processing failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Widget _buildMobilePayButton(List<PaymentItem> paymentItems) {
+    // Check if we're on a mobile platform
+    final bool isMobilePlatform = !kIsWeb && 
+        (defaultTargetPlatform == TargetPlatform.android || 
+         defaultTargetPlatform == TargetPlatform.iOS);
+    
+    if (!isMobilePlatform) {
+      // Show info message on desktop/web
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AurennaTheme.mysticBlue.withValues(alpha: 0.05),
+          border: Border.all(color: AurennaTheme.electricViolet.withValues(alpha: 0.2)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              Icons.phone_android,
+              color: AurennaTheme.textSecondary,
+              size: 32,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Google Pay / Apple Pay',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: AurennaTheme.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Available on mobile devices only',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AurennaTheme.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    // Show appropriate payment button for mobile
+    final bool isIOS = defaultTargetPlatform == TargetPlatform.iOS;
+    
+    // Load configuration and show button
+    return FutureBuilder<PaymentConfiguration>(
+      future: isIOS 
+          ? GooglePayService.applePayConfig 
+          : GooglePayService.googlePayConfig,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          // Show error with details for debugging
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Icon(Icons.error_outline, color: Colors.red),
+                const SizedBox(height: 8),
+                Text(
+                  isIOS ? 'Apple Pay Error' : 'Google Pay Error',
+                  style: TextStyle(color: AurennaTheme.textPrimary, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${snapshot.error}',
+                  style: TextStyle(color: AurennaTheme.textSecondary, fontSize: 12),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        if (!snapshot.hasData) {
+          // Loading state
+          return OutlinedButton.icon(
+            onPressed: null,
+            icon: const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AurennaTheme.electricViolet,
+              ),
+            ),
+            label: Text(isIOS ? 'Loading Apple Pay...' : 'Loading Google Pay...'),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          );
+        }
+        
+        // Show the actual payment button
+        if (isIOS) {
+          return ApplePayButton(
+            paymentConfiguration: snapshot.data!,
+            paymentItems: paymentItems,
+            type: ApplePayButtonType.subscribe,
+            width: double.infinity,
+            height: 50,
+            onPaymentResult: _onGooglePayResult,
+            loadingIndicator: const Center(
+              child: CircularProgressIndicator(
+                color: AurennaTheme.electricViolet,
+              ),
+            ),
+          );
+        } else {
+          return GooglePayButton(
+            paymentConfiguration: snapshot.data!,
+            paymentItems: paymentItems,
+            type: GooglePayButtonType.subscribe,
+            width: double.infinity,
+            height: 50,
+            onPaymentResult: _onGooglePayResult,
+            loadingIndicator: const Center(
+              child: CircularProgressIndicator(
+                color: AurennaTheme.electricViolet,
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 }
