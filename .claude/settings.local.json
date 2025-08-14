@@ -21,7 +21,11 @@
       "Bash(git restore:*)",
       "Bash(true)",
       "Bash(flutter:*)",
-      "Bash(dart test:*)"
+      "Bash(dart test:*)",
+      "Bash(mkdir:*)",
+      "Bash(keytool:*)",
+      "Bash(where java)",
+      "Bash(\"C:\\Program Files\\Android\\Android Studio\\jbr\\bin\\keytool.exe\" -list -printcert -jarfile build/app/outputs/bundle/release/app-release.aab)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
