@@ -8,6 +8,7 @@ import '../../utils/reading_messages.dart';
 import '../../utils/share_reading.dart';
 import '../../widgets/reading_animation_v1.dart';
 import '../../widgets/tarot_spread_grid.dart';
+import '../../utils/premium_check.dart';
 
 class CareerReadingScreen extends StatefulWidget {
   const CareerReadingScreen({super.key});
@@ -41,6 +42,9 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
     
     // Select generation message once for this session
     _generationMessage = ReadingMessages.getRandomGenerationMessage();
+    
+    // Check premium access
+    PremiumCheck.requirePremiumAccess(context);
   }
 
   @override

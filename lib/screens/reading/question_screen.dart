@@ -37,11 +37,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
       if (!hasQuestions && !hasSubscription) {
         if (mounted) {
-          ErrorDialog.show(
-            context,
-            'You have no free questions remaining.',
-            onRetry: null,
-          );
+          Navigator.pushNamed(context, '/premium-upgrade');
         }
         return;
       }

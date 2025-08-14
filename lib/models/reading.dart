@@ -12,6 +12,7 @@ enum ReadingType {
   career,
   careerChange,
   cardOfTheDay,
+  divineTiming,
 }
 
 class Reading {
@@ -162,6 +163,15 @@ class DrawnCard {
         case 0: return 'Current Situation';
         case 1: return 'Action to Take';
         case 2: return 'Potential Outcome';
+        default: return 'Unknown';
+      }
+    } else if (readingType == ReadingType.divineTiming) {
+      switch (position) {
+        case 0: return 'Present Energy';
+        case 1: return 'Ideal Window';
+        case 2: return 'What to Prepare';
+        case 3: return 'Perfect Outcome';
+        case 4: return 'Potential Delays';
         default: return 'Unknown';
       }
     } else {

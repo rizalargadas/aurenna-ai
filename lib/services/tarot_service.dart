@@ -9,6 +9,7 @@ import '../data/tarot_deck.dart';
 import '../models/tarot_card.dart';
 import '../models/reading.dart';
 import '../services/auth_service.dart';
+import '../services/error_handler.dart';
 
 class TarotService {
   static const _uuid = Uuid();
@@ -324,7 +325,7 @@ EXAMPLE VIBE:
         throw Exception('Unable to generate reading. Please try again.');
       }
     } catch (e) {
-      throw Exception('Error generating reading: $e');
+      throw Exception(ErrorHandler.getUserFriendlyMessage(e));
     }
   }
 
@@ -466,7 +467,7 @@ Alright, here's your life in HD: [Sum up the major theme in one sentence]. [Conn
         throw Exception('Unable to generate reading. Please try again.');
       }
     } catch (e) {
-      throw Exception('Error generating general reading: $e');
+      throw Exception(ErrorHandler.getUserFriendlyMessage(e));
     }
   }
 
@@ -583,7 +584,7 @@ Okay, here's the real deal about you two: [Sum up the actual dynamic in one blun
         throw Exception('Unable to generate reading. Please try again.');
       }
     } catch (e) {
-      throw Exception('Error generating compatibility reading: $e');
+      throw Exception(ErrorHandler.getUserFriendlyMessage(e));
     }
   }
 
@@ -705,7 +706,7 @@ Alright, here's the deal: [Sum up what this really is in one blunt sentence—"T
         throw Exception('Unable to generate reading. Please try again.');
       }
     } catch (e) {
-      throw Exception('Error generating situationship reading: $e');
+      throw Exception(ErrorHandler.getUserFriendlyMessage(e));
     }
   }
 
@@ -844,7 +845,7 @@ Okay, here's the deal: [Sum up who they were in 1-2 sentences]. You lived, you l
         throw Exception('Unable to generate reading. Please try again.');
       }
     } catch (e) {
-      throw Exception('Error generating past life reading: $e');
+      throw Exception(ErrorHandler.getUserFriendlyMessage(e));
     }
   }
 
@@ -957,7 +958,7 @@ Alright, decision time. Here's what the cards are screaming: [State the clear ve
         throw Exception('Unable to generate reading. Please try again.');
       }
     } catch (e) {
-      throw Exception('Error generating relationship decision reading: $e');
+      throw Exception(ErrorHandler.getUserFriendlyMessage(e));
     }
   }
 
@@ -1074,7 +1075,7 @@ Okay, let's cut through the corporate BS: [Sum up their actual career situation 
         throw Exception('Unable to generate reading. Please try again.');
       }
     } catch (e) {
-      throw Exception('Error generating career reading: $e');
+      throw Exception(ErrorHandler.getUserFriendlyMessage(e));
     }
   }
 
@@ -1182,8 +1183,158 @@ Alright, moment of truth: [State their situation bluntly—"You're miserable and
         throw Exception('Unable to generate reading. Please try again.');
       }
     } catch (e) {
-      throw Exception('Error generating career change reading: $e');
+      throw Exception(ErrorHandler.getUserFriendlyMessage(e));
     }
+  }
+
+  // Generate Divine Timing reading using OpenAI
+  static Future<String> generateDivineTimingReading(
+    List<DrawnCard> cards, {
+    String? question,
+  }) async {
+    final prompt = _buildDivineTimingPrompt(
+      cards,
+      question: question,
+    );
+
+    try {
+      final response = await http.post(
+        Uri.parse(OpenAIConfig.chatCompletionsEndpoint),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${OpenAIConfig.apiKey}',
+        },
+        body: jsonEncode({
+          'model': OpenAIConfig.model,
+          'messages': [
+            {
+              'role': 'system',
+              'content': '''# Divine Timing Spread Tarot Reading Prompt
+
+You are Aurenna, a premium tarot reader — part mystic, part truth-bomber, part ride-or-die bestie. Your Divine Timing readings feel like a \$150 session with your most psychic friend who's DONE watching you overthink when to make your move: brutally honest, surprisingly specific, and calling out EXACTLY when the universe is green-lighting your next step.
+
+[PERSONALITY & STYLE]
+- Speak like a best friend who's psychic AF about timing and won't let you miss your moment.
+- Be SPECIFIC: Not "good things come to those who wait" but "August is your month—specifically the 3rd week."
+- Be FRANK: "You've been waiting for the 'perfect' time for 6 months. This IS the time."
+- Be REAL: Talk like you're reading their cosmic calendar over coffee, not delivering fortune cookie wisdom.
+- Be FUNNY: Timing is everything and sometimes everything is chaos. "Mercury retrograde AND your ex texting? Universe has jokes."
+- Be LOVING: Deliver timing truth with encouragement. "Yes, it's soon. Yes, you're ready. Here's proof."
+- Be PRACTICAL: Give them actual timing strategies and preparation steps.
+- Be VALUABLE: Make them go, "Holy shit, that's exactly when I need to move."
+
+[ETHICAL & SAFETY RULES]
+- Handle timing guidance like their smartest friend:
+  * Early timing? "The energy's building. Get your ducks in a row now."
+  * Delayed timing? "I know you're impatient, but the foundation isn't ready yet."
+  * Perfect timing? "This is IT. The window is open. Don't overthink it."
+  * Never create anxiety about missing "the moment."
+  * Always balance patience with action.
+  * If timing is uncertain: "The cards are saying 'trust the process'—I know, annoying, but true."
+
+[TASK INSTRUCTION — DIVINE TIMING READING VERSION]
+When given a 5-card Divine Timing Reading with these positions:
+1. Present Energy - Current situation around the question
+2. Ideal Window - When the stars align for action
+3. What to Prepare - What needs to be in place first
+4. Perfect Outcome - What happens when timing is right
+5. Potential Delays - What might slow things down
+
+Your job is to give them cosmic precision on when to make their move, like their bestie who can see their timeline AND their readiness level.
+
+Instructions:
+1. **Read the CURRENT energy accurately**, not what they want to hear about timing.
+2. **Be SPECIFIC about windows**. Seasons, months, even weeks if the cards are clear.
+3. **Give PRACTICAL preparation steps**. What actually needs to happen before they move.
+4. **Paint the REALISTIC outcome** when timing aligns perfectly.
+5. **Address delays with SOLUTIONS**. Don't just warn—give workarounds.
+6. **Make it actionable TODAY**. What can they start preparing right now?
+
+FORMAT (separate each card interpretation into its own paragraph):
+
+✨ Present Energy - [CARD Drawn] ✨
+The REAL energy surrounding their timing question right now. Call out their impatience, their fear, their readiness level—whatever the card reveals about where they actually are with this situation. 3 to 5 sentences long.
+
+✨ Ideal Window - [CARD Drawn] ✨
+When the cosmic conditions are PERFECT for their move. Be specific about timing—seasons, months, planetary influences. Include what makes this window special and why waiting for it pays off. 3 to 5 sentences long.
+
+✨ What to Prepare - [CARD Drawn] ✨
+The EXACT preparation required before they can move. Not vague "get ready" advice—specific tasks, conversations, research, or foundation-building they need to complete first. 3 to 5 sentences long.
+
+✨ Perfect Outcome - [CARD Drawn] ✨
+What ACTUALLY happens when they nail the timing. Paint the picture of success, but keep it realistic. Include how their preparation pays off and what the reward looks like. 3 to 5 sentences long.
+
+✨ Potential Delays - [CARD Drawn] ✨
+What might push their timeline back and HOW TO HANDLE IT. Don't just warn about delays—give them strategies to minimize or work around them. 3 to 5 sentences long.
+
+☪️ YOUR DIVINE TIMING GAME PLAN: ☪️
+Bottom line: [State their current timing situation bluntly—"You're chomping at the bit but the universe says 'not yet'" or "The window is literally opening and you're still making excuses"]. The cards are showing that [specific timing window] is your sweet spot, BUT only if you [specific preparation steps]. Here's your action plan: [Give them ONE thing to do this week to prepare], then [second step for next month]. The universe isn't keeping you waiting to be cruel—it's giving you time to [specific reason from the cards]. When [ideal window timeframe] arrives, you'll either be ready to fly or still wondering "what if." I'm betting on you being ready. Now get to work.
+
+**Tone:** Think psychic best friend who can see your perfect timing window and won't let you miss it through overthinking or under-preparing.
+**Goal:** Give them specific timing guidance and preparation steps so they can move with cosmic confidence when their moment arrives.''',
+            },
+            {'role': 'user', 'content': prompt},
+          ],
+          'temperature': OpenAIConfig.temperature,
+          'max_tokens': OpenAIConfig.maxTokensGeneral,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['choices'][0]['message']['content'];
+      } else if (response.statusCode == 401) {
+        throw Exception(
+          'Authentication failed. Please check your API configuration.',
+        );
+      } else if (response.statusCode == 429) {
+        throw Exception('Too many requests. Please try again in a moment.');
+      } else if (response.statusCode == 500 || response.statusCode == 503) {
+        throw Exception(
+          'The AI service is temporarily unavailable. Please try again later.',
+        );
+      } else {
+        throw Exception('Unable to generate reading. Please try again.');
+      }
+    } catch (e) {
+      throw Exception(ErrorHandler.getUserFriendlyMessage(e));
+    }
+  }
+
+  // Build the prompt for Divine Timing reading
+  static String _buildDivineTimingPrompt(
+    List<DrawnCard> cards, {
+    String? question,
+  }) {
+    final buffer = StringBuffer();
+
+    if (question != null && question.isNotEmpty) {
+      buffer.writeln('5-Card Divine Timing Reading for: "$question"\n');
+    } else {
+      buffer.writeln('5-Card Divine Timing Reading:\n');
+    }
+
+    for (final drawnCard in cards) {
+      final orientation = drawnCard.isReversed ? 'Reversed' : 'Upright';
+      buffer.writeln(
+        '${drawnCard.positionName} - ${drawnCard.card.fullName} ($orientation)',
+      );
+      buffer.writeln('Meaning: ${drawnCard.meaning}');
+      buffer.writeln('Keywords: ${drawnCard.card.keywords}');
+      buffer.writeln('Description: ${drawnCard.card.description}\n');
+    }
+
+    buffer.writeln('''Provide a Divine Timing reading that:
+1. Analyzes the current energy around their timing question
+2. Identifies the ideal window for action with specific timeframes
+3. Details what preparation is needed before they can move
+4. Describes the perfect outcome when timing aligns
+5. Addresses potential delays and how to handle them
+6. Feels like a \$150 session with a psychic who sees their timeline clearly
+7. Uses warm, frank language with cosmic specificity
+8. Provides actionable timing guidance and preparation steps''');
+
+    return buffer.toString();
   }
 
   // Build the prompt for OpenAI
@@ -1830,7 +1981,7 @@ Break it down in best friend language. Start with the answer again, then give th
         throw Exception('Unable to generate reading. Please try again.');
       }
     } catch (e) {
-      throw Exception('Error generating yes/no reading: $e');
+      throw Exception(ErrorHandler.getUserFriendlyMessage(e));
     }
   }
 
@@ -2242,7 +2393,7 @@ Break it down in best friend language. Start with the answer again, then give th
       print('Error getting daily card reading: $e');
       print('Error type: ${e.runtimeType}');
       print('Error details: ${e.toString()}');
-      rethrow;
+      throw Exception(ErrorHandler.getUserFriendlyMessage(e));
     }
   }
 
@@ -2332,7 +2483,7 @@ The REAL energy of your day ahead. Start with the main theme in one punchy sente
       }
     } catch (e) {
       print('Error generating Card of the Day reading: $e');
-      rethrow;
+      throw Exception(ErrorHandler.getUserFriendlyMessage(e));
     }
   }
 }
