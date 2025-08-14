@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../config/theme.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/question_counter.dart';
+import '../auth/login_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -665,7 +666,11 @@ class SettingsScreen extends StatelessWidget {
                 if (shouldSignOut == true) {
                   await authService.signOut();
                   if (context.mounted) {
-                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    // Navigate directly to login screen and clear navigation stack
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      (route) => false,
+                    );
                   }
                 }
               },

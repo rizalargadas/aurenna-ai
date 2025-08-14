@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../services/auth_service.dart';
+import 'email_verification_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -34,42 +35,130 @@ class _SignupScreenState extends State<SignupScreen> {
 
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+      
+      // Sign up with password
       await authService.signUp(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+        email: email,
+        password: password,
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              'Welcome to Aurenna! Check your email to verify your account.',
-              style: TextStyle(color: Colors.white),
-            ),
-            backgroundColor: AurennaTheme.crystalBlue,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+        // Navigate to email verification screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EmailVerificationScreen(
+              email: email,
+              password: password,
             ),
           ),
         );
-        Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              e.toString().replaceAll('Exception: ', ''),
-              style: const TextStyle(color: Colors.white),
+        String errorMessage = e.toString().replaceAll('Exception: ', '');
+        
+        // Check for rate limit error
+        if (errorMessage.toLowerCase().contains('rate limit')) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                title: Row(
+                  children: [
+                    Icon(
+                      Icons.timer_off,
+                      color: AurennaTheme.amberGlow,
+                      size: 28,
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Too Many Attempts',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'You\'ve requested too many verification codes. For security, we limit the number of codes sent.',
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Please try again in:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AurennaTheme.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AurennaTheme.amberGlow.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AurennaTheme.amberGlow.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.access_time,
+                            color: AurennaTheme.amberGlow,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            '15-30 minutes',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      'Got it',
+                      style: TextStyle(
+                        color: AurennaTheme.crystalBlue,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                errorMessage,
+                style: const TextStyle(color: Colors.white),
+              ),
+              backgroundColor: AurennaTheme.errorColor,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
-            backgroundColor: AurennaTheme.errorColor,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
+          );
+        }
       }
     } finally {
       if (mounted) {
@@ -202,8 +291,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                           onPressed: () {
                             setState(() {
-                              _obscureConfirmPassword =
-                                  !_obscureConfirmPassword;
+                              _obscureConfirmPassword = !_obscureConfirmPassword;
                             });
                           },
                         ),
@@ -218,6 +306,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         return null;
                       },
                     ),
+
 
                     const SizedBox(height: 32),
 
@@ -235,7 +324,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 ),
                               ),
                             )
-                          : const Text('Start My Journey'),
+                          : const Text('Create Account'),
                     ),
 
                     const SizedBox(height: 24),
@@ -256,6 +345,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           _buildBenefit('🤖 AI-powered tarot readings'),
                           _buildBenefit('💫 No judgment, just insights'),
                           _buildBenefit('📱 Access anywhere, anytime'),
+                          _buildBenefit('🔐 Secure email verification'),
                         ],
                       ),
                     ),

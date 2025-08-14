@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../services/auth_service.dart';
+import '../home/home_screen.dart';
 import 'signup_screen.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -36,12 +38,25 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
+
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+          (route) => false,
+        );
+      }
     } catch (e) {
       if (mounted) {
+        String errorMessage = e.toString().replaceAll('Exception: ', '');
+        
+        // Show user-friendly error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              e.toString().replaceAll('Exception: ', ''),
+              errorMessage.contains('Invalid login credentials')
+                  ? 'Incorrect email or password. Please try again.'
+                  : errorMessage,
               style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: AurennaTheme.errorColor,
@@ -82,9 +97,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 32),
 
-              // Welcome Text with mystical touch
+              // Welcome Text
               Text(
-                'Hey there,\nCosmic Soul',
+                'Welcome Back,\nCosmic Soul ✨',
                 style: Theme.of(context).textTheme.displayLarge,
                 textAlign: TextAlign.center,
               ),
@@ -92,7 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 8),
 
               Text(
-                'Ready to see what the universe has been gossiping about?',
+                'The universe has been waiting for you',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: AurennaTheme.textSecondary,
                 ),
@@ -157,6 +172,30 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                     ),
 
+                    const SizedBox(height: 12),
+
+                    // Forgot Password Link
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ForgotPasswordScreen(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'Forgot Password?',
+                          style: TextStyle(
+                            color: AurennaTheme.crystalBlue,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+
                     const SizedBox(height: 24),
 
                     // Login Button
@@ -173,39 +212,31 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             )
-                          : const Text('Let\'s get mystical'),
+                          : const Text('Sign In'),
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 32),
 
-                    // Forgot Password
-                    TextButton(
-                      onPressed: () {
-                        // TODO: Implement forgot password
-                      },
-                      child: const Text('Forgot password? It happens'),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Divider with text
+                    // Divider
                     Row(
                       children: [
                         Expanded(
                           child: Divider(
-                            color: AurennaTheme.textSecondary.withValues(alpha: 0.3),
+                            color: AurennaTheme.textSecondary.withOpacity(0.3),
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
-                            'New here?',
-                            style: Theme.of(context).textTheme.bodyMedium,
+                            'New to Aurenna?',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AurennaTheme.textSecondary,
+                            ),
                           ),
                         ),
                         Expanded(
                           child: Divider(
-                            color: AurennaTheme.textSecondary.withValues(alpha: 0.3),
+                            color: AurennaTheme.textSecondary.withOpacity(0.3),
                           ),
                         ),
                       ],
@@ -223,25 +254,21 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         );
                       },
-                      child: const Text('Begin Your Journey'),
+                      child: const Text('Create Account'),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Fun footer text
+                    Text(
+                      '🔮 Your future is calling',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AurennaTheme.textSecondary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Tagline
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: AurennaTheme.mysticalGradientBox,
-                child: Text(
-                  'Real talk. Real cards. Real insights. ✨',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontStyle: FontStyle.italic,
-                    color: AurennaTheme.silverMist,
-                  ),
-                  textAlign: TextAlign.center,
                 ),
               ),
             ],

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:app_links/app_links.dart';
 import 'config/theme.dart';
 import 'config/app_themes.dart';
 import 'config/supabase.dart';
 import 'screens/auth/login_screen.dart';
+import 'screens/auth/verification_success_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/reading/reading_history_screen.dart';
 import 'screens/reading/general_reading_screen.dart';
@@ -92,6 +95,7 @@ class _MaterialAppWithThemeState extends State<_MaterialAppWithTheme> {
             '/career-change': (context) => const CareerChangeScreen(),
             '/premium-upgrade': (context) => const PremiumUpgradeScreen(),
             '/payment-success': (context) => const PaymentSuccessScreen(),
+            '/verification-success': (context) => const VerificationSuccessScreen(),
           },
         );
       },
@@ -99,12 +103,38 @@ class _MaterialAppWithThemeState extends State<_MaterialAppWithTheme> {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
 
+class _AuthWrapperState extends State<AuthWrapper> {
+  late AppLinks _appLinks;
+
+  @override
+  void initState() {
+    super.initState();
+    _appLinks = AppLinks();
+    _handleIncomingLinks();
+  }
+
+  void _handleIncomingLinks() {
+    _appLinks.uriLinkStream.listen((uri) {
+      if (uri.scheme == 'aurenna' && uri.host == 'auth-callback') {
+        // Show success screen after successful verification
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => const VerificationSuccessScreen(),
+          ),
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return StreamBuilder(
       stream: SupabaseConfig.client.auth.onAuthStateChange,
       builder: (context, snapshot) {

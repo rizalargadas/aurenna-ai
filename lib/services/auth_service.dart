@@ -28,15 +28,29 @@ class AuthService extends ChangeNotifier {
     super.dispose();
   }
 
-  // Sign up with email and password
-  Future<AuthResponse> signUp({
+  // Sign up with email (OTP)
+  Future<void> signUpWithOtp({
     required String email,
-    required String password,
   }) async {
     try {
-      final response = await _supabase.auth.signUp(
+      await _supabase.auth.signInWithOtp(
         email: email,
-        password: password,
+      );
+    } catch (e) {
+      throw Exception('Sign up failed: ${e.toString()}');
+    }
+  }
+
+  // Verify OTP
+  Future<AuthResponse> verifyOtp({
+    required String email,
+    required String token,
+  }) async {
+    try {
+      final response = await _supabase.auth.verifyOTP(
+        type: OtpType.email,
+        email: email,
+        token: token,
       );
 
       if (response.user != null) {
@@ -48,11 +62,92 @@ class AuthService extends ChangeNotifier {
 
       return response;
     } catch (e) {
+      throw Exception('Verification failed: ${e.toString()}');
+    }
+  }
+
+  // Resend OTP
+  Future<void> resendOtp(String email) async {
+    try {
+      await _supabase.auth.signInWithOtp(
+        email: email,
+      );
+    } catch (e) {
+      throw Exception('Failed to resend code: ${e.toString()}');
+    }
+  }
+
+  // Sign up with email and password - requires OTP verification
+  Future<AuthResponse> signUp({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await _supabase.auth.signUp(
+        email: email,
+        password: password,
+        emailRedirectTo: null, // We'll handle verification via OTP
+      );
+
+      // Note: User won't be automatically signed in until email is verified
+      return response;
+    } catch (e) {
       throw Exception('Sign up failed: ${e.toString()}');
     }
   }
 
-  // Sign in with email and password
+  // Verify OTP for email confirmation
+  Future<AuthResponse> verifyOTP({
+    required String email,
+    required String token,
+    required String type,
+  }) async {
+    try {
+      final response = await _supabase.auth.verifyOTP(
+        type: type == 'signup' ? OtpType.signup : OtpType.email,
+        email: email,
+        token: token,
+      );
+
+      if (response.user != null) {
+        // The database trigger will automatically create the user profile
+        if (!_disposed) {
+          notifyListeners();
+        }
+      }
+
+      return response;
+    } catch (e) {
+      throw Exception('Verification failed: ${e.toString()}');
+    }
+  }
+
+  // Resend signup OTP
+  Future<void> resendSignupOTP(String email) async {
+    try {
+      await _supabase.auth.resend(
+        type: OtpType.signup,
+        email: email,
+      );
+    } catch (e) {
+      throw Exception('Failed to resend code: ${e.toString()}');
+    }
+  }
+
+  // Sign in with email OTP
+  Future<void> signInWithOtp({
+    required String email,
+  }) async {
+    try {
+      await _supabase.auth.signInWithOtp(
+        email: email,
+      );
+    } catch (e) {
+      throw Exception('Sign in failed: ${e.toString()}');
+    }
+  }
+
+  // Sign in with email and password (kept for compatibility)
   Future<AuthResponse> signIn({
     required String email,
     required String password,
@@ -79,6 +174,9 @@ class AuthService extends ChangeNotifier {
   Future<void> signOut() async {
     try {
       await _supabase.auth.signOut();
+      // Clear cached values
+      _cachedQuestionCount = null;
+      _cachedSubscriptionStatus = null;
       if (!_disposed) {
         notifyListeners();
       }
@@ -87,13 +185,46 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  // Reset password
-  Future<void> resetPassword(String email) async {
+  // Send password reset OTP
+  Future<void> sendPasswordResetOTP(String email) async {
     try {
+      // Use recovery flow instead of signin
       await _supabase.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'io.supabase.aurennaai://reset-password',
+        redirectTo: null, // No redirect, we'll handle OTP verification
       );
+    } catch (e) {
+      throw Exception('Failed to send reset code: ${e.toString()}');
+    }
+  }
+
+  // Reset password with OTP verification
+  Future<void> resetPasswordWithOTP({
+    required String email,
+    required String token,
+    required String newPassword,
+  }) async {
+    try {
+      // Verify the recovery OTP and get session
+      final response = await _supabase.auth.verifyOTP(
+        type: OtpType.recovery,
+        email: email,
+        token: token,
+      );
+
+      if (response.user != null) {
+        // Now update the password
+        await _supabase.auth.updateUser(
+          UserAttributes(password: newPassword),
+        );
+        
+        // Sign out the user so they need to login with new password
+        await _supabase.auth.signOut();
+        
+        if (!_disposed) {
+          notifyListeners();
+        }
+      }
     } catch (e) {
       throw Exception('Password reset failed: ${e.toString()}');
     }
