@@ -6,6 +6,7 @@ import '../../models/reading.dart';
 import '../../services/auth_service.dart';
 import '../../services/tarot_service.dart';
 import '../../utils/reading_messages.dart';
+import '../../utils/share_reading.dart';
 import '../../widgets/reading_animation_v1.dart';
 
 class YesOrNoReadingScreen extends StatefulWidget {
@@ -228,6 +229,45 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
+              
+              // Share button (only show when reading is complete)
+              if (_currentStep == 4 && _isComplete)
+                Positioned(
+                  top: 16,
+                  right: 16,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.share,
+                      color: AurennaTheme.amberGlow.withValues(alpha: 0.8),
+                    ),
+                    onPressed: () async {
+                      try {
+                        await ShareReading.shareReading(
+                          question: _question,
+                          drawnCards: _drawnCards,
+                          reading: _aiReading,
+                          readingType: 'Yes or No Reading',
+                        );
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                e.toString().replaceAll('Exception: ', ''),
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              backgroundColor: AurennaTheme.crystalBlue,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                ),
             ],
           ),
         ),
