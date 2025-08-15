@@ -4,8 +4,9 @@
 
 OVERVIEW:
 The Aurenna AI Tarot Reading application utilizes a modular service architecture 
-to handle authentication, tarot card operations, and database management. This 
-document provides a comprehensive analysis of all services in the application.
+to handle authentication, tarot card operations, payment processing, error handling,
+and database management. This document provides a comprehensive analysis of all 
+services in the application.
 
 ===============================================================================
                                  1. AUTH SERVICE
@@ -87,10 +88,11 @@ CLASS: TarotService (static utility class)
 DESCRIPTION:
 Core business logic for tarot readings. Handles card drawing, AI reading 
 generation, database operations, and supports multiple reading types with 
-unique spreads and interpretations.
+unique spreads and interpretations. Recently updated with inclusive ethical 
+guidelines for all reading prompts.
 
 KEY FEATURES:
-✅ Multiple Reading Types (9 different spreads)
+✅ Multiple Reading Types (11 different spreads)
 ✅ AI-Powered Reading Generation (OpenAI integration)
 ✅ Intelligent Card Drawing with Randomization
 ✅ Database Reading Storage & Retrieval
@@ -98,6 +100,7 @@ KEY FEATURES:
 ✅ Reading History Management
 ✅ Premium vs Free Reading Logic
 ✅ Error Handling & Diagnostics
+✅ Inclusive Ethical Guidelines
 
 READING TYPES SUPPORTED:
 
@@ -155,6 +158,19 @@ READING TYPES SUPPORTED:
    - Target: Career transitions
    - AI: Transformation roadmap
 
+10. CARD OF THE DAY (Free with daily limit)
+    - Cards: 1 (Daily guidance card)
+    - Method: drawCardOfTheDay()
+    - Target: Daily inspiration
+    - AI: Personal daily guidance
+    - Special: Once per day limit enforced
+
+11. DIVINE TIMING SPREAD (Premium)
+    - Cards: 5 (Current Energy, Blocks, Timeline, Action, Outcome)
+    - Method: drawFiveCards() with divineTiming type
+    - Target: Timing guidance for major decisions
+    - AI: Cosmic timing precision
+
 CORE CARD DRAWING LOGIC:
 - Uses complete 78-card tarot deck
 - Shuffles deck for randomization
@@ -170,6 +186,14 @@ AI INTEGRATION:
 - Tone: Honest, supportive, specific guidance
 - Error handling for API failures
 - Rate limiting and timeout management
+- Ethical guidelines: Inclusive, respectful, no derogatory content
+
+ETHICAL & SAFETY RULES (Recently Updated):
+- Respect all individuals: No derogatory references to LGBTQ+ communities
+- No racist content
+- Maintains respectful and inclusive environment
+- Handles sensitive topics with care
+- Provides supportive guidance for difficult situations
 
 Database Operations:
 - saveReading() → Stores readings with user association
@@ -192,6 +216,7 @@ Each reading type has specialized AI prompts:
 - Reading type-specific formatting
 - Cultural sensitivity
 - Safety guidelines for sensitive topics
+- Inclusive language requirements
 
 ERROR HANDLING:
 - API failure graceful degradation
@@ -201,7 +226,155 @@ ERROR HANDLING:
 - Logging for debugging
 
 ===============================================================================
-                              3. SUPABASE SERVICE
+                             3. PAYPAL SERVICE
+===============================================================================
+
+FILE: lib/services/paypal_service.dart
+CLASS: PayPalService (Singleton)
+
+DESCRIPTION:
+Handles all payment processing through PayPal, including subscription management,
+coupon validation, and multi-tier pricing. Supports both sandbox and production
+environments.
+
+KEY FEATURES:
+✅ PayPal Payment Integration
+✅ Multi-tier Subscription Plans (Monthly, Quarterly, Yearly)
+✅ Universal Coupon System
+✅ Sandbox/Production Environment Support
+✅ Subscription Status Management
+✅ Coupon Usage Tracking
+✅ Price Calculation with Discounts
+
+SUBSCRIPTION TIERS:
+1. Monthly Plan
+   - Price: $6.99/month
+   - Duration: 30 days
+   - Plan ID: premium_monthly
+
+2. Quarterly Plan
+   - Price: $17.99 (3 months)
+   - Duration: 90 days
+   - Savings: 14% off monthly rate
+   - Plan ID: premium_quarterly
+
+3. Yearly Plan
+   - Price: $59.99 (12 months)
+   - Duration: 365 days
+   - Savings: 28% off monthly rate
+   - Plan ID: premium_yearly
+
+COUPON SYSTEM:
+Predefined Coupon Codes:
+- WELCOME50: 50% off (one-time use)
+- AURENNA20: 20% off (unlimited)
+- AURENNA90: 90% off (unlimited)
+- AURENNA99: 99% off (unlimited)
+- FRIEND30: 30% friend referral (one-time use)
+- BETA100: 100% free for beta testers (one-time use)
+
+Features:
+- Automatic expiration checking
+- Usage tracking per user
+- Percentage-based discounts
+- Support for 100% discounts (free subscriptions)
+
+CORE METHODS:
+- validateCoupon(code, planPrice) → CouponDetails
+  * Validates coupon code
+  * Checks expiration date
+  * Verifies usage limits
+  * Calculates discount amount
+
+- startSubscription(context, couponCode, selectedPlan) → Future<bool>
+  * Initiates PayPal payment flow
+  * Applies coupon discounts
+  * Handles free subscriptions (100% discount)
+  * Updates database on success
+
+- Configuration via environment variables:
+  * PAYPAL_CLIENT_ID
+  * PAYPAL_SECRET_KEY
+  * PAYPAL_ENVIRONMENT (sandbox/production)
+
+INTEGRATION POINTS:
+- PayPal Payment Gateway
+- Supabase for subscription tracking
+- Coupon usage database table
+- User profiles for subscription status
+
+===============================================================================
+                            4. ERROR HANDLER SERVICE
+===============================================================================
+
+FILE: lib/services/error_handler.dart
+CLASS: ErrorHandler (static utility class)
+
+DESCRIPTION:
+Provides user-friendly error message conversion and error categorization.
+Transforms technical errors into friendly, personality-driven messages that
+align with Aurenna's mystical theme.
+
+KEY FEATURES:
+✅ Network Error Detection
+✅ User-Friendly Message Conversion
+✅ Error Categorization
+✅ Personality-Driven Error Messages
+✅ Context-Aware Error Handling
+
+ERROR CATEGORIES HANDLED:
+
+Network/Connection Errors:
+- SocketException
+- Failed host lookup
+- Network unreachable
+- Connection refused
+- Returns: "📱 Looks like you're offline, bestie!"
+
+Timeout Errors:
+- Connection timeout
+- Request timeout
+- Returns: "⏰ The universe is taking its sweet time..."
+
+Authentication Errors:
+- 401 Unauthorized
+- Returns: "🔐 Oops! There's an authentication hiccup."
+
+Rate Limiting:
+- 429 Too Many Requests
+- Returns: "🚦 Whoa there, speed demon!"
+
+Server Errors:
+- 500, 502, 503 Server errors
+- Returns: "🌩️ The cosmic servers are having a moment..."
+
+API Errors:
+- OpenAI API failures
+- Returns: "✨ The AI spirits are temporarily unavailable..."
+
+Database Errors:
+- Supabase connection issues
+- Returns: "📚 Our cosmic library is having a moment..."
+
+Daily Limit Errors:
+- Daily card already drawn
+- Returns: "🌅 You've already pulled your daily cosmic wisdom!"
+
+CORE METHODS:
+- getUserFriendlyMessage(error) → String
+  * Converts technical errors to friendly messages
+  * Maintains Aurenna's personality in error messages
+
+- isNetworkError(error) → bool
+  * Detects if error is network-related
+  * Used for offline mode handling
+
+- getErrorTitle(error) → String
+  * Provides short, descriptive error titles
+  * Used in error dialog headers
+
+===============================================================================
+                              5. SUPABASE SERVICE
 ===============================================================================
 
 FILE: lib/services/supabase_service.dart
@@ -240,6 +413,10 @@ DESIGN PATTERNS USED:
    - Card drawing methods create configured DrawnCard objects
    - Reading type-specific factories
 
+5. Singleton Pattern
+   - PayPalService uses singleton for payment processing
+   - Ensures single instance for payment flow
+
 DEPENDENCIES:
 
 External:
@@ -247,6 +424,8 @@ External:
 - http: OpenAI API communication  
 - provider: State management
 - uuid: Unique ID generation
+- flutter_paypal_payment: PayPal integration
+- flutter_dotenv: Environment configuration
 
 Internal:
 - config/: Configuration files
@@ -272,6 +451,18 @@ Data Protection:
 ✅ Secure API communication
 ✅ Input validation
 ✅ SQL injection prevention (Supabase ORM)
+
+Payment Security:
+✅ PayPal secure payment processing
+✅ No credit card data stored locally
+✅ Environment-based configuration
+✅ Coupon validation and tracking
+
+Content Safety:
+✅ Ethical guidelines enforcement
+✅ Inclusive language requirements
+✅ Respectful content generation
+✅ Sensitive topic handling
 
 ===============================================================================
                             PERFORMANCE OPTIMIZATIONS
@@ -313,9 +504,16 @@ USER REGISTRATION/LOGIN:
 READING GENERATION:
 1. User selects reading type → Appropriate draw method called
 2. Cards drawn with randomization → DrawnCard objects created
-3. AI prompt built → OpenAI API called
+3. AI prompt built with ethical guidelines → OpenAI API called
 4. Reading generated → Database storage
 5. Results displayed → User can share
+
+PREMIUM SUBSCRIPTION FLOW:
+1. User selects subscription plan → PayPalService.startSubscription()
+2. Coupon validated if provided → Discount applied
+3. PayPal payment initiated → User completes payment
+4. Subscription status updated → Database record created
+5. Premium features unlocked → AuthService notified
 
 PREMIUM VERIFICATION:
 1. User attempts premium feature → hasActiveSubscription() called
@@ -323,8 +521,46 @@ PREMIUM VERIFICATION:
 3. Result cached → UI updated accordingly
 4. Access granted or upgrade prompt shown
 
+ERROR HANDLING FLOW:
+1. Error occurs → ErrorHandler processes
+2. Error type identified → User-friendly message generated
+3. Appropriate UI response → Toast, dialog, or inline message
+4. Recovery options provided → Retry or alternative actions
+
 ===============================================================================
-                                  FUTURE ENHANCEMENTS
+                            RECENT UPDATES
+===============================================================================
+
+JANUARY 2025 UPDATES:
+
+1. Ethical Guidelines Implementation:
+   - Added inclusive language requirements to all tarot spreads
+   - No derogatory LGBTQ+ references
+   - No racist content
+   - Respectful and inclusive environment maintained
+
+2. Multi-Tier Subscription System:
+   - Monthly, Quarterly, and Yearly plans
+   - Tiered pricing with savings incentives
+   - Universal coupon support across all plans
+
+3. Divine Timing Spread:
+   - New premium reading type
+   - 5-card spread for timing guidance
+   - Specialized AI prompts for timing precision
+
+4. Enhanced Error Handling:
+   - Personality-driven error messages
+   - Better network error detection
+   - Context-aware error responses
+
+5. PayPal Integration:
+   - Simplified payment flow
+   - Support for 100% discount coupons
+   - Sandbox/Production environment switching
+
+===============================================================================
+                              FUTURE ENHANCEMENTS
 ===============================================================================
 
 POTENTIAL IMPROVEMENTS:
@@ -334,24 +570,35 @@ POTENTIAL IMPROVEMENTS:
    - Push notifications for daily readings
    - Offline reading capability
    - Reading analytics service
+   - WebSocket integration for live features
 
 2. AI Improvements:
    - Multi-language support
    - Personalized reading styles
    - Learning from user feedback
    - Voice reading generation
+   - Enhanced context awareness
 
 3. Performance:
    - Service Worker for caching
    - Background reading pre-generation
    - Image optimization service
    - CDN integration
+   - Lazy loading optimizations
 
 4. Features:
    - Social sharing service
    - Reading scheduling service
    - Tarot learning service
    - Community features service
+   - Reading recommendations engine
+
+5. Payment Enhancements:
+   - Additional payment methods
+   - Subscription pausing
+   - Gift subscriptions
+   - Referral program integration
+   - Dynamic pricing
 
 ===============================================================================
                                    CONCLUSION
@@ -364,17 +611,21 @@ enhancements and feature additions.
 
 Key Strengths:
 ✅ Clean architecture with separated concerns
-✅ Comprehensive error handling
+✅ Comprehensive error handling with personality
 ✅ Performance optimizations
 ✅ Security best practices
 ✅ Extensible design for new reading types
 ✅ Robust state management
+✅ Inclusive and ethical content generation
+✅ Multi-tier subscription system
+✅ User-friendly error messages
 
 The modular design allows for easy testing, maintenance, and feature additions 
-while maintaining high code quality and user experience standards.
+while maintaining high code quality and user experience standards. Recent updates
+have focused on inclusivity, subscription flexibility, and enhanced user experience.
 
 ===============================================================================
-Generated: $(date)
+Generated: January 2025
 Author: AI Analysis of Aurenna AI Codebase
-Version: 1.0
+Version: 2.0
 ===============================================================================
