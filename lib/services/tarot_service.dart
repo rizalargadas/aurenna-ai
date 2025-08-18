@@ -1341,45 +1341,31 @@ You'll be given 3 cards:
 3. **Potential Outcome**
 
 Format your response EXACTLY like this HTML structure:
+<h3>Your Current Situation — [CARD NAME]</h3>
+<p>[Name what's *really* going on — the Sunday scaries, the soul death, the unused potential. No sugarcoating. Why are they stuck? What's eating them? 2–3 sentences]</p>
+<br><br>
 
-<div class="career-reading">
-  <div class="card-section">
-    <h3>🔮 Your Current Situation — [CARD NAME]</h3>
-    <p>[Name what's *really* going on — the Sunday scaries, the soul death, the unused potential. No sugarcoating. Why are they stuck? What's eating them? 2-3 sentences]</p>
-  </div>
+<h3>Action You Need to Take — [CARD NAME]</h3>
+<p>[Give *clear, specific, doable* next steps. Not "believe in yourself" — "update LinkedIn," "DM your former boss," "budget for 3 months off." Include a short timeline. 2–3 sentences]</p>
+<br><br>
 
-  <div class="card-section">
-    <h3>⚡ Action You Need to Take — [CARD NAME]</h3>
-    <p>[Give *clear, specific, doable* next steps. Not "believe in yourself" — "update LinkedIn," "DM your former boss," "budget for 3 months off." Include a short timeline. 2-3 sentences]</p>
-  </div>
+<h3>Potential Outcome — [CARD NAME]</h3>
+<p>[What could actually happen *if* they take the leap. Include real talk: possible struggles + the wins. How soon could they see change — 3 months? 9? Paint the picture. 2–3 sentences]</p>
+<br><br>
 
-  <div class="card-section">
-    <h3>✨ Potential Outcome — [CARD NAME]</h3>
-    <p>[What could actually happen *if* they take the leap. Include real talk: possible struggles + the wins. How soon could they see change — 3 months? 9? Paint the picture. 2-3 sentences]</p>
-  </div>
+<h3>☪️ CAREER CHANGE WAKE-UP CALL</h3>
+<p><strong>[Name the situation bluntly — "You're dying inside and pretending it's fine."]</strong> [Connect the dots — "You've outgrown this place, and the cards are shouting it."] [State the path forward — "Your exit route starts with sending that message you've been avoiding."]</p>
+<br>
 
-  <div class="wake-up-call" style="border-radius: 10px;">
-    <h3>☪️ CAREER CHANGE WAKE-UP CALL ☪️</h3>
-    
-    <div class="real-talk">
-      <p>Alright babe, here's the deal: <strong>[Name the situation bluntly — "You're dying inside and pretending it's fine."]</strong> [Connect the dots — "You've outgrown this place, and the cards are shouting it."] [State the path forward — "Your exit route starts with sending that message you've been avoiding."]</p>
-    </div>
-    
-    <div class="homework">
-      <h4>Here's your homework:</h4>
-      <ul>
-        <li><strong>Today:</strong> [1 specific step — "Fix your resume," "Message that contact," "Research job titles."]</li>
-        <li><strong>This week:</strong> [2nd step — "Apply to 2 roles," "Book an informational call."]</li>
-      </ul>
-    </div>
-    
-    <div class="final-push">
-      <p>Let's be honest — you've been <em>thinking about it</em> long enough. This is your cosmic permission slip to move. Your future self is either <strong>thriving in a new role</strong> — or still Googling "how to survive a soul-sucking job" next year.</p>
-      
-      <p class="signature">I know which version I want for you. 💜</p>
-    </div>
-  </div>
-</div>
+<h4>Here's your homework:</h4>
+<ul>
+  <li><strong>Today:</strong> [1 specific step — "Fix your resume," "Message that contact," "Research job titles."]</li>
+  <li><strong>This week:</strong> [2nd step — "Apply to 2 roles," "Book an informational call."]</li>
+</ul>
+<br>
+
+<p>Let's be honest — you've been <em>thinking about it</em> long enough. This is your cosmic permission slip to move. Your future self is either <strong>thriving in a new role</strong> — or still Googling "how to survive a soul-sucking job" next year.</p>
+
 
 ---
 
@@ -2618,34 +2604,25 @@ Instructions:
 
 FORMAT - Use this exact HTML structure:
 
-<div class="card-of-day-reading">
-  <div class="card-section">
-    <h3>✨ Your Card of the Day — ${card.name} ($orientation)</h3>
-    <p>[The REAL energy of your day ahead. Start with the main theme in one punchy sentence. Then get specific about what this actually means for their next 24 hours. Call out specific situations, people, or decisions they'll face. Include timing hints if they come through. Give them practical advice for navigating whatever's coming. End with one key thing to remember when shit gets real today. 5 to 8 sentences total.]</p>
-  </div>
+<h3>Your Card of the Day — [CARD NAME] ([Orientation])</h3>
+<p>The REAL energy of your day ahead. Start with the main theme in one punchy sentence. Then get specific about what this actually means for the next 24 hours. Call out situations, people, or decisions they'll face. Include timing hints if they come through. Give practical advice for navigating what's coming. End with one key reminder for when things get real today. (5–8 sentences)</p>
+<br><br>
 
-  <div class="card-section">
-    <h3>☪️ TODAY'S GAME PLAN</h3>
-    
-    <div class="real-talk">
-      <p><strong>[Sum up their day in one blunt sentence—"Today's about finally saying what you mean" or "Today's testing your boundaries, big time"]</strong> [Give them the specific situation to watch for] [Provide the exact strategy—"When they ask, say no," "Take the meeting but don't commit," "That opportunity at 3pm? Jump on it"]</p>
-    </div>
-    
-    <div class="homework">
-      <h4>Today's Power Move:</h4>
-      <ul>
-        <li><strong>DO:</strong> [One thing they should definitely do]</li>
-        <li><strong>AVOID:</strong> [One thing they should definitely avoid]</li>
-      </ul>
-    </div>
-    
-    <div class="final-push">
-      <p>Remember: You pulled this card for a reason. The universe doesn't do random. When <em>[specific moment]</em> happens today, you'll know exactly why you needed this message.</p>
-      
-      <p class="signature">Now go handle your business. 💫</p>
-    </div>
-  </div>
-</div>
+<h3>TODAY'S GAME PLAN</h3>
+
+<p><strong>[Blunt one-liner summary of their day — e.g., "Today’s about finally saying what you mean" or "Today’s testing your boundaries, big time."]</strong> [Describe the specific situation to watch for.] [Provide the exact strategy — “Say no when they ask,” “Take the meeting but don’t commit,” “That opportunity at 3pm? Jump on it.”]</p>
+<br>
+
+<h4>Today's Power Move</h4>
+<ul>
+  <li><strong>DO:</strong> [One thing they should definitely do today]</li>
+  <li><strong>AVOID:</strong> [One thing they should definitely avoid today]</li>
+</ul>
+<br>
+
+<p><strong>Final Note:</strong> You pulled this card for a reason. The universe doesn’t do random. When <em>[specific moment]</em> happens today, you’ll understand exactly why this message showed up.</p>
+<p><strong>Now go handle your business. 💫</strong></p>
+
 
 **Tone:** Think psychic best friend texting you the daily download while you're having coffee.
 **Goal:** Give them specific, practical guidance for the next 24 hours that makes them feel prepared, not paranoid.
