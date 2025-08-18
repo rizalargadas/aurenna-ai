@@ -2,6 +2,62 @@ import 'package:share_plus/share_plus.dart';
 import '../models/reading.dart';
 
 class ShareReading {
+  /// Converts HTML content to formatted plain text for sharing
+  static String _htmlToPlainText(String html) {
+    // Remove all HTML tags but preserve the content structure
+    String text = html;
+    
+    // First, handle special sections with formatting
+    // Convert h3 headers with more compact formatting
+    text = text.replaceAllMapped(
+      RegExp(r'<h3[^>]*>(.*?)</h3>', dotAll: true),
+      (match) => '\n【 ${match.group(1)} 】\n',
+    );
+    
+    // Convert h4 headers
+    text = text.replaceAllMapped(
+      RegExp(r'<h4[^>]*>(.*?)</h4>', dotAll: true),
+      (match) => '\n${match.group(1)}\n',
+    );
+    
+    // Convert list items to bullet points
+    text = text.replaceAllMapped(
+      RegExp(r'<li[^>]*>(.*?)</li>', dotAll: true),
+      (match) => '• ${match.group(1)}\n',
+    );
+    
+    // Convert paragraphs to single line breaks (more compact)
+    text = text.replaceAllMapped(
+      RegExp(r'<p[^>]*>(.*?)</p>', dotAll: true),
+      (match) => '${match.group(1)}\n',
+    );
+    
+    // Handle strong tags (keep simple)
+    text = text.replaceAllMapped(
+      RegExp(r'<strong[^>]*>(.*?)</strong>', dotAll: true),
+      (match) => '${match.group(1)}',
+    );
+    
+    // Handle em tags (keep simple)
+    text = text.replaceAllMapped(
+      RegExp(r'<em[^>]*>(.*?)</em>', dotAll: true),
+      (match) => '${match.group(1)}',
+    );
+    
+    // Add minimal section break for wake-up-call
+    text = text.replaceAll('<div class="wake-up-call">', '\n---\n');
+    text = text.replaceAll('</div>', '');
+    
+    // Remove remaining HTML tags
+    text = text.replaceAll(RegExp(r'<[^>]+>'), '');
+    
+    // Clean up excessive whitespace (be more aggressive)
+    text = text.replaceAll(RegExp(r'\n{3,}'), '\n\n');
+    text = text.replaceAll(RegExp(r'\n\s+\n'), '\n'); // Remove lines with only spaces
+    text = text.trim();
+    
+    return text;
+  }
   /// Shares a tarot reading with formatted text
   static Future<void> shareReading({
     required String question,
@@ -45,7 +101,11 @@ class ShareReading {
     
     // Reading section
     buffer.writeln('🌟 Your Reading:');
-    buffer.writeln(reading);
+    // Check if the reading contains HTML and convert it
+    final cleanReading = reading.contains('<') && reading.contains('>') 
+        ? _htmlToPlainText(reading)
+        : reading;
+    buffer.writeln(cleanReading);
     buffer.writeln();
     
     // Footer
