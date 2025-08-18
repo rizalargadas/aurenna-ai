@@ -492,6 +492,19 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
     }
   }
 
+  String _stripHtmlForPreview(String text) {
+    // Strip HTML tags and create clean preview text
+    String cleanText = text;
+    
+    // Remove HTML tags but preserve content
+    cleanText = cleanText.replaceAll(RegExp(r'<[^>]+>'), ' ');
+    
+    // Clean up extra whitespace
+    cleanText = cleanText.replaceAll(RegExp(r'\s+'), ' ').trim();
+    
+    return cleanText;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -853,7 +866,7 @@ class _ReadingHistoryScreenState extends State<ReadingHistoryScreen> {
                 
                 // Reading preview
                 Text(
-                  reading.aiReading,
+                  _stripHtmlForPreview(reading.aiReading),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AurennaTheme.textPrimary,
                     height: 1.4,
