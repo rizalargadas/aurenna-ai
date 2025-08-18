@@ -10,6 +10,7 @@ import '../../utils/reading_messages.dart';
 import '../../utils/share_reading.dart';
 import '../../widgets/mystical_loading.dart';
 import '../../widgets/reading_animation_v1.dart';
+import '../../widgets/html_reading_widget.dart';
 
 class GeneralReadingScreen extends StatefulWidget {
   const GeneralReadingScreen({super.key});
@@ -1232,87 +1233,9 @@ class _GeneralReadingScreenState extends State<GeneralReadingScreen>
   }
   
   Widget _buildFormattedReading() {
-    // Parse the reading to format bold headers
-    final List<TextSpan> spans = [];
-    final lines = _aiReading.split('\n');
-    
-    // Debug: print total lines
-    print('Total lines in reading: ${lines.length}');
-    print('Reading length: ${_aiReading.length} characters');
-    
-    for (int i = 0; i < lines.length; i++) {
-      final line = lines[i];
-      
-      // Check if line starts with ** and contains a card position
-      if (line.startsWith('**') && line.contains(' - ')) {
-        // Extract the text between ** markers
-        final match = RegExp(r'\*\*(.+?)\*\*').firstMatch(line);
-        if (match != null) {
-          final boldText = match.group(1) ?? '';
-          // Add the bold header
-          spans.add(TextSpan(
-            text: boldText,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              height: 1.6,
-              color: AurennaTheme.silverMist,
-              fontWeight: FontWeight.bold,
-            ),
-          ));
-          // Add the rest of the line after **
-          final restOfLine = line.substring(match.end);
-          if (restOfLine.isNotEmpty) {
-            spans.add(TextSpan(
-              text: restOfLine,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                height: 1.6,
-                color: AurennaTheme.silverMist,
-              ),
-            ));
-          }
-          spans.add(TextSpan(text: '\n'));
-        } else {
-          // Fallback if regex doesn't match
-          spans.add(TextSpan(
-            text: line + '\n',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              height: 1.6,
-              color: AurennaTheme.silverMist,
-            ),
-          ));
-        }
-      } else if (line == '**CONCLUSION:**') {
-        // Handle conclusion header
-        spans.add(TextSpan(
-          text: 'CONCLUSION:',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            height: 1.6,
-            color: AurennaTheme.silverMist,
-            fontWeight: FontWeight.bold,
-          ),
-        ));
-        spans.add(TextSpan(text: '\n'));
-      } else {
-        // Regular line
-        spans.add(TextSpan(
-          text: line + '\n',
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-            height: 1.6,
-            color: AurennaTheme.silverMist,
-          ),
-        ));
-      }
-    }
-    
-    // Debug: print total spans
-    print('Total spans created: ${spans.length}');
-    
-    // Return SelectableText directly - it will size to its content
-    return SelectableText.rich(
-      TextSpan(children: spans),
-      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-        height: 1.6,
-        color: AurennaTheme.silverMist,
-      ),
+    return HtmlReadingWidget(
+      content: _aiReading,
+      fallbackTextColor: 'silvermist',
     );
   }
 

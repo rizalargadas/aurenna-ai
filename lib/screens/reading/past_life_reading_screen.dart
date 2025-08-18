@@ -8,6 +8,7 @@ import '../../services/tarot_service.dart';
 import '../../utils/reading_messages.dart';
 import '../../utils/share_reading.dart';
 import '../../widgets/reading_animation_v1.dart';
+import '../../widgets/html_reading_widget.dart';
 
 class PastLifeReadingScreen extends StatefulWidget {
   const PastLifeReadingScreen({super.key});
@@ -743,13 +744,9 @@ class _PastLifeReadingScreenState extends State<PastLifeReadingScreen> {
   }
   
   Widget _buildFormattedReading() {
-    // Simple text display
-    return SelectableText(
-      _aiReading,
-      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-        height: 1.6,
-        color: AurennaTheme.silverMist,
-      ),
+    return HtmlReadingWidget(
+      content: _aiReading,
+      fallbackTextColor: 'silvermist',
     );
   }
 }

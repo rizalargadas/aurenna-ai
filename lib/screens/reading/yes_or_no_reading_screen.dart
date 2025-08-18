@@ -8,6 +8,7 @@ import '../../services/tarot_service.dart';
 import '../../utils/reading_messages.dart';
 import '../../utils/share_reading.dart';
 import '../../widgets/reading_animation_v1.dart';
+import '../../widgets/html_reading_widget.dart';
 
 class YesOrNoReadingScreen extends StatefulWidget {
   const YesOrNoReadingScreen({super.key});
@@ -621,12 +622,9 @@ class _YesOrNoReadingScreenState extends State<YesOrNoReadingScreen>
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    _aiReading,
-                    style: TextStyle(color: AurennaTheme.textSecondary).copyWith(
-                      fontSize: 15,
-                      height: 1.6,
-                    ),
+                  HtmlReadingWidget(
+                    content: _aiReading,
+                    fallbackTextColor: 'textSecondary',
                   ),
                 ],
               ),

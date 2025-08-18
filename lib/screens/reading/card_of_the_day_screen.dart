@@ -8,6 +8,8 @@ import '../../services/auth_service.dart';
 import '../../services/error_handler.dart';
 import '../../models/reading.dart';
 import 'reading_result_screen.dart';
+import '../../widgets/html_reading_widget.dart';
+import '../../utils/share_reading.dart';
 
 class CardOfTheDayScreen extends StatefulWidget {
   const CardOfTheDayScreen({super.key});
@@ -123,6 +125,18 @@ class _CardOfTheDayScreenState extends State<CardOfTheDayScreen>
     } else {
       return '$minutes minute${minutes > 1 ? 's' : ''}';
     }
+  }
+
+  void _showCardReadingModal() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => _CardOfTheDayReadingScreen(
+          card: _todayCard!,
+          reading: _todayReading ?? 'Your daily card reading',
+        ),
+      ),
+    );
   }
 
   // Debug function to reset daily card (remove in production)
@@ -523,18 +537,8 @@ class _CardOfTheDayScreenState extends State<CardOfTheDayScreen>
       scale: _cardAnimation,
       child: GestureDetector(
         onTap: () {
-          // Show full reading - navigate back to result screen
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ReadingResultScreen(
-                question: 'Card of the Day',
-                drawnCards: [_todayCard!],
-                reading: _todayReading ?? 'Your daily card reading',
-                isFromHistory: false,
-              ),
-            ),
-          );
+          // Navigate to a simple reading display
+          _showCardReadingModal();
         },
         child: Container(
           width: cardWidth,
@@ -695,6 +699,231 @@ class _CardOfTheDayScreenState extends State<CardOfTheDayScreen>
           ),
         );
       },
+    );
+  }
+}
+
+class _CardOfTheDayReadingScreen extends StatelessWidget {
+  final DrawnCard card;
+  final String reading;
+
+  const _CardOfTheDayReadingScreen({
+    required this.card,
+    required this.reading,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AurennaTheme.voidBlack,
+      appBar: AppBar(
+        title: const Text('Card of the Day'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () async {
+              try {
+                await ShareReading.shareReadingResult(
+                  question: 'Card of the Day',
+                  drawnCards: [card],
+                  reading: reading,
+                );
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        e.toString().replaceAll('Exception: ', ''),
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      backgroundColor: AurennaTheme.crystalBlue,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header with card
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AurennaTheme.electricViolet.withValues(alpha: 0.3),
+                      AurennaTheme.cosmicPurple.withValues(alpha: 0.3),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.wb_sunny,
+                      color: AurennaTheme.electricViolet,
+                      size: 32,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Your Daily Guidance',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AurennaTheme.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    // Card display
+                    Container(
+                      width: 120,
+                      height: 180,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AurennaTheme.electricViolet.withValues(alpha: 0.3),
+                            blurRadius: 15,
+                            spreadRadius: 3,
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          card.card.imagePath,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      card.card.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AurennaTheme.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (card.isReversed) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '(Reversed)',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AurennaTheme.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Reading container
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: AurennaTheme.mysticBlue,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: AurennaTheme.silverMist.withValues(alpha: 0.1),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AurennaTheme.silverMist.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    HtmlReadingWidget(
+                      content: reading,
+                      fallbackTextColor: 'silvermist',
+                    ),
+                    const SizedBox(height: 16),
+                    Divider(color: AurennaTheme.silverMist.withValues(alpha: 0.2)),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Trust your intuition and let the wisdom guide your day.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AurennaTheme.textSecondary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Action buttons
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: const Text('Back to Home'),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/reading-history');
+                    },
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: const Text('View Reading History'),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              Center(
+                child: Text(
+                  '✨ Trust the process, trust yourself ✨',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AurennaTheme.textSecondary,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

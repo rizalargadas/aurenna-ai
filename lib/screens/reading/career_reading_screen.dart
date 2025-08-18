@@ -9,6 +9,7 @@ import '../../utils/share_reading.dart';
 import '../../widgets/reading_animation_v1.dart';
 import '../../widgets/tarot_spread_grid.dart';
 import '../../utils/premium_check.dart';
+import '../../widgets/html_reading_widget.dart';
 
 class CareerReadingScreen extends StatefulWidget {
   const CareerReadingScreen({super.key});
@@ -340,7 +341,7 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
               crossAxisCount: 3, // 5 cards in flexible layout
               minCardWidth: 90,
               maxCardWidth: 130,
-              customMainAxisSpacing: 22.0, // Add extra 10px spacing between rows (12px default + 10px)
+              customMainAxisSpacing: 32.0, // Increased spacing between rows to prevent overflow
             ),
           ),
 
@@ -593,13 +594,9 @@ class _CareerReadingScreenState extends State<CareerReadingScreen> {
   }
   
   Widget _buildFormattedReading() {
-    // Simple text display
-    return SelectableText(
-      _aiReading,
-      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-        height: 1.6,
-        color: AurennaTheme.silverMist,
-      ),
+    return HtmlReadingWidget(
+      content: _aiReading,
+      fallbackTextColor: 'silvermist',
     );
   }
 }

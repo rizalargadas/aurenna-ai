@@ -253,18 +253,32 @@ class ShareReading {
   
   /// Determines reading type based on number of cards
   static String _getReadingTypeFromCards(List<DrawnCard> cards) {
+    // Check for specific reading types first
+    if (cards.isNotEmpty) {
+      switch (cards.first.readingType) {
+        case ReadingType.cardOfTheDay:
+          return 'Card of the Day';
+        case ReadingType.careerChange:
+          return 'Career Change Reading';
+        case ReadingType.career:
+          return 'Career Reading';
+        case ReadingType.general:
+          return 'Comprehensive General Reading';
+        case ReadingType.threeCard:
+          return 'Three-Card Reading';
+        default:
+          break;
+      }
+    }
+    
+    // Fallback to number of cards
     switch (cards.length) {
       case 1:
         return 'Single Card Reading';
       case 3:
-        if (cards.first.readingType == ReadingType.careerChange) {
-          return 'Career Change Reading';
-        }
         return 'Three-Card Reading';
       case 5:
-        return cards.first.readingType == ReadingType.career 
-            ? 'Career Reading' 
-            : 'Five-Card Reading';
+        return 'Five-Card Reading';
       case 12:
         return 'Comprehensive Reading';
       default:

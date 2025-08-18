@@ -8,6 +8,7 @@ import '../../utils/reading_messages.dart';
 import '../../utils/share_reading.dart';
 import '../../widgets/reading_animation_v1.dart';
 import '../../widgets/tarot_spread_grid.dart';
+import '../../widgets/html_reading_widget.dart';
 
 class SituationshipReadingScreen extends StatefulWidget {
   const SituationshipReadingScreen({super.key});
@@ -746,13 +747,9 @@ class _SituationshipReadingScreenState extends State<SituationshipReadingScreen>
   }
   
   Widget _buildFormattedReading() {
-    // Simple text display
-    return SelectableText(
-      _aiReading,
-      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-        height: 1.6,
-        color: AurennaTheme.silverMist,
-      ),
+    return HtmlReadingWidget(
+      content: _aiReading,
+      fallbackTextColor: 'silvermist',
     );
   }
 }

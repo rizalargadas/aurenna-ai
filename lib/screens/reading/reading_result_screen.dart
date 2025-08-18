@@ -31,14 +31,12 @@ class ReadingResultScreen extends StatelessWidget {
           "div.career-reading": Style(
             padding: HtmlPaddings.zero,
           ),
+          "div.three-card-reading": Style(
+            padding: HtmlPaddings.zero,
+          ),
           "div.card-section": Style(
             margin: Margins.only(bottom: 24),
             padding: HtmlPaddings.all(20),
-            backgroundColor: AurennaTheme.mysticBlue.withValues(alpha: 0.15),
-            border: Border.all(
-              color: AurennaTheme.electricViolet.withValues(alpha: 0.3),
-              width: 1,
-            ),
           ),
           "h3": Style(
             color: AurennaTheme.electricViolet,
@@ -50,7 +48,7 @@ class ReadingResultScreen extends StatelessWidget {
             color: AurennaTheme.textPrimary,
             fontSize: FontSize(15),
             lineHeight: LineHeight(1.6),
-            margin: Margins.zero,
+            margin: Margins.only(bottom: 16),
           ),
           "div.wake-up-call": Style(
             margin: Margins.only(top: 32),
@@ -75,6 +73,7 @@ class ReadingResultScreen extends StatelessWidget {
             fontSize: FontSize(16),
             fontStyle: FontStyle.italic,
             color: AurennaTheme.textPrimary,
+            margin: Margins.only(bottom: 16),
           ),
           "strong": Style(
             color: AurennaTheme.electricViolet,

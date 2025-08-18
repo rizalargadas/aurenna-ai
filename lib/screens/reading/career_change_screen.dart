@@ -9,6 +9,7 @@ import '../../utils/reading_messages.dart';
 import '../../utils/share_reading.dart';
 import '../../widgets/reading_animation_v1.dart';
 import '../../widgets/tarot_spread_grid.dart';
+import '../../widgets/html_reading_widget.dart';
 
 class CareerChangeScreen extends StatefulWidget {
   const CareerChangeScreen({super.key});
@@ -339,6 +340,7 @@ class _CareerChangeScreenState extends State<CareerChangeScreen> {
               crossAxisCount: 3, // 3 cards in a row
               minCardWidth: 90,
               maxCardWidth: 130,
+              customMainAxisSpacing: 32.0, // Added spacing between rows to prevent overflow
             ),
           ),
 
