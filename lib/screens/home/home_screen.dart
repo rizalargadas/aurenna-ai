@@ -837,20 +837,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           borderColor: AurennaTheme.electricViolet,
           isSmallScreen: isSmallScreen,
         ),
-        SizedBox(height: isSmallScreen ? 12 : 16),
-        _buildPremiumCard(
-          authService: authService,
-          title: 'Divine Timing Spread',
-          description: 'Know exactly when to make your move with cosmic precision',
-          icon: '⏰',
-          route: '/divine-timing-reading',
-          colors: [
-            AurennaTheme.stardustPurple.withValues(alpha: 0.2),
-            AurennaTheme.crystalBlue.withValues(alpha: 0.2),
-          ],
-          borderColor: AurennaTheme.stardustPurple,
-          isSmallScreen: isSmallScreen,
-        ),
       ],
     );
   }

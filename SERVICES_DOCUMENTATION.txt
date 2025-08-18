@@ -92,7 +92,7 @@ unique spreads and interpretations. Recently updated with inclusive ethical
 guidelines for all reading prompts.
 
 KEY FEATURES:
-✅ Multiple Reading Types (11 different spreads)
+✅ Multiple Reading Types (10 different spreads)
 ✅ AI-Powered Reading Generation (OpenAI integration)
 ✅ Intelligent Card Drawing with Randomization
 ✅ Database Reading Storage & Retrieval
@@ -165,11 +165,6 @@ READING TYPES SUPPORTED:
     - AI: Personal daily guidance
     - Special: Once per day limit enforced
 
-11. DIVINE TIMING SPREAD (Premium)
-    - Cards: 5 (Current Energy, Blocks, Timeline, Action, Outcome)
-    - Method: drawFiveCards() with divineTiming type
-    - Target: Timing guidance for major decisions
-    - AI: Cosmic timing precision
 
 CORE CARD DRAWING LOGIC:
 - Uses complete 78-card tarot deck
@@ -544,17 +539,12 @@ JANUARY 2025 UPDATES:
    - Tiered pricing with savings incentives
    - Universal coupon support across all plans
 
-3. Divine Timing Spread:
-   - New premium reading type
-   - 5-card spread for timing guidance
-   - Specialized AI prompts for timing precision
-
-4. Enhanced Error Handling:
+3. Enhanced Error Handling:
    - Personality-driven error messages
    - Better network error detection
    - Context-aware error responses
 
-5. PayPal Integration:
+4. PayPal Integration:
    - Simplified payment flow
    - Support for 100% discount coupons
    - Sandbox/Production environment switching

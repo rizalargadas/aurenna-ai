@@ -18,7 +18,6 @@ import 'screens/reading/past_life_reading_screen.dart';
 import 'screens/reading/relationship_decision_screen.dart';
 import 'screens/reading/career_reading_screen.dart';
 import 'screens/reading/career_change_screen.dart';
-import 'screens/reading/divine_timing_reading_screen.dart';
 import 'screens/premium/premium_upgrade_screen.dart';
 import 'screens/premium/payment_success_screen.dart';
 import 'services/auth_service.dart';
@@ -94,7 +93,6 @@ class _MaterialAppWithThemeState extends State<_MaterialAppWithTheme> {
             '/relationship-decision': (context) => const RelationshipDecisionScreen(),
             '/career-reading': (context) => const CareerReadingScreen(),
             '/career-change': (context) => const CareerChangeScreen(),
-            '/divine-timing-reading': (context) => const DivineTimingReadingScreen(),
             '/premium-upgrade': (context) => const PremiumUpgradeScreen(),
             '/payment-success': (context) => const PaymentSuccessScreen(),
             '/verification-success': (context) => const VerificationSuccessScreen(),
