@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../config/theme.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/question_counter.dart';
@@ -706,6 +707,27 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Privacy Policy Link
+            Center(
+              child: TextButton(
+                onPressed: () async {
+                  final uri = Uri.parse('https://aurenna.app/privacy');
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
+                child: Text(
+                  'Privacy Policy',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AurennaTheme.crystalBlue,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
               ),
             ),
 
