@@ -3,18 +3,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_themes.dart';
 
 enum AppThemeType {
-  aurenna,
+  aurennaDark,
+  aurennaLight,
 }
 
 class ThemeProvider with ChangeNotifier {
-  AppThemeType _currentTheme = AppThemeType.aurenna;
+  AppThemeType _currentTheme = AppThemeType.aurennaDark;
   static const String _themeKey = 'selected_theme';
   bool _disposed = false;
 
   AppThemeType get currentTheme => _currentTheme;
 
   AppThemeData get themeData {
-    return AppThemes.aurennaTheme;
+    switch (_currentTheme) {
+      case AppThemeType.aurennaDark:
+        return AppThemes.aurennaDarkTheme;
+      case AppThemeType.aurennaLight:
+        return AppThemes.aurennaLightTheme;
+    }
   }
 
   ThemeProvider() {
@@ -48,13 +54,16 @@ class ThemeProvider with ChangeNotifier {
     
     try {
       final prefs = await SharedPreferences.getInstance();
-      final themeIndex = prefs.getInt(_themeKey) ?? 0;
+      // Explicitly default to dark mode (index 0) for new users
+      final themeIndex = prefs.getInt(_themeKey) ?? AppThemeType.aurennaDark.index;
       
       // Ensure the index is valid
       if (themeIndex >= 0 && themeIndex < AppThemeType.values.length) {
         _currentTheme = AppThemeType.values[themeIndex];
       } else {
-        _currentTheme = AppThemeType.aurenna;
+        // Fallback to dark mode if invalid index
+        _currentTheme = AppThemeType.aurennaDark;
+        await prefs.setInt(_themeKey, AppThemeType.aurennaDark.index);
       }
       
       if (!_disposed) {
@@ -62,7 +71,7 @@ class ThemeProvider with ChangeNotifier {
       }
     } catch (e) {
       // If loading fails, use default theme
-      _currentTheme = AppThemeType.aurenna;
+      _currentTheme = AppThemeType.aurennaDark;
     }
   }
 
@@ -83,10 +92,29 @@ class ThemeProvider with ChangeNotifier {
   }
 
   String getThemeName(AppThemeType theme) {
-    return 'Aurenna';
+    switch (theme) {
+      case AppThemeType.aurennaDark:
+        return 'Dark Mode';
+      case AppThemeType.aurennaLight:
+        return 'Light Mode';
+    }
   }
 
   String getThemeDescription(AppThemeType theme) {
-    return 'Deep cosmic colors with mystical vibes';
+    switch (theme) {
+      case AppThemeType.aurennaDark:
+        return 'Deep cosmic colors with mystical vibes';
+      case AppThemeType.aurennaLight:
+        return 'Bright and ethereal cosmic colors';
+    }
+  }
+
+  bool get isDarkMode => _currentTheme == AppThemeType.aurennaDark;
+  
+  void toggleTheme() {
+    final newTheme = _currentTheme == AppThemeType.aurennaDark 
+        ? AppThemeType.aurennaLight 
+        : AppThemeType.aurennaDark;
+    setTheme(newTheme);
   }
 }

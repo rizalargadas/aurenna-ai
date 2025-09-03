@@ -30,6 +30,57 @@ class AurennaTheme {
   ); // Keeping a standard error red
   static const Color successColor = Color(0xFF10B981); // Success green
 
+  // Dynamic color helpers - these should be used instead of static colors
+  static Color getBackgroundColor(BuildContext context) {
+    return Theme.of(context).scaffoldBackgroundColor;
+  }
+  
+  static Color getSurfaceColor(BuildContext context) {
+    return Theme.of(context).colorScheme.surface;
+  }
+  
+  static Color getPrimaryTextColor(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? Theme.of(context).colorScheme.onSurface : const Color(0xFF0A0B0D);
+  }
+  
+  static Color getSecondaryTextColor(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7) : const Color(0xFF0A0B0D);
+  }
+  
+  static Color getPrimaryColor(BuildContext context) {
+    return Theme.of(context).colorScheme.primary;
+  }
+  
+  static Color getCardColor(BuildContext context) {
+    return Theme.of(context).cardTheme.color ?? Theme.of(context).colorScheme.surface;
+  }
+
+  // Theme-aware color methods that adapt based on light/dark mode
+  static Color getElectricViolet(BuildContext context) {
+    return Theme.of(context).colorScheme.primary;
+  }
+  
+  static Color getCrystalBlue(BuildContext context) {
+    return Theme.of(context).colorScheme.secondary;
+  }
+  
+  static Color getAmberGlow(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? amberGlow : const Color(0xFFF59E0B);
+  }
+  
+  static Color getCosmicPurple(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? cosmicPurple : const Color(0xFF7C3AED);
+  }
+  
+  static Color getMysticBlue(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? mysticBlue : Theme.of(context).colorScheme.surface;
+  }
+
   // Gradients
   static const LinearGradient cosmicGradient = LinearGradient(
     begin: Alignment.topLeft,
@@ -262,6 +313,32 @@ class AurennaTheme {
     ],
   );
 
+  // Dynamic card decoration that adapts to current theme
+  static BoxDecoration getCardDecoration(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    return BoxDecoration(
+      color: theme.cardTheme.color,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(
+        color: isDark 
+            ? etherealIndigo.withValues(alpha: 0.3)
+            : theme.colorScheme.outline.withValues(alpha: 0.2), 
+        width: 1,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: isDark 
+              ? voidBlack.withValues(alpha: 0.5)
+              : Colors.black.withValues(alpha: 0.1),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+  }
+
   // Glow effect for special elements
   static BoxShadow cosmicGlow = BoxShadow(
     color: electricViolet.withValues(alpha: 0.4),
@@ -354,12 +431,12 @@ class AurennaTheme {
       ),
       bodyMedium: _getGoogleFont(themeData.bodyFont)(
         fontSize: 14,
-        color: themeData.textSecondary,
+        color: themeData.textPrimary, // Use same void black color
         height: 1.5,
       ),
       bodySmall: _getGoogleFont(themeData.bodyFont)(
         fontSize: 12,
-        color: themeData.textSecondary,
+        color: themeData.textPrimary, // Use same void black color
         height: 1.4,
       ),
       

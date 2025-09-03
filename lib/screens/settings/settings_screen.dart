@@ -7,6 +7,7 @@ import '../../config/theme.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/question_counter.dart';
 import '../../models/subscription_plan.dart';
+import '../../providers/theme_provider.dart';
 import '../auth/login_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -234,25 +235,29 @@ class SettingsScreen extends StatelessWidget {
             // Profile Section
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: AurennaTheme.cardDecoration,
+              decoration: AurennaTheme.getCardDecoration(context),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '👤 Profile',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AurennaTheme.getPrimaryTextColor(context),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Email',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AurennaTheme.textSecondary,
+                      color: AurennaTheme.getSecondaryTextColor(context),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     authService.currentUser?.email ?? 'No email',
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AurennaTheme.getPrimaryTextColor(context),
+                    ),
                   ),
                 ],
               ),
@@ -263,7 +268,7 @@ class SettingsScreen extends StatelessWidget {
             // Free Questions Counter
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: AurennaTheme.cardDecoration,
+              decoration: AurennaTheme.getCardDecoration(context),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -272,7 +277,9 @@ class SettingsScreen extends StatelessWidget {
                     children: [
                       Text(
                         '🎴 Questions',
-                        style: Theme.of(context).textTheme.titleLarge,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AurennaTheme.getPrimaryTextColor(context),
+                    ),
                       ),
                       const QuestionCounter(),
                     ],
@@ -295,12 +302,12 @@ class SettingsScreen extends StatelessWidget {
                           Text(
                             'Free tier',
                             style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: AurennaTheme.textSecondary),
+                                ?.copyWith(color: AurennaTheme.getSecondaryTextColor(context)),
                           ),
                           const SizedBox(height: 8),
                           LinearProgressIndicator(
                             value: 0.33, // placeholder value
-                            backgroundColor: AurennaTheme.textSecondary
+                            backgroundColor: AurennaTheme.getSecondaryTextColor(context)
                                 .withValues(alpha: 0.2),
                             valueColor: const AlwaysStoppedAnimation<Color>(
                               AurennaTheme.crystalBlue,
@@ -319,13 +326,15 @@ class SettingsScreen extends StatelessWidget {
             // Subscription Status
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: AurennaTheme.cardDecoration,
+              decoration: AurennaTheme.getCardDecoration(context),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '✨ Subscription',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AurennaTheme.getPrimaryTextColor(context),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   FutureBuilder<bool>(
@@ -341,7 +350,7 @@ class SettingsScreen extends StatelessWidget {
                                 ?.copyWith(
                                   color: hasSubscription
                                       ? AurennaTheme.crystalBlue
-                                      : AurennaTheme.textSecondary,
+                                      : AurennaTheme.getSecondaryTextColor(context),
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),
@@ -350,7 +359,7 @@ class SettingsScreen extends StatelessWidget {
                             Text(
                               'Upgrade for unlimited questions',
                               style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(color: AurennaTheme.textSecondary),
+                                  ?.copyWith(color: AurennaTheme.getSecondaryTextColor(context)),
                             ),
                             const SizedBox(height: 12),
                             SizedBox(
@@ -464,7 +473,7 @@ class SettingsScreen extends StatelessWidget {
                                           ? 'Your ${currentPlan?.description ?? 'premium'} subscription is active'
                                           : 'Renew to continue premium access',
                                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                          color: AurennaTheme.textSecondary,
+                                          color: AurennaTheme.getSecondaryTextColor(context),
                                         ),
                                         textAlign: TextAlign.center,
                                       ),
@@ -487,13 +496,15 @@ class SettingsScreen extends StatelessWidget {
             // Reading History
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: AurennaTheme.cardDecoration,
+              decoration: AurennaTheme.getCardDecoration(context),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     '📚 Reading History',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AurennaTheme.getPrimaryTextColor(context),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   FutureBuilder<bool>(
@@ -506,8 +517,8 @@ class SettingsScreen extends StatelessWidget {
                           'View Past Readings',
                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: hasSubscription 
-                                ? AurennaTheme.textPrimary 
-                                : AurennaTheme.textSecondary,
+                                ? AurennaTheme.getPrimaryTextColor(context)
+                                : AurennaTheme.getSecondaryTextColor(context),
                           ),
                         ),
                         subtitle: Text(
@@ -516,7 +527,7 @@ class SettingsScreen extends StatelessWidget {
                               : 'Premium feature - Upgrade to unlock',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: hasSubscription 
-                                ? AurennaTheme.textSecondary
+                                ? AurennaTheme.getSecondaryTextColor(context)
                                 : AurennaTheme.amberGlow,
                           ),
                         ),
@@ -547,8 +558,8 @@ class SettingsScreen extends StatelessWidget {
                               Icons.arrow_forward_ios,
                               size: 16,
                               color: hasSubscription 
-                                  ? AurennaTheme.textSecondary 
-                                  : AurennaTheme.textSecondary.withValues(alpha: 0.5),
+                                  ? AurennaTheme.getSecondaryTextColor(context) 
+                                  : AurennaTheme.getSecondaryTextColor(context),
                             ),
                           ],
                         ),
@@ -559,6 +570,68 @@ class SettingsScreen extends StatelessWidget {
                             Navigator.pushNamed(context, '/premium-upgrade');
                           }
                         },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Theme Settings
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: AurennaTheme.getCardDecoration(context),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '🎨 Appearance',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AurennaTheme.getPrimaryTextColor(context),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Consumer<ThemeProvider>(
+                    builder: (context, themeProvider, child) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Dark Mode',
+                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: AurennaTheme.getPrimaryTextColor(context),
+                    ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  themeProvider.isDarkMode 
+                                      ? 'Deep cosmic colors with mystical vibes'
+                                      : 'Bright and ethereal cosmic colors',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AurennaTheme.getSecondaryTextColor(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Switch(
+                            value: themeProvider.isDarkMode,
+                            onChanged: (value) {
+                              themeProvider.toggleTheme();
+                            },
+                            activeColor: AurennaTheme.crystalBlue,
+                            activeTrackColor: AurennaTheme.crystalBlue.withValues(alpha: 0.3),
+                            inactiveThumbColor: AurennaTheme.getSecondaryTextColor(context),
+                            inactiveTrackColor: AurennaTheme.getSecondaryTextColor(context).withValues(alpha: 0.2),
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -780,7 +853,7 @@ class SettingsScreen extends StatelessWidget {
               child: Text(
                 'Aurenna.ai v1.0.0',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AurennaTheme.textSecondary,
+                  color: AurennaTheme.getSecondaryTextColor(context),
                 ),
               ),
             ),

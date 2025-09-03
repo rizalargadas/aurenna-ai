@@ -72,8 +72,8 @@ class _MaterialAppWithThemeState extends State<_MaterialAppWithTheme> {
             _lastThemeType = themeProvider.currentTheme;
           } catch (e) {
             // Fallback to default theme if theme building fails
-            _cachedTheme = AurennaTheme.buildTheme(AppThemes.aurennaTheme);
-            _lastThemeType = AppThemeType.aurenna;
+            _cachedTheme = AurennaTheme.buildTheme(AppThemes.aurennaDarkTheme);
+            _lastThemeType = AppThemeType.aurennaDark;
           }
         }
         

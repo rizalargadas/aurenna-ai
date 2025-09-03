@@ -52,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final isTablet = screenWidth > 600;
 
     return Scaffold(
-      backgroundColor: AurennaTheme.voidBlack,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildAppBar(),
       body: SafeArea(
         child: CustomScrollView(
@@ -111,10 +111,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       preferredSize: const Size.fromHeight(80),
       child: AppBar(
         toolbarHeight: 80,
-        backgroundColor: AurennaTheme.voidBlack,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         title: Image.asset(
-          'assets/img/logo/horizontal-transparent.png',
+          Theme.of(context).brightness == Brightness.dark
+              ? 'assets/img/logo/horizontal-transparent.png'
+              : 'assets/img/logo/light-mode-horizontal-transparent.png',
           height: 180,
           fit: BoxFit.contain,
         ),
@@ -123,11 +125,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Container(
             margin: const EdgeInsets.only(right: 16),
             decoration: BoxDecoration(
-              color: AurennaTheme.mysticBlue.withValues(alpha: 0.3),
+              color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
-              icon: const Icon(Icons.settings, color: AurennaTheme.textPrimary),
+              icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.onSurface),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -156,14 +158,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AurennaTheme.electricViolet.withValues(alpha: 0.15),
-                  AurennaTheme.crystalBlue.withValues(alpha: 0.15),
-                  AurennaTheme.cosmicPurple.withValues(alpha: 0.1),
+                  AurennaTheme.getElectricViolet(context).withValues(alpha: 0.15),
+                  AurennaTheme.getCrystalBlue(context).withValues(alpha: 0.15),
+                  AurennaTheme.getCosmicPurple(context).withValues(alpha: 0.1),
                 ],
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: AurennaTheme.silverMist.withValues(alpha: 0.1),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -176,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   style: GoogleFonts.cinzel(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
-                    color: AurennaTheme.textPrimary,
+                    color: AurennaTheme.getPrimaryTextColor(context),
                     letterSpacing: 0.5,
                   ),
                   textAlign: TextAlign.center,
@@ -185,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Text(
                   'Your cards are feeling chatty — shall we?',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AurennaTheme.textSecondary.withValues(alpha: 0.8),
+                    color: AurennaTheme.getSecondaryTextColor(context),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -240,11 +242,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            backgroundColor: AurennaTheme.voidBlack,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
               side: BorderSide(
-                color: AurennaTheme.electricViolet.withValues(alpha: 0.5),
+                color: AurennaTheme.getElectricViolet(context).withValues(alpha: 0.5),
                 width: 2,
               ),
             ),
@@ -252,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               children: [
                 Icon(
                   Icons.schedule,
-                  color: AurennaTheme.electricViolet,
+                  color: AurennaTheme.getElectricViolet(context),
                   size: 28,
                 ),
                 const SizedBox(width: 12),
@@ -260,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   child: Text(
                     '⏰ Hold Up, Speed Racer!',
                     style: TextStyle(
-                      color: AurennaTheme.textPrimary,
+                      color: AurennaTheme.getPrimaryTextColor(context),
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -275,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Text(
                   'It\'s called Card of the DAY, not Card of the Hour, bestie! 💅',
                   style: TextStyle(
-                    color: AurennaTheme.textPrimary,
+                    color: AurennaTheme.getPrimaryTextColor(context),
                     fontSize: 16,
                     height: 1.4,
                   ),
@@ -284,7 +286,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Text(
                   'The universe doesn\'t do instant replays. One cosmic download per 24 hours, that\'s the rules!',
                   style: TextStyle(
-                    color: AurennaTheme.textSecondary,
+                    color: AurennaTheme.getSecondaryTextColor(context),
                     fontSize: 14,
                     height: 1.4,
                   ),
@@ -314,14 +316,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             Text(
                               'Come back in:',
                               style: TextStyle(
-                                color: AurennaTheme.textSecondary,
+                                color: AurennaTheme.getSecondaryTextColor(context),
                                 fontSize: 12,
                               ),
                             ),
                             Text(
                               _getTimeUntilNextCard(),
                               style: TextStyle(
-                                color: AurennaTheme.electricViolet,
+                                color: AurennaTheme.getElectricViolet(context),
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -438,7 +440,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           '🌅 Card of the Day',
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
-                                color: AurennaTheme.textPrimary,
+                                color: AurennaTheme.getPrimaryTextColor(context),
                                 fontWeight: FontWeight.bold,
                               ),
                         ),
@@ -461,7 +463,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             'FREE',
                             style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(
-                                  color: AurennaTheme.electricViolet,
+                                  color: AurennaTheme.getElectricViolet(context),
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -473,7 +475,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     Text(
                       'Your daily cosmic check-in. Pull one card for guidance.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AurennaTheme.textSecondary,
+                        color: AurennaTheme.getSecondaryTextColor(context),
                         height: 1.3,
                       ),
                     ),
@@ -484,7 +486,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               // Arrow
               Icon(
                 Icons.arrow_forward_ios,
-                color: AurennaTheme.textSecondary,
+                color: AurennaTheme.getSecondaryTextColor(context),
                 size: 16,
               ),
             ],
@@ -518,7 +520,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               Text(
                 'Start Your Journey',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AurennaTheme.textPrimary,
+                  color: AurennaTheme.getPrimaryTextColor(context),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -592,7 +594,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   style: GoogleFonts.outfit(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: AurennaTheme.textPrimary,
+                    color: AurennaTheme.getPrimaryTextColor(context),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -600,7 +602,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Text(
                   'Past • Present • Future',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AurennaTheme.textSecondary,
+                    color: AurennaTheme.getSecondaryTextColor(context),
                     fontWeight: FontWeight.w500,
                     letterSpacing: 1.2,
                   ),
@@ -610,7 +612,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Text(
                   'Ask a question and let the cards reveal their ancient wisdom',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AurennaTheme.textSecondary.withValues(alpha: 0.9),
+                    color: AurennaTheme.getSecondaryTextColor(context),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -673,7 +675,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Text(
             'Premium Readings',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: AurennaTheme.textPrimary,
+              color: AurennaTheme.getPrimaryTextColor(context),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -900,14 +902,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   Text(
                     title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AurennaTheme.textPrimary,
+                      color: AurennaTheme.getPrimaryTextColor(context),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   Text(
                     subtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AurennaTheme.textSecondary.withValues(alpha: 0.8),
+                      color: AurennaTheme.getSecondaryTextColor(context),
                     ),
                   ),
                 ],
@@ -961,7 +963,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 colors: hasSubscription
                     ? colors
                     : [
-                        AurennaTheme.mysticBlue.withValues(alpha: 0.1),
+                        AurennaTheme.getMysticBlue(context).withValues(alpha: 0.1),
                         AurennaTheme.voidBlack.withValues(alpha: 0.1),
                       ],
               ),
@@ -1001,8 +1003,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               style: Theme.of(context).textTheme.titleSmall
                                   ?.copyWith(
                                     color: hasSubscription
-                                        ? AurennaTheme.textPrimary
-                                        : AurennaTheme.textSecondary,
+                                        ? AurennaTheme.getPrimaryTextColor(context)
+                                        : AurennaTheme.getSecondaryTextColor(context),
                                     fontWeight: FontWeight.w600,
                                   ),
                             ),
@@ -1038,12 +1040,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             : 'Unlock ${title.toLowerCase()}',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: hasSubscription
-                              ? AurennaTheme.textSecondary.withValues(
-                                  alpha: 0.9,
-                                )
-                              : AurennaTheme.textSecondary.withValues(
-                                  alpha: 0.7,
-                                ),
+                              ? AurennaTheme.getSecondaryTextColor(context)
+                              : AurennaTheme.getSecondaryTextColor(context),
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -1055,7 +1053,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   hasSubscription ? Icons.arrow_forward_ios : Icons.lock,
                   color: hasSubscription
                       ? borderColor.withValues(alpha: 0.7)
-                      : AurennaTheme.textSecondary.withValues(alpha: 0.5),
+                      : AurennaTheme.getSecondaryTextColor(context),
                   size: 16,
                 ),
               ],
@@ -1075,7 +1073,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            AurennaTheme.mysticBlue.withValues(alpha: 0.1),
+            AurennaTheme.getMysticBlue(context).withValues(alpha: 0.1),
             AurennaTheme.voidBlack.withValues(alpha: 0.1),
           ],
         ),
@@ -1089,7 +1087,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Text(
             '✨ May the universe guide your journey ✨',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AurennaTheme.textSecondary.withValues(alpha: 0.8),
+              color: AurennaTheme.getSecondaryTextColor(context),
               fontStyle: FontStyle.italic,
               fontWeight: FontWeight.w500,
             ),
@@ -1099,7 +1097,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Text(
             'Every card drawn is a step closer to understanding your path',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AurennaTheme.textSecondary.withValues(alpha: 0.6),
+              color: AurennaTheme.getSecondaryTextColor(context),
             ),
             textAlign: TextAlign.center,
           ),
