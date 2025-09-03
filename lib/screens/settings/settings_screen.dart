@@ -639,10 +639,12 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 32),
+            // Show spacing only if developer section is visible, otherwise use smaller spacing
+            SizedBox(height: authService.currentUser?.email == 'rmlargadas@gmail.com' ? 32 : 16),
 
-            // Developer Testing - Password Protected
-            Container(
+            // Developer Testing - Password Protected (Only for specific user)
+            if (authService.currentUser?.email == 'rmlargadas@gmail.com')
+              Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.orange.withValues(alpha: 0.1),
