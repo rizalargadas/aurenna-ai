@@ -25,7 +25,10 @@
       "Bash(mkdir:*)",
       "Bash(keytool:*)",
       "Bash(where java)",
-      "Bash(\"C:\\Program Files\\Android\\Android Studio\\jbr\\bin\\keytool.exe\" -list -printcert -jarfile build/app/outputs/bundle/release/app-release.aab)"
+      "Bash(\"C:\\Program Files\\Android\\Android Studio\\jbr\\bin\\keytool.exe\" -list -printcert -jarfile build/app/outputs/bundle/release/app-release.aab)",
+      "Bash(rg:*)",
+      "Read(/D:\\flutter_projects\\aurenna_ai/**)",
+      "Read(/D:\\flutter_projects\\aurenna_ai\\android\\app\\src\\main\\kotlin\\com\\aurenna\\aurenna_ai/**)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

@@ -4,7 +4,7 @@ description: "AI-powered tarot card readings for spiritual guidance and cosmic i
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+3
+version: 1.0.0+7
 
 environment:
     sdk: ^3.8.1
@@ -44,6 +44,9 @@ dependencies:
     
     # PayPal integration
     flutter_paypal_payment: ^1.0.8
+    
+    # In-app purchases (Google Play Billing)
+    in_app_purchase: ^3.2.0
     
     # Environment variables
     flutter_dotenv: ^5.1.0
