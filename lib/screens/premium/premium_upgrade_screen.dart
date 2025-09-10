@@ -21,14 +21,6 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
   
   // Plan selection
   SubscriptionPlan _selectedPlan = SubscriptionPlan.monthly;
-  
-  // Coupon code controller
-  final TextEditingController _couponController = TextEditingController();
-  String? _appliedCoupon;
-  double _discountAmount = 0;
-  double _discountPercentage = 0;
-  String? _couponMessage;
-  bool _isValidatingCoupon = false;
 
   @override
   void initState() {
@@ -57,7 +49,6 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
   void dispose() {
     _glowController.dispose();
     _floatController.dispose();
-    _couponController.dispose();
     super.dispose();
   }
 
@@ -131,11 +122,6 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
                 
                 // Plan selection
                 _buildPlanSelection(),
-                
-                const SizedBox(height: 24),
-                
-                // Coupon code input
-                _buildCouponSection(),
                 
                 const SizedBox(height: 32),
                 
@@ -315,7 +301,6 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
 
   Widget _buildPlanOption(SubscriptionPlan plan) {
     final isSelected = _selectedPlan == plan;
-    final finalPrice = plan.price - (_selectedPlan == plan ? _discountAmount : 0);
     
     return GestureDetector(
       onTap: () {
@@ -409,18 +394,8 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      if (_discountAmount > 0 && isSelected) ...[
-                        Text(
-                          '\$${plan.price.toStringAsFixed(2)}',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AurennaTheme.textSecondary,
-                            decoration: TextDecoration.lineThrough,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
                       Text(
-                        '\$${finalPrice.toStringAsFixed(2)}',
+                        '\$${plan.price.toStringAsFixed(2)}',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: AurennaTheme.electricViolet,
                           fontWeight: FontWeight.bold,
@@ -463,187 +438,6 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
     );
   }
 
-  Widget _buildCouponSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AurennaTheme.mysticBlue.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AurennaTheme.electricViolet.withValues(alpha: 0.2),
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Have a coupon code?',
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: AurennaTheme.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _couponController,
-                  textCapitalization: TextCapitalization.characters,
-                  enabled: !_isValidatingCoupon && _appliedCoupon == null,
-                  style: const TextStyle(color: AurennaTheme.textPrimary),
-                  decoration: InputDecoration(
-                    hintText: 'Enter coupon code',
-                    hintStyle: TextStyle(
-                      color: AurennaTheme.textSecondary.withValues(alpha: 0.5),
-                    ),
-                    filled: true,
-                    fillColor: AurennaTheme.voidBlack,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color: AurennaTheme.electricViolet.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color: AurennaTheme.electricViolet.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(
-                        color: AurennaTheme.electricViolet,
-                      ),
-                    ),
-                    disabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color: AurennaTheme.textSecondary.withValues(alpha: 0.2),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              SizedBox(
-                width: 100,
-                child: ElevatedButton(
-                  onPressed: _isValidatingCoupon
-                      ? null 
-                      : _appliedCoupon == null 
-                          ? _validateAndApplyCoupon
-                          : _removeCoupon,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: _isValidatingCoupon
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(_appliedCoupon == null ? 'Apply' : 'Remove'),
-                ),
-              ),
-            ],
-          ),
-          if (_couponMessage != null && _appliedCoupon != null) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  Icons.check_circle,
-                  size: 16,
-                  color: AurennaTheme.amberGlow,
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    _couponMessage!,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AurennaTheme.amberGlow,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Future<void> _validateAndApplyCoupon() async {
-    final code = _couponController.text.trim();
-    if (code.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Please enter a coupon code'),
-          backgroundColor: Colors.orange,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      _isValidatingCoupon = true;
-    });
-
-    final paypalService = PayPalService();
-    final couponDetails = await paypalService.validateCoupon(code, planPrice: _selectedPlan.price);
-
-    setState(() {
-      _isValidatingCoupon = false;
-      if (couponDetails.isValid) {
-        _appliedCoupon = couponDetails.code;
-        _discountAmount = couponDetails.discountAmount;
-        _discountPercentage = couponDetails.discountPercentage;
-        _couponMessage = couponDetails.message;
-      }
-    });
-
-    if (!couponDetails.isValid) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(couponDetails.message ?? 'Invalid coupon code'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
-      }
-    }
-  }
-
-  void _removeCoupon() {
-    setState(() {
-      _appliedCoupon = null;
-      _discountAmount = 0;
-      _discountPercentage = 0;
-      _couponMessage = null;
-      _couponController.clear();
-    });
-  }
 
   void _startPayPalSubscription() async {
     final paypalService = PayPalService();
@@ -662,7 +456,7 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
     try {
       final success = await paypalService.startSubscription(
         context,
-        couponCode: _appliedCoupon,
+        couponCode: null,
         selectedPlan: _selectedPlan,
       );
       
@@ -676,9 +470,9 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
             context, 
             '/payment-success',
             arguments: {
-              'couponCode': _appliedCoupon,
-              'discountAmount': _discountAmount,
-              'finalPrice': _selectedPlan.price - _discountAmount,
+              'couponCode': null,
+              'discountAmount': 0,
+              'finalPrice': _selectedPlan.price,
               'selectedPlan': _selectedPlan,
             },
           );
@@ -688,7 +482,7 @@ class _PremiumUpgradeScreenState extends State<PremiumUpgradeScreen>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Payment cancelled or failed. ${_appliedCoupon != null ? 'Coupon $_appliedCoupon was valid but payment did not complete.' : 'Please try again.'}'),
+              content: const Text('Payment cancelled or failed. Please try again.'),
               backgroundColor: AurennaTheme.textSecondary,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
